@@ -10,7 +10,8 @@ const BRANCHES_EN = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '�
  * 오행별 색상 정의 (Tailwind CSS 기준 또는 Hex 코드)
  */
 const ELEMENT_COLORS = {
-  WOOD: { name: '목', color: '#2d91e9ff', bgClass: 'bg-green-400' }, // 초록
+  // WOOD: { name: '목', colorrgba(43, 184, 66, 1)9ff', bgClass: 'bg-green-400' }, // 초록
+  WOOD: { name: '목', color: '#2db343ff', bgClass: 'bg-green-400' }, // 초록
   FIRE: { name: '화', color: '#e85555ff', bgClass: 'bg-red-400' }, // 빨강
   EARTH: { name: '토', color: '#FACC15', bgClass: 'bg-yellow-400' }, // 노랑
   METAL: { name: '금', color: '#FFFFFF', bgClass: 'bg-white' }, // 하양
@@ -525,7 +526,7 @@ const getCurrentDaewunStartYear = (birthYear: number, daewunSu: number) => {
  * @param ilganHj 일간
  * @param sajuJiHjs 사주 지지 정보
  */
-export const getSewunList = (startYear: number, ilganHj: string, sajuJiHjs: any) => {
+export const getYearList = (startYear: number, ilganHj: string, sajuJiHjs: any) => {
   const list = [];
   for (let i = 0; i < 10; i++) {
     const currentYear = startYear + i;
@@ -577,6 +578,74 @@ const getSewunDetail = (targetYear: number, ilganHj: string, sajuJiHjs: any) => 
       ],
     },
   };
+};
+
+/**
+ * 특정 연도의 12개월 월운 리스트를 구하는 함수
+ * @param {number} targetYear - 계산하려는 연도 (예: 2026)
+ * @param {string} ilganHj - 내 사주의 일간
+ * @param {Object} sajuJiHjs - 내 사주의 지지들 (연, 월, 일)
+ */
+export const getMonthList = (targetYear: number, ilganHj: string, sajuJiHjs: any) => {
+  const wolwunList: any[] = [];
+
+  // 12달을 시작하는 절기 이름 (입춘부터 소한까지) 및 매핑 키
+  const JIES = [
+    { name: '소한', key: '小寒' },
+    { name: '입춘', key: '立春' },
+    { name: '경칩', key: '惊蛰' },
+    { name: '청명', key: '清明' },
+    { name: '입하', key: '立夏' },
+    { name: '망종', key: '芒种' },
+    { name: '소서', key: '小暑' },
+    { name: '입추', key: '立秋' },
+    { name: '백로', key: '白露' },
+    { name: '한로', key: '寒露' },
+    { name: '입동', key: '立冬' },
+    { name: '대설', key: '大雪' },
+  ];
+
+  // 1. 해당 연도의 절기 날짜 정보 가져오기
+  const baseLunar = Lunar.fromYmd(targetYear, 1, 1);
+  const jieQiTable = baseLunar.getJieQiTable();
+
+  JIES.forEach((jie, index) => {
+    const jieSolar = jieQiTable[jie.key];
+    if (!jieSolar) return;
+
+    // Solar 객체를 Lunar 객체로 변환
+    const jieLunar = Lunar.fromSolar(jieSolar);
+
+    const monthGanHj = jieLunar.getMonthGan();
+    const monthJiHj = jieLunar.getMonthZhi();
+
+    wolwunList.push({
+      month: index + 1,
+      jieName: jie.name,
+      startDate: jieSolar.toYmd(),
+      hanja: monthGanHj + monthJiHj,
+      gan: {
+        hanja: monthGanHj,
+        korean: convertCharToKorean(monthGanHj),
+        sipsin: getSipsin(ilganHj, monthGanHj, false),
+        color: getElementInfo(monthGanHj).color,
+      },
+      ji: {
+        hanja: monthJiHj,
+        korean: convertCharToKorean(monthJiHj),
+        sipsin: getSipsin(ilganHj, monthJiHj, true),
+        color: getElementInfo(monthJiHj).color,
+        wunsung: get12Wunsung(ilganHj, monthJiHj),
+        shinsals: [
+          get12ShinSal(sajuJiHjs.yearJi, monthJiHj),
+          get12ShinSal(sajuJiHjs.dayJi, monthJiHj),
+          get12ShinSal(GAN_ELEMENT_GROUP[ilganHj as keyof typeof GAN_ELEMENT_GROUP], monthJiHj),
+        ],
+      },
+    });
+  });
+
+  return wolwunList;
 };
 
 /**
@@ -641,7 +710,8 @@ export const getMyEightSaju = (
   };
 
   const startYear = getCurrentDaewunStartYear(year, daewunSu);
-  const sewunList = getSewunList(startYear, ilganHanja, sajuJiHjs);
+  const yearList = getYearList(startYear, ilganHanja, sajuJiHjs);
+  const monthList = getMonthList(year, ilganHanja, sajuJiHjs);
 
   const result = {
     year: getPillarDetail(ilganHanja, eightChar.getYear()),
@@ -653,13 +723,14 @@ export const getMyEightSaju = (
       lunar: lunar.toString(),
       sajuJiHjs: sajuJiHjs,
     },
-    daewun: {
+    lifeList: {
       daewunSu: daewunSu,
       isForward: isForward,
       directionText: isForward ? '순행' : '역행',
       list: daewunList, // 10개 대운 배열
     },
-    sewun: sewunList,
+    yearList,
+    monthList,
   };
 
   console.log(result);
