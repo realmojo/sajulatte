@@ -1,5 +1,7 @@
+// npx tsx test.ts
+
 const { Solar } = require('lunar-javascript');
-const { calculateSidu, getMyEightSaju } = require('./lib/utils/he');
+const { calculateSidu, getMyEightSaju } = require('./lib/utils/latte');
 //const {Solar, Lunar, HolidayUtil} = require('lunar-javascript')
 
 let solar = Solar.fromYmdHms(1988, 7, 14, 5, 45, 0);

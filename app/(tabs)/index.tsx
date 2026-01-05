@@ -3,8 +3,13 @@ import { Input } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
 import { Stack, useRouter } from 'expo-router';
 import * as React from 'react';
-import { ScrollView, View } from 'react-native';
+import { Platform, ScrollView, View, TouchableOpacity } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { supabase } from '@/lib/supabase';
+import { useFocusEffect } from '@react-navigation/native';
+import { SajuResultView } from '@/components/SajuResultView';
+import { RefreshCcw } from 'lucide-react-native';
 
 export default function Screen() {
   const insets = useSafeAreaInsets();
@@ -16,22 +21,108 @@ export default function Screen() {
   const [minute, setMinute] = React.useState('');
   const [gender, setGender] = React.useState<'male' | 'female'>('male');
 
+  const [savedProfile, setSavedProfile] = React.useState<any>(null);
+
   const router = useRouter();
 
-  const handleSubmit = () => {
+  // Load saved profile on focus
+  useFocusEffect(
+    React.useCallback(() => {
+      const loadFirstProfile = async () => {
+        try {
+          const jsonValue = await AsyncStorage.getItem('saju_list');
+          if (jsonValue != null) {
+            const list = JSON.parse(jsonValue);
+            if (list.length > 0) {
+              setSavedProfile(list[0]);
+            } else {
+              setSavedProfile(null);
+            }
+          } else {
+            setSavedProfile(null);
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      };
+      loadFirstProfile();
+    }, [])
+  );
+
+  const handleSubmit = async () => {
     if (!year || !month || !day) {
       // Basic validation
       return;
     }
-    router.push({
-      pathname: '/result',
-      params: { name, year, month, day, hour, minute, gender },
-    });
+
+    const newProfile = {
+      id: Date.now().toString(), // 임시 ID (timestamp)
+      name,
+      gender,
+      birth_year: parseInt(year),
+      birth_month: parseInt(month),
+      birth_day: parseInt(day),
+      birth_hour: hour ? parseInt(hour) : null,
+      birth_minute: minute ? parseInt(minute) : null,
+      calendar_type: 'solar',
+      created_at: new Date().toISOString(),
+    };
+
+    try {
+      // 로컬 스토리지에 리스트 형태로 저장
+      const existingData = await AsyncStorage.getItem('saju_list');
+      const list = existingData ? JSON.parse(existingData) : [];
+      list.push(newProfile);
+      await AsyncStorage.setItem('saju_list', JSON.stringify(list));
+
+      console.log('Saved to local list. Total:', list.length + 1);
+      // 저장 후 바로 뷰 갱신을 위해 상태 업데이트
+      setSavedProfile(newProfile);
+    } catch (e) {
+      console.error('Failed to save local data:', e);
+    }
   };
+
+  const handleReset = () => {
+    setSavedProfile(null);
+    setName('');
+    setYear('');
+    setMonth('');
+    setDay('');
+    setHour('');
+    setMinute('');
+    setGender('male');
+  };
+
+  if (savedProfile) {
+    return (
+      <>
+        <Stack.Screen
+          options={{
+            title: '나의 사주',
+            headerRight: () => (
+              <TouchableOpacity onPress={handleReset} className="mr-4">
+                <RefreshCcw size={20} color="#000" />
+              </TouchableOpacity>
+            ),
+          }}
+        />
+        <SajuResultView
+          name={savedProfile.name}
+          year={savedProfile.birth_year}
+          month={savedProfile.birth_month}
+          day={savedProfile.birth_day}
+          hour={savedProfile.birth_hour || 0}
+          minute={savedProfile.birth_minute || 0}
+          gender={savedProfile.gender}
+        />
+      </>
+    );
+  }
 
   return (
     <>
-      <Stack.Screen options={{ title: '사주 정보 입력', headerTransparent: false }} />
+      <Stack.Screen options={{ title: '만세력', headerTransparent: false }} />
       <ScrollView
         contentContainerClassName="flex-grow justify-center p-6 gap-8"
         className="flex-1 bg-background">

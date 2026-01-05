@@ -13,8 +13,8 @@ const ELEMENT_COLORS = {
   // WOOD: { name: '목', colorrgba(43, 184, 66, 1)9ff', bgClass: 'bg-green-400' }, // 초록
   WOOD: { name: '목', color: '#2db343ff', bgClass: 'bg-green-400' }, // 초록
   FIRE: { name: '화', color: '#e85555ff', bgClass: 'bg-red-400' }, // 빨강
-  EARTH: { name: '토', color: '#FACC15', bgClass: 'bg-yellow-400' }, // 노랑
-  METAL: { name: '금', color: '#FFFFFF', bgClass: 'bg-white' }, // 하양
+  EARTH: { name: '토', color: '#df8825ff', bgClass: 'bg-yellow-300' }, // 황토색 (가독성 위해 등색/진한 노랑)
+  METAL: { name: '금', color: '#9CA3AF', bgClass: 'bg-white' }, // 회색 (가독성 위해 변경)
   WATER: { name: '수', color: '#0e0e0eff', bgClass: 'bg-blue-500' }, // 파랑/검정
 };
 
@@ -67,21 +67,6 @@ const JI_INFO = {
   亥: { elem: 'WATER', sang: 1 },
   子: { elem: 'WATER', sang: -1 },
 };
-
-const SHIN_SAL_ORDER = [
-  '지살',
-  '년살',
-  '월살',
-  '망신살',
-  '장성살',
-  '반안살',
-  '역마살',
-  '육해살',
-  '화개살',
-  '겁살',
-  '천살',
-  '재살',
-];
 
 // 삼합 기준 지살 시작점
 const SAM_HAP_START = {
@@ -649,12 +634,39 @@ export const getMonthList = (targetYear: number, ilganHj: string, sajuJiHjs: any
 };
 
 /**
+ * 지장간 데이터 (초기/중기/정기)
+ */
+const JIJANGAN_MAP = {
+  子: ['壬', '', '癸'],
+  丑: ['癸', '辛', '己'],
+  寅: ['戊', '丙', '甲'],
+  卯: ['甲', '', '乙'],
+  辰: ['乙', '癸', '戊'],
+  巳: ['戊', '庚', '丙'],
+  午: ['丙', '己', '丁'],
+  未: ['丁', '乙', '己'],
+  申: ['戊', '壬', '庚'],
+  酉: ['庚', '', '辛'],
+  戌: ['辛', '丁', '戊'],
+  亥: ['戊', '甲', '壬'],
+};
+
+/**
  * 각 기둥(Pillar)의 상세 정보를 생성하는 내부 함수
  */
-const getPillarDetail = (ilganHanja: string, hanjaPillar: string, isHour = false) => {
+const getPillarDetail = (
+  ilganHanja: string,
+  hanjaPillar: string,
+  sajuJiHjs: any,
+  isHour = false
+) => {
   const ganHj = hanjaPillar[0];
   const jiHj = hanjaPillar[1];
   const krPillar = convertToKorean(hanjaPillar);
+
+  // 지장간 포맷팅 (예: 무병갑)
+  const jijanganHj = JIJANGAN_MAP[jiHj as keyof typeof JIJANGAN_MAP] || [];
+  const jijanganKr = jijanganHj.map((h) => (h ? convertCharToKorean(h) : '')).join('');
 
   return {
     korean: krPillar,
@@ -674,8 +686,238 @@ const getPillarDetail = (ilganHanja: string, hanjaPillar: string, isHour = false
       color: getElementInfo(jiHj)?.color || '#fff',
       animal: getZodiacInfo(jiHj)?.animalKr || '',
       animalHj: getZodiacInfo(jiHj)?.animalHj || '',
+      jijangan: jijanganKr,
+      wunsung: get12Wunsung(ilganHanja, jiHj),
+      // 년지 기준 신살 (일반적인 기준)
+      shinsal: sajuJiHjs ? get12ShinSal(sajuJiHjs.yearJi, jiHj) : '',
     },
   };
+};
+
+// 신강/신약 계산 가중치
+const STRENGTH_WEIGHTS = {
+  monthJi: 30, // 월지 (등령)
+  dayJi: 15, // 일지 (득지)
+  hourJi: 15, // 시지 (득시)
+  yearJi: 10,
+  monthGan: 10,
+  hourGan: 10,
+  yearGan: 10,
+};
+
+const isSupporting = (meElem: string, targetElem: string) => {
+  const order = ['WOOD', 'FIRE', 'EARTH', 'METAL', 'WATER'];
+  const meIdx = order.indexOf(meElem);
+  const targetIdx = order.indexOf(targetElem);
+  const diff = (targetIdx - meIdx + 5) % 5;
+  // 0: 비견/겁재 (동일), 4: 인성 (나를 생함) - 4 is -1 mod 5
+  return diff === 0 || diff === 4;
+};
+
+export const calculateSajuStrength = (
+  ilgan: string,
+  yearPillar: string[], // [gan, ji]
+  monthPillar: string[],
+  dayPillar: string[],
+  hourPillar: string[]
+) => {
+  const me = GAN_INFO[ilgan as keyof typeof GAN_INFO];
+  if (!me) return null;
+
+  let score = 0;
+  let supportCount = 0; // 득세 판단용 (월지/일지/시지 제외한 세력)
+
+  // 1. 월지 (등령 여부)
+  const monthJiInfo = JI_INFO[monthPillar[1] as keyof typeof JI_INFO];
+  const deukRyeong = isSupporting(me.elem, monthJiInfo.elem);
+  if (deukRyeong) score += STRENGTH_WEIGHTS.monthJi;
+
+  // 2. 일지 (득지 여부)
+  const dayJiInfo = JI_INFO[dayPillar[1] as keyof typeof JI_INFO];
+  const deukJi = isSupporting(me.elem, dayJiInfo.elem);
+  if (deukJi) score += STRENGTH_WEIGHTS.dayJi;
+
+  // 3. 시지 (득시 여부)
+  const hourJiInfo = JI_INFO[hourPillar[1] as keyof typeof JI_INFO];
+  const deukSi = isSupporting(me.elem, hourJiInfo.elem);
+  if (deukSi) score += STRENGTH_WEIGHTS.hourJi;
+
+  // 4. 나머지 세력 (득세 여부 판단)
+  // 년주 (간/지)
+  const yearGanInfo = GAN_INFO[yearPillar[0] as keyof typeof GAN_INFO];
+  const yearJiInfo = JI_INFO[yearPillar[1] as keyof typeof JI_INFO];
+  if (isSupporting(me.elem, yearGanInfo.elem)) {
+    score += STRENGTH_WEIGHTS.yearGan;
+    supportCount++;
+  }
+  if (isSupporting(me.elem, yearJiInfo.elem)) {
+    score += STRENGTH_WEIGHTS.yearJi;
+    supportCount++;
+  }
+
+  // 월간
+  const monthGanInfo = GAN_INFO[monthPillar[0] as keyof typeof GAN_INFO];
+  if (isSupporting(me.elem, monthGanInfo.elem)) {
+    score += STRENGTH_WEIGHTS.monthGan;
+    supportCount++;
+  }
+
+  // 시간
+  const hourGanInfo = GAN_INFO[hourPillar[0] as keyof typeof GAN_INFO];
+  if (isSupporting(me.elem, hourGanInfo.elem)) {
+    score += STRENGTH_WEIGHTS.hourGan;
+    supportCount++;
+  }
+
+  // 득세 기준: 주변 세력(년주 전체 + 월간 + 시간 = 총 4글자) 중 2개 이상이 내 편일 때
+  const deukSe = supportCount >= 2;
+
+  // 신강/신약 판정 및 분포 비율 (예시 데이터)
+  let verdict = '';
+  let ratio = 0;
+
+  if (score < 20) {
+    verdict = '극약';
+    ratio = 3.2;
+  } else if (score < 30) {
+    verdict = '태약';
+    ratio = 8.5;
+  } else if (score < 40) {
+    verdict = '신약';
+    ratio = 16.1;
+  } else if (score < 50) {
+    verdict = '중화신약';
+    ratio = 22.2;
+  } else if (score < 60) {
+    verdict = '중화신강';
+    ratio = 22.2;
+  } else if (score < 70) {
+    verdict = '신강';
+    ratio = 16.1;
+  } else if (score < 80) {
+    verdict = '태강';
+    ratio = 8.5;
+  } else {
+    verdict = '극왕';
+    ratio = 3.2;
+  }
+
+  return {
+    score,
+    verdict,
+    ratio,
+    flags: { deukRyeong, deukJi, deukSi, deukSe },
+  };
+};
+
+export const calculateElementDistribution = (
+  yearGan: string,
+  yearJi: string,
+  monthGan: string,
+  monthJi: string,
+  dayGan: string,
+  dayJi: string,
+  hourGan: string,
+  hourJi: string
+) => {
+  const counts = {
+    WOOD: 0,
+    FIRE: 0,
+    EARTH: 0,
+    METAL: 0,
+    WATER: 0,
+  };
+
+  const chars = [
+    { char: yearGan, type: 'gan' },
+    { char: yearJi, type: 'ji' },
+    { char: monthGan, type: 'gan' },
+    { char: monthJi, type: 'ji' },
+    { char: dayGan, type: 'gan' },
+    { char: dayJi, type: 'ji' },
+    { char: hourGan, type: 'gan' },
+    { char: hourJi, type: 'ji' },
+  ];
+
+  chars.forEach(({ char, type }) => {
+    const info =
+      type === 'gan'
+        ? GAN_INFO[char as keyof typeof GAN_INFO]
+        : JI_INFO[char as keyof typeof JI_INFO];
+    if (info) {
+      counts[info.elem as keyof typeof counts]++;
+    }
+  });
+
+  const total = 8;
+  const distribution: any = {};
+  for (const [key, value] of Object.entries(counts)) {
+    distribution[key] = {
+      count: value,
+      percent: (value / total) * 100,
+    };
+  }
+
+  return distribution;
+};
+
+// 방위 한글 매핑
+const DIRECTION_MAP: { [key: string]: string } = {
+  East: '동',
+  West: '서',
+  South: '남',
+  North: '북',
+  Southeast: '동남',
+  Northeast: '동북',
+  Southwest: '서남',
+  Northwest: '서북',
+  正东: '정동',
+  正西: '정서',
+  正南: '정남',
+  正北: '정북',
+  东南: '동남',
+  东北: '동북',
+  西南: '서남',
+  西北: '서북',
+  中: '중앙',
+};
+
+const translateDirection = (dir: string) => {
+  return DIRECTION_MAP[dir] || dir;
+};
+
+const getExtendedDetails = (lunar: any, eightChar: any) => {
+  // 1. 납음 (NaYin)
+  const nayin = {
+    year: eightChar.getYearNaYin(),
+    month: eightChar.getMonthNaYin(),
+    day: eightChar.getDayNaYin(),
+    hour: eightChar.getTimeNaYin(),
+  };
+
+  // 2. 28수 (Xiu)
+  const xiu = lunar.getXiu() + '수';
+
+  // 3. 팽조백기 (PengZu)
+  const pengzu = {
+    gan: lunar.getPengZuGan(),
+    zhi: lunar.getPengZuZhi(),
+  };
+
+  // 4. 신살 방위 (Positions)
+  const positions = {
+    xi: translateDirection(lunar.getPositionXiDesc()), // 희신(기쁨)
+    fu: translateDirection(lunar.getPositionFuDesc()), // 복신(행운)
+    cai: translateDirection(lunar.getPositionCaiDesc()), // 재신(재물)
+    yangGui: translateDirection(lunar.getPositionYangGuiDesc()), // 양귀인
+    yinGui: translateDirection(lunar.getPositionYinGuiDesc()), // 음귀인
+  };
+
+  // 5. 충/살 (Chong/Sha)
+  const chong = lunar.getDayChongDesc(); // 예: (甲子)鼠
+  const sha = translateDirection(lunar.getDaySha()); // 예: 北
+
+  return { nayin, xiu, pengzu, positions, chong, sha };
 };
 
 export const getMyEightSaju = (
@@ -693,6 +935,13 @@ export const getMyEightSaju = (
   const ilganHanja = eightChar.getDayGan(); // 기준점 '庚'
   console.log('ilganHanja', ilganHanja);
 
+  // 사주 지지 정보 미리 추출
+  const sajuJiHjs = {
+    yearJi: eightChar.getYear()[1],
+    monthJi: eightChar.getMonth()[1],
+    dayJi: eightChar.getDay()[1],
+  };
+
   // 시주 계산
   // 1. 기본 시주 및 대운 기초 정보 계산
   const siPillar = calculateSidu(ilganHanja, hour, minute);
@@ -701,28 +950,47 @@ export const getMyEightSaju = (
   // 2. 대운 리스트(10단계) 생성
   const daewunList = getDaewunList(ilganHanja, eightChar, siPillar, daewunSu, isForward);
 
-  // 3. 세운 리스트(현재 대운 기준 10년) 생성
-  // const todayYear = new Date().getFullYear();
-  const sajuJiHjs = {
-    yearJi: eightChar.getYear()[1],
-    monthJi: eightChar.getMonth()[1],
-    dayJi: eightChar.getDay()[1],
-  };
-
   const startYear = getCurrentDaewunStartYear(year, daewunSu);
   const yearList = getYearList(startYear, ilganHanja, sajuJiHjs);
   const monthList = getMonthList(year, ilganHanja, sajuJiHjs);
 
+  // 신강/신약 계산
+  const strength = calculateSajuStrength(
+    ilganHanja,
+    [eightChar.getYear()[0], eightChar.getYear()[1]],
+    [eightChar.getMonth()[0], eightChar.getMonth()[1]],
+    [eightChar.getDay()[0], eightChar.getDay()[1]],
+    [siPillar.hanja[0], siPillar.hanja[1]]
+  );
+
+  // 오행 분포 계산
+  const distributions = calculateElementDistribution(
+    eightChar.getYear()[0],
+    eightChar.getYear()[1],
+    eightChar.getMonth()[0],
+    eightChar.getMonth()[1],
+    eightChar.getDay()[0],
+    eightChar.getDay()[1],
+    siPillar.hanja[0],
+    siPillar.hanja[1]
+  );
+
+  // 추가 상세 정보 (납음, 방위 등)
+  const details = getExtendedDetails(lunar, eightChar);
+
   const result = {
-    year: getPillarDetail(ilganHanja, eightChar.getYear()),
-    month: getPillarDetail(ilganHanja, eightChar.getMonth()),
-    day: getPillarDetail(ilganHanja, eightChar.getDay()),
-    hour: getPillarDetail(ilganHanja, siPillar.hanja, true),
+    year: getPillarDetail(ilganHanja, eightChar.getYear(), sajuJiHjs),
+    month: getPillarDetail(ilganHanja, eightChar.getMonth(), sajuJiHjs),
+    day: getPillarDetail(ilganHanja, eightChar.getDay(), sajuJiHjs),
+    hour: getPillarDetail(ilganHanja, siPillar.hanja, sajuJiHjs, true),
     meta: {
       ilgan: ilganHanja,
-      lunar: lunar.toString(),
+      lunar: `${lunar.getYear()}년 ${lunar.getMonth()}월 ${lunar.getDay()}일`,
       sajuJiHjs: sajuJiHjs,
     },
+    strength, // 신강/신약 정보 추가
+    distributions, // 오행 분포 추가
+    details, // 상세 해석 정보 추가
     lifeList: {
       daewunSu: daewunSu,
       isForward: isForward,
