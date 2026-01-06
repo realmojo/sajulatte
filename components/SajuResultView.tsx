@@ -8,6 +8,8 @@ import Svg, {
   Line,
   Marker,
   Path,
+  Polygon,
+  Polyline,
   Rect,
   Text as SvgText,
 } from 'react-native-svg';
@@ -120,7 +122,7 @@ export const SajuResultView = ({
   const columns = [saju.hour, saju.day, saju.month, saju.year];
 
   return (
-    <ScrollView contentContainerClassName="p-6 gap-8" className="flex-1 bg-background">
+    <ScrollView contentContainerClassName="p-6 gap-10" className="flex-1 bg-background">
       <View className="gap-2">
         <Text className="mb-2 text-xl font-bold text-foreground">{name}님의 사주명식</Text>
         <View className="gap-2 rounded-lg border border-border bg-card p-4">
@@ -418,366 +420,289 @@ export const SajuResultView = ({
           </Text>
         </View>
 
-        <View className="rounded-xl border border-border bg-card p-4">
-          {/* Legend */}
-          <View className="mb-4 flex-row gap-4">
-            <View className="flex-row items-center gap-1">
-              <Svg width="20" height="10">
-                <Defs>
-                  <Marker
-                    id="arrowBlue"
-                    markerWidth="4"
-                    markerHeight="4"
-                    refX="2"
-                    refY="2"
-                    orient="auto">
-                    <Path d="M0,0 L0,4 L4,2 z" fill="#3B82F6" />
-                  </Marker>
-                </Defs>
-                <Line
-                  x1="0"
-                  y1="5"
-                  x2="15"
-                  y2="5"
-                  stroke="#3B82F6"
-                  strokeWidth="2"
-                  markerEnd="url(#arrowBlue)"
-                />
-              </Svg>
-              <Text className="text-sm text-gray-600">생(生)</Text>
-            </View>
-            <View className="flex-row items-center gap-1">
-              <Svg width="20" height="10">
-                <Defs>
-                  <Marker
-                    id="arrowRed"
-                    markerWidth="4"
-                    markerHeight="4"
-                    refX="2"
-                    refY="2"
-                    orient="auto">
-                    <Path d="M0,0 L0,4 L4,2 z" fill="#EF4444" />
-                  </Marker>
-                </Defs>
-                <Line
-                  x1="0"
-                  y1="5"
-                  x2="15"
-                  y2="5"
-                  stroke="#EF4444"
-                  strokeWidth="2"
-                  markerEnd="url(#arrowRed)"
-                />
-              </Svg>
-              <Text className="text-sm text-gray-600">극(剋)</Text>
-            </View>
-          </View>
-
-          {/* Diagram */}
+        <View className="items-center rounded-xl border border-border bg-card p-6">
+          {/* Five Elements Cycle Diagram */}
           <View className="h-[320px] w-full items-center justify-center">
-            <Svg width="300" height="300" viewBox="0 0 300 300">
+            {/* Legend */}
+            <View className="flex-row items-center gap-2">
+              <View className="h-[2px] w-6 bg-gray-300" />
+              <Text className="text-[10px] font-medium text-gray-600">생(生) : 상생</Text>
+            </View>
+            <View className="flex-row items-center gap-2">
+              <View className="h-[0px] w-6 border-b border-dashed border-gray-300" />
+              <Text className="text-[10px] font-medium text-gray-600">극(剋) : 상극</Text>
+            </View>
+
+            <Svg width="320" height="320" viewBox="0 0 320 320">
               <Defs>
                 <Marker
-                  id="blueArrow"
-                  markerWidth="6"
-                  markerHeight="6"
-                  refX="5"
-                  refY="3"
+                  id="arrowhead"
+                  markerWidth="10"
+                  markerHeight="7"
+                  refX="9"
+                  refY="3.5"
                   orient="auto">
-                  <Path d="M0,0 L0,6 L6,3 z" fill="#3B82F6" />
+                  <Polygon points="0 0, 10 3.5, 0 7" fill="#9CA3AF" />
                 </Marker>
                 <Marker
-                  id="redArrow"
-                  markerWidth="6"
+                  id="arrowhead-control"
+                  markerWidth="8"
                   markerHeight="6"
-                  refX="5"
+                  refX="7"
                   refY="3"
                   orient="auto">
-                  <Path d="M0,0 L0,6 L6,3 z" fill="#EF4444" />
+                  <Polygon points="0 0, 8 3, 0 6" fill="#D1D5DB" />
                 </Marker>
               </Defs>
 
-              {(() => {
-                const center = { x: 150, y: 150 };
-                const radius = 100; // Circle arrangement radius
-                const circleRadius = 38; // Individual circle radius
+              {['WOOD', 'FIRE', 'EARTH', 'METAL', 'WATER'].map((key, i, arr) => {
+                const radius = 105;
+                const center = 160;
+                const angle = (i * 72 - 90) * (Math.PI / 180);
+                const x = center + radius * Math.cos(angle);
+                const y = center + radius * Math.sin(angle);
 
-                // 1. Determine My Element Index
-                const ilganHanja = saju.meta.ilgan;
-                let myElemIndex = 0;
-                const GAN_ORDER = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
-                const ELEM_ORDER = ['WOOD', 'FIRE', 'EARTH', 'METAL', 'WATER'];
-                const ELEM_KR = {
+                // @ts-ignore
+                const percent = saju.distributions?.[key]?.percent || 0;
+                // Limit the max size so it doesn't overlap arrows
+                // Min 22, Max ~38 (at 63% like example)
+                const r = 22 + Math.min(percent, 60) * 0.25;
+
+                // --- Generation Link (Saeng) ---
+                const nextI = (i + 1) % 5;
+                const nextAngle = (nextI * 72 - 90) * (Math.PI / 180);
+                const nextX = center + radius * Math.cos(nextAngle);
+                const nextY = center + radius * Math.sin(nextAngle);
+                // @ts-ignore
+                const nextPercent = saju.distributions?.[arr[nextI]]?.percent || 0;
+                const nextR = 22 + Math.min(nextPercent, 60) * 0.25;
+
+                const dx = nextX - x;
+                const dy = nextY - y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                const gap = 16; // Increased gap for visibility
+                let genLink = null;
+
+                if (dist > 0) {
+                  const startT = (r + gap) / dist;
+                  const endT = 1 - (nextR + gap) / dist;
+                  if (startT < endT) {
+                    genLink = (
+                      <Line
+                        x1={x + dx * startT}
+                        y1={y + dy * startT}
+                        x2={x + dx * endT}
+                        y2={y + dy * endT}
+                        stroke="#E5E7EB" // Gray-200
+                        strokeWidth="2"
+                        markerEnd="url(#arrowhead)"
+                      />
+                    );
+                  }
+                }
+
+                // --- Control Link (Geuk) ---
+                const controlI = (i + 2) % 5;
+                const controlAngle = (controlI * 72 - 90) * (Math.PI / 180);
+                const controlX = center + radius * Math.cos(controlAngle);
+                const controlY = center + radius * Math.sin(controlAngle);
+                // @ts-ignore
+                const controlPercent = saju.distributions?.[arr[controlI]]?.percent || 0;
+                const controlR = 22 + Math.min(controlPercent, 60) * 0.25;
+
+                const cDx = controlX - x;
+                const cDy = controlY - y;
+                const cDist = Math.sqrt(cDx * cDx + cDy * cDy);
+                let controlLink = null;
+
+                if (cDist > 0) {
+                  const cStartT = (r + gap) / cDist;
+                  const cEndT = 1 - (controlR + gap) / cDist;
+                  if (cStartT < cEndT) {
+                    controlLink = (
+                      <Line
+                        x1={x + cDx * cStartT}
+                        y1={y + cDy * cStartT}
+                        x2={x + cDx * cEndT}
+                        y2={y + cDy * cEndT}
+                        stroke="#D1D5DB" // Gray-300 (Subtle)
+                        strokeWidth="1.5"
+                        strokeDasharray="4, 4"
+                        markerEnd="url(#arrowhead-control)"
+                      />
+                    );
+                  }
+                }
+
+                const labels: any = {
                   WOOD: '목',
                   FIRE: '화',
                   EARTH: '토',
                   METAL: '금',
                   WATER: '수',
                 };
-                const SIPSIN_NAMES = ['비겁', '식상', '재성', '관성', '인성'];
-                const COLORS = {
+                const colors: any = {
                   WOOD: '#4ADE80',
                   FIRE: '#F87171',
                   EARTH: '#FACC15',
                   METAL: '#9CA3AF',
                   WATER: '#60A5FA',
                 };
-
-                const myIdx = GAN_ORDER.indexOf(ilganHanja);
-                const myElemKey = ELEM_ORDER[Math.floor(myIdx / 2)]; // 0: Wood, 1: Fire...
-                const shift = ELEM_ORDER.indexOf(myElemKey); // Rotation needed
-
-                const sortedElems = [...ELEM_ORDER.slice(shift), ...ELEM_ORDER.slice(0, shift)];
-
-                // 2. Points
-                const points = sortedElems.map((_, i) => {
-                  const angle = (-90 + i * 72) * (Math.PI / 180);
-                  return {
-                    x: center.x + radius * Math.cos(angle),
-                    y: center.y + radius * Math.sin(angle),
-                  };
-                });
+                const textColors: any = {
+                  WOOD: '#15803d', // green-700
+                  FIRE: '#b91c1c', // red-700
+                  EARTH: '#a16207', // yellow-700
+                  METAL: '#4b5563', // gray-600
+                  WATER: '#1d4ed8', // blue-700
+                };
+                const color = colors[key];
+                const textColor = textColors[key];
 
                 return (
-                  <>
-                    {/* Arrows Layer */}
-                    {points.map((p, i) => {
-                      const next = points[(i + 1) % 5]; // Blue Arrow Target
-                      const star = points[(i + 2) % 5]; // Red Arrow Target
+                  <React.Fragment key={key}>
+                    {/* Render Links underneath nodes */}
+                    {controlLink}
+                    {genLink}
 
-                      // Shorten line to not overlap circle
-                      // Vector math for trimming
-                      const trim = circleRadius + 5;
-                      const getTrimmedLine = (p1: any, p2: any) => {
-                        const dx = p2.x - p1.x;
-                        const dy = p2.y - p1.y;
-                        const dist = Math.sqrt(dx * dx + dy * dy);
-                        const ratio = (dist - trim) / dist;
-                        const startRatio = trim / dist;
-                        return {
-                          x1: p1.x + dx * startRatio,
-                          y1: p1.y + dy * startRatio,
-                          x2: p1.x + dx * ratio,
-                          y2: p1.y + dy * ratio,
-                        };
-                      };
-
-                      const blueL = getTrimmedLine(p, next);
-                      const redL = getTrimmedLine(p, star);
-
-                      return (
-                        <G key={`arrows-${i}`}>
-                          <Line
-                            x1={blueL.x1}
-                            y1={blueL.y1}
-                            x2={blueL.x2}
-                            y2={blueL.y2}
-                            stroke="#3B82F6"
-                            strokeWidth="2"
-                            markerEnd="url(#blueArrow)"
-                          />
-                          <Line
-                            x1={redL.x1}
-                            y1={redL.y1}
-                            x2={redL.x2}
-                            y2={redL.y2}
-                            stroke="#EF4444"
-                            strokeWidth="2"
-                            opacity={0.6}
-                            markerEnd="url(#redArrow)"
-                          />
-                        </G>
-                      );
-                    })}
-
-                    {/* Circles Layer */}
-                    {sortedElems.map((elemKey, i) => {
-                      const p = points[i];
-                      const data = saju.distributions?.[elemKey] || {
-                        count: 0,
-                        percent: 0,
-                      };
-                      // @ts-ignore
-                      const elemName = ELEM_KR[elemKey];
-                      const sipsin = SIPSIN_NAMES[i];
-                      // @ts-ignore
-                      const color = COLORS[elemKey];
-
-                      // Fill calculation
-                      const fillHeight = (data.percent / 100) * (circleRadius * 2);
-                      const fillY = p.y + circleRadius - fillHeight;
-
-                      return (
-                        <G key={`circle-${i}`}>
-                          <Defs>
-                            <ClipPath id={`clip-${i}`}>
-                              <Rect
-                                x={p.x - circleRadius}
-                                y={fillY}
-                                width={circleRadius * 2}
-                                height={fillHeight}
-                              />
-                            </ClipPath>
-                          </Defs>
-
-                          {/* Background Circle */}
-                          <SvgCircle
-                            cx={p.x}
-                            cy={p.y}
-                            r={circleRadius}
-                            fill="white"
-                            stroke="#E5E7EB"
-                            strokeWidth="2"
-                          />
-
-                          {/* Level Fill */}
-                          <SvgCircle
-                            cx={p.x}
-                            cy={p.y}
-                            r={circleRadius}
-                            fill={color}
-                            opacity={0.5}
-                            clipPath={`url(#clip-${i})`}
-                          />
-
-                          {/* Text */}
-                          <SvgText
-                            x={p.x}
-                            y={p.y - 5}
-                            fontSize="14"
-                            fontWeight="bold"
-                            fill="#374151"
-                            textAnchor="middle">
-                            {elemName}({sipsin})
-                          </SvgText>
-                          <SvgText
-                            x={p.x}
-                            y={p.y + 15}
-                            fontSize="16"
-                            fontWeight="bold"
-                            fill="#1F2937"
-                            textAnchor="middle">
-                            {data.percent.toFixed(1)}%
-                          </SvgText>
-                        </G>
-                      );
-                    })}
-                  </>
+                    <G>
+                      <SvgCircle cx={x} cy={y} r={r} fill="white" stroke={color} strokeWidth="3" />
+                      <SvgCircle cx={x} cy={y} r={r - 3} fill={color} fillOpacity={0.15} />
+                      <SvgText
+                        x={x}
+                        y={y - 4}
+                        fill={textColor}
+                        fontSize="15"
+                        fontWeight="bold"
+                        textAnchor="middle"
+                        alignmentBaseline="middle">
+                        {labels[key]}
+                      </SvgText>
+                      <SvgText
+                        x={x}
+                        y={y + 11}
+                        fill={textColor}
+                        fontSize="11"
+                        fontWeight="500"
+                        textAnchor="middle"
+                        alignmentBaseline="middle">
+                        {percent.toFixed(0)}%
+                      </SvgText>
+                    </G>
+                  </React.Fragment>
                 );
-              })()}
+              })}
             </Svg>
           </View>
+        </View>
 
-          {/* Detailed Interpretations */}
-          <View className="gap-2">
-            <Text className="text-lg font-semibold text-foreground">상세 해석</Text>
-            <View className="gap-3 rounded-xl border border-border bg-card p-4">
-              {/* NaYin */}
-              <View>
-                <Text className="mb-2 text-sm font-bold text-gray-700">납음 (소리 오행)</Text>
-                <View className="flex-row gap-2">
-                  {[
-                    { label: '년주', value: saju.details?.nayin.year },
-                    { label: '월주', value: saju.details?.nayin.month },
-                    { label: '일주', value: saju.details?.nayin.day },
-                    { label: '시주', value: saju.details?.nayin.hour },
-                  ].map((item, i) => (
-                    <View key={i} className="flex-1 items-center gap-1 rounded bg-gray-50 p-2">
-                      <Text className="text-xs text-gray-500">{item.label}</Text>
-                      <Text
-                        className="text-center text-xs font-medium text-gray-800"
-                        numberOfLines={2}>
-                        {item.value}
-                      </Text>
-                    </View>
-                  ))}
-                </View>
-              </View>
-
-              <View className="my-1 h-[1px] bg-border" />
-
-              {/* 28 Xiu & Chong/Sha */}
-              <View className="flex-row gap-4">
-                <View className="flex-1 gap-1">
-                  <Text className="text-sm font-bold text-gray-700">28수 (별자리)</Text>
-                  <Text className="text-sm text-gray-600">{saju.details?.xiu}</Text>
-                </View>
-                <View className="flex-1 gap-1">
-                  <Text className="text-sm font-bold text-gray-700">충(沖) / 살(煞)</Text>
-                  <View className="gap-1">
-                    <Text className="text-xs text-gray-600">
-                      <Text className="font-semibold text-red-500">충:</Text> {saju.details?.chong}
-                    </Text>
-                    <Text className="text-xs text-gray-600">
-                      <Text className="font-semibold text-gray-800">살방위:</Text>{' '}
-                      {saju.details?.sha}
+        {/* Detailed Interpretations */}
+        <View className="gap-2">
+          <Text className="text-lg font-semibold text-foreground">상세 해석</Text>
+          <View className="gap-3 rounded-xl border border-border bg-card p-4">
+            {/* NaYin */}
+            <View>
+              <Text className="mb-2 text-sm font-bold text-gray-700">납음 (소리 오행)</Text>
+              <View className="flex-row gap-2">
+                {[
+                  { label: '년주', value: saju.details?.nayin.year },
+                  { label: '월주', value: saju.details?.nayin.month },
+                  { label: '일주', value: saju.details?.nayin.day },
+                  { label: '시주', value: saju.details?.nayin.hour },
+                ].map((item, i) => (
+                  <View key={i} className="flex-1 items-center gap-1 rounded bg-gray-50 p-2">
+                    <Text className="text-xs text-gray-500">{item.label}</Text>
+                    <Text
+                      className="text-center text-xs font-medium text-gray-800"
+                      numberOfLines={2}>
+                      {item.value}
                     </Text>
                   </View>
+                ))}
+              </View>
+            </View>
+
+            <View className="my-1 h-[1px] bg-border" />
+
+            {/* 28 Xiu & Chong/Sha */}
+            <View className="flex-row gap-4">
+              <View className="flex-1 gap-1">
+                <Text className="text-sm font-bold text-gray-700">28수 (별자리)</Text>
+                <Text className="text-sm text-gray-600">{saju.details?.xiu}</Text>
+              </View>
+              <View className="flex-1 gap-1">
+                <Text className="text-sm font-bold text-gray-700">충(沖) / 살(煞)</Text>
+                <View className="gap-1">
+                  <Text className="text-xs text-gray-600">
+                    <Text className="font-semibold text-red-500">충:</Text> {saju.details?.chong}
+                  </Text>
+                  <Text className="text-xs text-gray-600">
+                    <Text className="font-semibold text-gray-800">살방위:</Text> {saju.details?.sha}
+                  </Text>
                 </View>
               </View>
+            </View>
 
-              <View className="my-1 h-[1px] bg-border" />
+            <View className="my-1 h-[1px] bg-border" />
 
-              {/* PengZu */}
-              <View className="gap-1">
-                <Text className="text-sm font-bold text-gray-700">팽조백기 (금기사항)</Text>
-                <View className="gap-1.5 rounded bg-gray-50 p-3">
-                  <Text className="text-xs leading-4 text-gray-600">
-                    <Text className="font-semibold text-gray-800">천간:</Text>{' '}
-                    {saju.details?.pengzu.gan}
-                  </Text>
-                  <Text className="text-xs leading-4 text-gray-600">
-                    <Text className="font-semibold text-gray-800">지지:</Text>{' '}
-                    {saju.details?.pengzu.zhi}
-                  </Text>
-                </View>
+            {/* PengZu */}
+            <View className="gap-1">
+              <Text className="text-sm font-bold text-gray-700">팽조백기 (금기사항)</Text>
+              <View className="gap-1.5 rounded bg-gray-50 p-3">
+                <Text className="text-xs leading-4 text-gray-600">
+                  <Text className="font-semibold text-gray-800">천간:</Text>{' '}
+                  {saju.details?.pengzu.gan}
+                </Text>
+                <Text className="text-xs leading-4 text-gray-600">
+                  <Text className="font-semibold text-gray-800">지지:</Text>{' '}
+                  {saju.details?.pengzu.zhi}
+                </Text>
               </View>
+            </View>
 
-              <View className="my-1 h-[1px] bg-border" />
+            <View className="my-1 h-[1px] bg-border" />
 
-              {/* Positions */}
-              <View className="gap-2">
-                <Text className="text-sm font-bold text-gray-700">신살 방위 (길신)</Text>
-                <View className="flex-row flex-wrap gap-2">
-                  {[
-                    {
-                      label: '희신',
-                      value: saju.details?.positions.xi,
-                      bg: 'bg-blue-50',
-                      text: 'text-blue-700',
-                    },
-                    {
-                      label: '재신',
-                      value: saju.details?.positions.cai,
-                      bg: 'bg-yellow-50',
-                      text: 'text-yellow-700',
-                    },
-                    {
-                      label: '복신',
-                      value: saju.details?.positions.fu,
-                      bg: 'bg-green-50',
-                      text: 'text-green-700',
-                    },
-                    {
-                      label: '양귀인',
-                      value: saju.details?.positions.yangGui,
-                      bg: 'bg-purple-50',
-                      text: 'text-purple-700',
-                    },
-                    {
-                      label: '음귀인',
-                      value: saju.details?.positions.yinGui,
-                      bg: 'bg-purple-50',
-                      text: 'text-purple-700',
-                    },
-                  ].map((item, i) => (
-                    <View key={i} className={`rounded px-2.5 py-1.5 ${item.bg}`}>
-                      <Text className={`text-xs font-medium ${item.text}`}>
-                        {item.label}: {item.value}
-                      </Text>
-                    </View>
-                  ))}
-                </View>
+            {/* Positions */}
+            <View className="gap-2">
+              <Text className="text-sm font-bold text-gray-700">신살 방위 (길신)</Text>
+              <View className="flex-row flex-wrap gap-2">
+                {[
+                  {
+                    label: '희신',
+                    value: saju.details?.positions.xi,
+                    bg: 'bg-blue-50',
+                    text: 'text-blue-700',
+                  },
+                  {
+                    label: '재신',
+                    value: saju.details?.positions.cai,
+                    bg: 'bg-yellow-50',
+                    text: 'text-yellow-700',
+                  },
+                  {
+                    label: '복신',
+                    value: saju.details?.positions.fu,
+                    bg: 'bg-green-50',
+                    text: 'text-green-700',
+                  },
+                  {
+                    label: '양귀인',
+                    value: saju.details?.positions.yangGui,
+                    bg: 'bg-purple-50',
+                    text: 'text-purple-700',
+                  },
+                  {
+                    label: '음귀인',
+                    value: saju.details?.positions.yinGui,
+                    bg: 'bg-purple-50',
+                    text: 'text-purple-700',
+                  },
+                ].map((item, i) => (
+                  <View key={i} className={`rounded px-2.5 py-1.5 ${item.bg}`}>
+                    <Text className={`text-xs font-medium ${item.text}`}>
+                      {item.label}: {item.value}
+                    </Text>
+                  </View>
+                ))}
               </View>
             </View>
           </View>
@@ -802,73 +727,62 @@ export const SajuResultView = ({
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerClassName="gap-2">
+          contentContainerClassName="gap-2 px-1">
           {saju.lifeList.list.map((item: any, index: number) => {
             const isSelected = selectedAge === item.age;
             return (
               <TouchableOpacity
-                activeOpacity={0.7}
+                activeOpacity={0.8}
                 onPress={() => handleDaewunPress(item.age)}
                 key={index}
-                className={`w-10 items-center gap-1.5 rounded-lg border p-1.5 py-2 ${
-                  isSelected ? 'border-primary bg-primary/10' : 'border-border bg-card'
+                className={`w-[60px] items-center overflow-hidden rounded-xl border bg-white ${
+                  isSelected ? 'border-blue-500 bg-blue-50/30' : 'border-gray-200'
                 }`}>
-                <Text
-                  className={`text-[10px] font-medium ${
-                    isSelected ? 'text-primary' : 'text-muted-foreground'
+                {/* Header */}
+                <View
+                  className={`w-full items-center py-1.5 ${
+                    isSelected ? 'bg-blue-500' : 'bg-gray-50'
                   }`}>
-                  {item.age}
-                </Text>
+                  <Text
+                    className={`text-[11px] font-bold ${
+                      isSelected ? 'text-white' : 'text-gray-500'
+                    }`}>
+                    {item.age}세
+                  </Text>
+                </View>
 
-                {/* Gan */}
-                <View className="items-center gap-0.5">
-                  <Text className="text-[10px] text-muted-foreground">{item.gan.sipsin}</Text>
-                  <View
-                    className="h-7 w-7 items-center justify-center rounded-full border border-border"
-                    style={{ backgroundColor: item.gan.color }}>
-                    <Text
-                      className="text-base font-bold text-white"
-                      style={{
-                        textShadowColor: 'rgba(0,0,0,1)',
-                        textShadowOffset: { width: 0, height: 0 },
-                        textShadowRadius: 2,
-                      }}>
+                {/* Pillars */}
+                <View className="w-full gap-1 py-2">
+                  {/* Gan */}
+                  <View className="items-center">
+                    <Text className="text-lg font-bold" style={{ color: item.gan.color }}>
                       {item.gan.hanja}
                     </Text>
+                    <Text className="text-[9px] text-gray-400">{item.gan.sipsin}</Text>
                   </View>
-                </View>
 
-                {/* Ji */}
-                <View className="items-center gap-0.5">
-                  <View
-                    className="h-7 w-7 items-center justify-center rounded-full border border-border"
-                    style={{ backgroundColor: item.ji.color }}>
-                    <Text
-                      className="text-base font-bold text-white"
-                      style={{
-                        textShadowColor: 'rgba(0,0,0,1)',
-                        textShadowOffset: { width: 0, height: 0 },
-                        textShadowRadius: 2,
-                      }}>
+                  {/* Divider */}
+                  <View className="h-[1px] w-8 self-center bg-gray-100" />
+
+                  {/* Ji */}
+                  <View className="items-center">
+                    <Text className="text-lg font-bold" style={{ color: item.ji.color }}>
                       {item.ji.hanja}
                     </Text>
+                    <Text className="text-[9px] text-gray-400">{item.ji.sipsin}</Text>
                   </View>
-                  <Text className="text-[10px] text-muted-foreground">{item.ji.sipsin}</Text>
-                  <Text className="text-[10px] font-medium text-muted-foreground">
-                    {item.ji.wunsung}
-                  </Text>
-                  {/* 12 Shin-sal */}
-                  {item.ji.shinsal?.map((sal: string, idx: number) => (
-                    <Text key={idx} className="text-[10px] text-muted-foreground opacity-80">
-                      {sal}
-                    </Text>
-                  ))}
                 </View>
 
-                <Text className="text-center text-[10px] text-muted-foreground" numberOfLines={1}>
-                  {item.gan.korean}
-                  {item.ji.korean}
-                </Text>
+                {/* Footer */}
+                <View className="w-full items-center gap-0.5 bg-gray-50/50 py-1.5">
+                  <Text className="text-[10px] font-medium text-gray-600">{item.ji.wunsung}</Text>
+                  {Array.isArray(item.ji.shinsal) &&
+                    item.ji.shinsal.slice(0, 3).map((sal: string, idx: number) => (
+                      <Text key={idx} className="text-[9px] text-gray-400" numberOfLines={1}>
+                        {sal}
+                      </Text>
+                    ))}
+                </View>
               </TouchableOpacity>
             );
           })}
@@ -889,73 +803,62 @@ export const SajuResultView = ({
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerClassName="gap-2">
+          contentContainerClassName="gap-2 px-1">
           {sewunData.map((item: any, index: number) => {
             const isSelected = selectedYear === item.year;
             return (
               <TouchableOpacity
-                activeOpacity={0.7}
+                activeOpacity={0.8}
                 onPress={() => handleYearPress(item.year)}
                 key={index}
-                className={`w-10 items-center gap-1.5 rounded-lg border p-1.5 py-2 ${
-                  isSelected ? 'border-primary bg-primary/10' : 'border-border bg-card'
+                className={`w-[60px] items-center overflow-hidden rounded-xl border bg-white ${
+                  isSelected ? 'border-blue-500 bg-blue-50/30' : 'border-gray-200'
                 }`}>
-                <Text
-                  className={`text-[10px] font-medium ${
-                    isSelected ? 'text-primary' : 'text-muted-foreground'
+                {/* Header */}
+                <View
+                  className={`w-full items-center py-1.5 ${
+                    isSelected ? 'bg-blue-500' : 'bg-gray-50'
                   }`}>
-                  {item.year}
-                </Text>
+                  <Text
+                    className={`text-[11px] font-bold ${
+                      isSelected ? 'text-white' : 'text-gray-500'
+                    }`}>
+                    {item.year}
+                  </Text>
+                </View>
 
-                {/* Gan */}
-                <View className="items-center gap-0.5">
-                  <Text className="text-[10px] text-muted-foreground">{item.gan.sipsin}</Text>
-                  <View
-                    className="h-7 w-7 items-center justify-center rounded-full border border-border"
-                    style={{ backgroundColor: item.gan.color }}>
-                    <Text
-                      className="text-base font-bold text-white"
-                      style={{
-                        textShadowColor: 'rgba(0,0,0,1)',
-                        textShadowOffset: { width: 0, height: 0 },
-                        textShadowRadius: 2,
-                      }}>
+                {/* Pillars */}
+                <View className="w-full gap-1 py-2">
+                  {/* Gan */}
+                  <View className="items-center">
+                    <Text className="text-lg font-bold" style={{ color: item.gan.color }}>
                       {item.gan.hanja}
                     </Text>
+                    <Text className="text-[9px] text-gray-400">{item.gan.sipsin}</Text>
                   </View>
-                </View>
 
-                {/* Ji */}
-                <View className="items-center gap-0.5">
-                  <View
-                    className="h-7 w-7 items-center justify-center rounded-full border border-border"
-                    style={{ backgroundColor: item.ji.color }}>
-                    <Text
-                      className="text-base font-bold text-white"
-                      style={{
-                        textShadowColor: 'rgba(0,0,0,1)',
-                        textShadowOffset: { width: 0, height: 0 },
-                        textShadowRadius: 2,
-                      }}>
+                  {/* Divider */}
+                  <View className="h-[1px] w-8 self-center bg-gray-100" />
+
+                  {/* Ji */}
+                  <View className="items-center">
+                    <Text className="text-lg font-bold" style={{ color: item.ji.color }}>
                       {item.ji.hanja}
                     </Text>
+                    <Text className="text-[9px] text-gray-400">{item.ji.sipsin}</Text>
                   </View>
-                  <Text className="text-[10px] text-muted-foreground">{item.ji.sipsin}</Text>
-                  <Text className="text-[10px] font-medium text-muted-foreground">
-                    {item.ji.wunsung}
-                  </Text>
-                  {/* 12 Shin-sal */}
-                  {item.ji.shinsals?.map((sal: string, idx: number) => (
-                    <Text key={idx} className="text-[10px] text-muted-foreground opacity-80">
-                      {sal}
-                    </Text>
-                  ))}
                 </View>
 
-                <Text className="text-center text-[10px] text-muted-foreground" numberOfLines={1}>
-                  {item.gan.korean}
-                  {item.ji.korean}
-                </Text>
+                {/* Footer */}
+                <View className="w-full items-center gap-0.5 bg-gray-50/50 py-1.5">
+                  <Text className="text-[10px] font-medium text-gray-600">{item.ji.wunsung}</Text>
+                  {Array.isArray(item.ji.shinsals) &&
+                    item.ji.shinsals.slice(0, 3).map((sal: string, idx: number) => (
+                      <Text key={idx} className="text-[9px] text-gray-400" numberOfLines={1}>
+                        {sal}
+                      </Text>
+                    ))}
+                </View>
               </TouchableOpacity>
             );
           })}
@@ -976,62 +879,48 @@ export const SajuResultView = ({
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerClassName="gap-2">
+          contentContainerClassName="gap-2 px-1">
           {monthData.map((item: any, index: number) => (
             <View
               key={index}
-              className="w-10 items-center gap-1.5 rounded-lg border border-border bg-card p-1.5 py-2">
-              <Text className="text-[10px] font-medium text-muted-foreground">{item.month}월</Text>
+              className="w-[60px] items-center overflow-hidden rounded-xl border border-gray-200 bg-white">
+              {/* Header */}
+              <View className="w-full items-center bg-gray-50 py-1.5">
+                <Text className="text-[11px] font-bold text-gray-500">{item.month}월</Text>
+              </View>
 
-              {/* Gan */}
-              <View className="items-center gap-0.5">
-                <Text className="text-[10px] text-muted-foreground">{item.gan.sipsin}</Text>
-                <View
-                  className="h-7 w-7 items-center justify-center rounded-full border border-border"
-                  style={{ backgroundColor: item.gan.color }}>
-                  <Text
-                    className="text-base font-bold text-white"
-                    style={{
-                      textShadowColor: 'rgba(0,0,0,1)',
-                      textShadowOffset: { width: 0, height: 0 },
-                      textShadowRadius: 2,
-                    }}>
+              {/* Pillars */}
+              <View className="w-full gap-1 py-2">
+                {/* Gan */}
+                <View className="items-center">
+                  <Text className="text-lg font-bold" style={{ color: item.gan.color }}>
                     {item.gan.hanja}
                   </Text>
+                  <Text className="text-[9px] text-gray-400">{item.gan.sipsin}</Text>
                 </View>
-              </View>
 
-              {/* Ji */}
-              <View className="items-center gap-0.5">
-                <View
-                  className="h-7 w-7 items-center justify-center rounded-full border border-border"
-                  style={{ backgroundColor: item.ji.color }}>
-                  <Text
-                    className="text-base font-bold text-white"
-                    style={{
-                      textShadowColor: 'rgba(0,0,0,1)',
-                      textShadowOffset: { width: 0, height: 0 },
-                      textShadowRadius: 2,
-                    }}>
+                {/* Divider */}
+                <View className="h-[1px] w-8 self-center bg-gray-100" />
+
+                {/* Ji */}
+                <View className="items-center">
+                  <Text className="text-lg font-bold" style={{ color: item.ji.color }}>
                     {item.ji.hanja}
                   </Text>
+                  <Text className="text-[9px] text-gray-400">{item.ji.sipsin}</Text>
                 </View>
-                <Text className="text-[10px] text-muted-foreground">{item.ji.sipsin}</Text>
-                <Text className="text-[10px] font-medium text-muted-foreground">
-                  {item.ji.wunsung}
-                </Text>
-                {/* 12 Shin-sal */}
-                {item.ji.shinsals?.map((sal: string, idx: number) => (
-                  <Text key={idx} className="text-[10px] text-muted-foreground opacity-80">
-                    {sal}
-                  </Text>
-                ))}
               </View>
 
-              <Text className="text-center text-[10px] text-muted-foreground" numberOfLines={1}>
-                {item.gan.korean}
-                {item.ji.korean}
-              </Text>
+              {/* Footer */}
+              <View className="w-full items-center gap-0.5 bg-gray-50/50 py-1.5">
+                <Text className="text-[10px] font-medium text-gray-600">{item.ji.wunsung}</Text>
+                {Array.isArray(item.ji.shinsals) &&
+                  item.ji.shinsals.slice(0, 3).map((sal: string, idx: number) => (
+                    <Text key={idx} className="text-[9px] text-gray-400" numberOfLines={1}>
+                      {sal}
+                    </Text>
+                  ))}
+              </View>
             </View>
           ))}
         </ScrollView>

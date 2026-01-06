@@ -3,7 +3,15 @@ import { Input } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
 import { Stack, useRouter } from 'expo-router';
 import * as React from 'react';
-import { Platform, ScrollView, View, TouchableOpacity } from 'react-native';
+import {
+  Platform,
+  ScrollView,
+  View,
+  TouchableOpacity,
+  Image,
+  Animated,
+  Easing,
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '@/lib/supabase';
@@ -22,6 +30,7 @@ export default function Screen() {
   const [gender, setGender] = React.useState<'male' | 'female'>('male');
 
   const [savedProfile, setSavedProfile] = React.useState<any>(null);
+  const [isLoading, setIsLoading] = React.useState(true);
 
   const router = useRouter();
 
@@ -43,6 +52,8 @@ export default function Screen() {
           }
         } catch (e) {
           console.error(e);
+        } finally {
+          setIsLoading(false);
         }
       };
       loadFirstProfile();
@@ -94,12 +105,68 @@ export default function Screen() {
     setGender('male');
   };
 
+  const rotateAnim = React.useRef(new Animated.Value(0)).current;
+  const pulseAnim = React.useRef(new Animated.Value(1)).current;
+
+  React.useEffect(() => {
+    if (isLoading) {
+      Animated.loop(
+        Animated.timing(rotateAnim, {
+          toValue: 1,
+          duration: 8000,
+          easing: Easing.linear,
+          useNativeDriver: true,
+        })
+      ).start();
+
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, {
+            toValue: 1.1,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseAnim, {
+            toValue: 1,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    }
+  }, [isLoading]);
+
+  const spin = rotateAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
+
+  if (isLoading) {
+    return (
+      <View className="flex-1 items-center justify-center gap-6 bg-background">
+        <Animated.View
+          style={{
+            transform: [{ rotate: spin }, { scale: pulseAnim }],
+          }}>
+          <View className="overflow-hidden rounded-full border-4 border-amber-100 shadow-xl">
+            <Image
+              source={require('../../assets/images/logo.png')}
+              style={{ width: 120, height: 120 }}
+              resizeMode="cover"
+            />
+          </View>
+        </Animated.View>
+        <Text className="text-lg font-bold text-foreground">사주를 분석하고 있습니다...</Text>
+      </View>
+    );
+  }
+
   if (savedProfile) {
     return (
       <>
         <Stack.Screen
           options={{
-            title: '나의 사주',
+            title: '만세력',
             headerRight: () => (
               <TouchableOpacity onPress={handleReset} className="mr-4">
                 <RefreshCcw size={20} color="#000" />

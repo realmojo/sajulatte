@@ -1,5 +1,6 @@
 import { Tabs } from 'expo-router';
-import { Home, ScrollText, Sparkles, Settings } from 'lucide-react-native';
+import { View } from 'react-native';
+import { CalendarDays, ScrollText, Sparkles, Ellipsis } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { NAV_THEME } from '@/lib/theme';
 
@@ -11,8 +12,8 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: theme.colors.primary,
-        tabBarInactiveTintColor: theme.colors.text,
+        tabBarActiveTintColor: '#d97706', // Amber-600
+        tabBarInactiveTintColor: '#9ca3af', // Gray-400
         tabBarStyle: {
           backgroundColor: theme.colors.background,
           borderTopColor: theme.colors.border,
@@ -21,29 +22,45 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: '홈',
-          tabBarIcon: ({ color }) => <Home color={color} size={24} />,
+          title: '만세력',
+          tabBarIcon: ({ focused, color }) => (
+            <View className={focused ? 'rounded-full bg-amber-100 px-4 py-1' : ''}>
+              <CalendarDays color={focused ? '#d97706' : color} size={20} />
+            </View>
+          ),
         }}
       />
       <Tabs.Screen
         name="saved"
         options={{
           title: '저장목록',
-          tabBarIcon: ({ color }) => <ScrollText color={color} size={24} />,
+          tabBarIcon: ({ focused, color }) => (
+            <View className={focused ? 'rounded-full bg-amber-100 px-4 py-1' : ''}>
+              <ScrollText color={focused ? '#d97706' : color} size={20} />
+            </View>
+          ),
         }}
       />
       <Tabs.Screen
         name="daily"
         options={{
           title: '운세',
-          tabBarIcon: ({ color }) => <Sparkles color={color} size={24} />,
+          tabBarIcon: ({ focused, color }) => (
+            <View className={focused ? 'rounded-full bg-amber-100 px-4 py-1' : ''}>
+              <Sparkles color={focused ? '#d97706' : color} size={20} />
+            </View>
+          ),
         }}
       />
       <Tabs.Screen
         name="settings"
         options={{
-          title: '설정',
-          tabBarIcon: ({ color }) => <Settings color={color} size={24} />,
+          title: '더보기',
+          tabBarIcon: ({ focused, color }) => (
+            <View className={focused ? 'rounded-full bg-amber-100 px-4 py-1' : ''}>
+              <Ellipsis color={focused ? '#d97706' : color} size={20} />
+            </View>
+          ),
         }}
       />
     </Tabs>

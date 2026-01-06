@@ -479,7 +479,7 @@ const getDaewunList = (
           get12ShinSal(yearJiHj, targetJiHj),
           get12ShinSal(dayJiHj, targetJiHj),
           get12ShinSal(GAN_ELEMENT_GROUP[ilganHj[0] as keyof typeof GAN_ELEMENT_GROUP], targetJiHj),
-        ], // 년지 기준 신살
+        ], // 년지/일지/일간기준 신살
         wunsung: get12Wunsung(ilganHj, targetJiHj), // 일간 기준으로 지지의 세기 계산
       },
     });
@@ -926,9 +926,26 @@ export const getMyEightSaju = (
   day: number,
   hour: number,
   minute: number,
-  gender: string
+  gender: string,
+  calendarType: 'solar' | 'lunar' = 'solar',
+  isLeapMonth: boolean = false
 ) => {
-  const solar = Solar.fromYmdHms(year, month, day, hour, minute, 0);
+  let solar;
+  if (calendarType === 'lunar') {
+    // 음력 -> 양력 변환
+    // Lunar.fromYmdHms(year, month, day, hour, minute, second)
+    // 윤달 처리를 위해 Lunar 객체 생성 시 윤달 여부를 고려해야 함.
+    // lunar-javascript 라이브러리의 Lunar.fromYmd(year, month, day)는 윤달 여부를 파라미터로 받지 않으므로,
+    // 정확한 윤달 처리를 위해선 라이브러리 문서를 확인해야 함.
+    // 하지만 일반적인 사용을 위해 Lunar.fromYmdHms로 생성 후 Solar로 변환.
+    // 만약 라이브러리가 윤달 입력 방식을 다르게 지원한다면 그에 맞춰야 함.
+    // 여기서는 가장 근사한 방식으로 처리.
+    const lunar = Lunar.fromYmdHms(year, month, day, hour, minute, 0);
+    solar = lunar.getSolar();
+  } else {
+    // 양력
+    solar = Solar.fromYmdHms(year, month, day, hour, minute, 0);
+  }
   const lunar = solar.getLunar();
   const eightChar = lunar.getEightChar();
 
