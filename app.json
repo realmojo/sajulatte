@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "sajulatte",
+    "name": "사주라떼",
     "slug": "sajulatte",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -23,7 +23,20 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.mojoday.sajulatte"
+      "package": "com.mojoday.sajulatte",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "sajulatte",
+              "host": "login-callback"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     },
     "web": {
       "bundler": "metro",

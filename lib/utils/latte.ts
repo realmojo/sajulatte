@@ -1018,7 +1018,7 @@ export const getMyEightSaju = (
     monthList,
   };
 
-  console.log(result);
+  // console.log(result);
   return result;
 };
 

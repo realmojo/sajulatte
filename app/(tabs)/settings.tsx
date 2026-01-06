@@ -1,7 +1,11 @@
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { Stack } from 'expo-router';
-import { View, Image, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Image, TouchableOpacity, ScrollView, Alert, AppState } from 'react-native';
+import * as WebBrowser from 'expo-web-browser';
+import * as Linking from 'expo-linking';
+
+WebBrowser.maybeCompleteAuthSession();
 import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Session } from '@supabase/supabase-js';
@@ -60,6 +64,67 @@ export default function SettingsScreen() {
     loadProfile();
 
     return () => subscription.unsubscribe();
+  }, []);
+
+  // useEffect(() => {
+  //   WebBrowser.warmUpAsync();
+  //   return () => {
+  //     WebBrowser.coolDownAsync();
+  //   };
+  // }, []);
+
+  // Handle deep links (Login callback)
+  useEffect(() => {
+    const handleDeepLink = async (url: string | null) => {
+      if (!url) return;
+
+      console.log('Incoming Deep Link:', url);
+      // Alert.alert('Debug Link', url); // Uncomment if needed for on-device debugging
+
+      try {
+        // Extract code from any part of the URL manually to be robust
+        if (url.includes('code=')) {
+          const match = url.match(/[?&]code=([^&]+)/);
+          const code = match ? match[1] : null;
+
+          if (code) {
+            console.log('Detected code:', code);
+            const { error } = await supabase.auth.exchangeCodeForSession(code);
+            if (error) throw error;
+
+            Alert.alert('알림', '로그인이 완료되었습니다.');
+          }
+        } else if (url.includes('error=')) {
+          // Basic error logging
+          console.error('Deep link error:', url);
+        }
+      } catch (e) {
+        console.error('Deep link processing error:', e);
+        if (e instanceof Error) Alert.alert('로그인 오류', e.message);
+      }
+    };
+
+    AppState.addEventListener('change', (state) => {
+      if (state === 'active') {
+        Linking.getInitialURL().then((url) => {
+          if (url) console.log('Foreground Initial URL:', url);
+        });
+      }
+    });
+
+    // 1. Check if app was opened by a link (cold start)
+    Linking.getInitialURL().then(handleDeepLink);
+
+    // 2. Listen for incoming links (warm resume)
+    const subscription = Linking.addEventListener('url', (event) => {
+      console.log('Deep link received:', event.url);
+      Alert.alert('Debug', `Link received: ${event.url}`);
+      handleDeepLink(event.url);
+    });
+
+    return () => {
+      subscription.remove();
+    };
   }, []);
 
   return (
@@ -138,20 +203,40 @@ export default function SettingsScreen() {
               activeOpacity={0.8}
               onPress={async () => {
                 try {
-                  const { error } = await supabase.auth.signInWithOAuth({
+                  const { data, error } = await supabase.auth.signInWithOAuth({
                     provider: 'kakao',
                     options: {
-                      redirectTo: 'sajulatte://',
+                      redirectTo: 'sajulatte://login-callback',
+                      skipBrowserRedirect: true,
                     },
                   });
-                  if (error) alert(error.message);
+                  if (error) throw error;
+
+                  console.log('SignIn initiated, data:', data);
+
+                  if (data?.url) {
+                    // Fix: Add delay to ensure code_verifier is persisted to AsyncStorage before context switch
+                    await new Promise((resolve) => setTimeout(resolve, 500));
+
+                    // Use openBrowserAsync for reliable redirection on Android
+                    const result = await WebBrowser.openBrowserAsync(data.url);
+                    console.log('Browser result:', result);
+                  }
                 } catch (e) {
-                  alert('로그인 중 오류가 발생했습니다.');
+                  console.error('Login error:', e);
+                  if (e instanceof Error) alert(e.message);
+                  else alert('로그인 중 오류가 발생했습니다.');
                 }
               }}
               className="h-12 w-full flex-row items-center justify-center gap-2 rounded-lg bg-[#FEE500] px-4">
               <MessageCircle size={20} color="#000000" fill="#000000" />
               <Text className="text-base font-bold text-[#000000]">카카오 로그인</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => Linking.openURL('sajulatte://login-callback?code=test-code')}
+              className="mt-4 self-center rounded bg-gray-200 p-2">
+              <Text>Deep Link Test (Self)</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -161,14 +246,14 @@ export default function SettingsScreen() {
           <Text className="px-1 text-lg font-bold text-foreground">전체 카테고리</Text>
           <View className="flex-row flex-wrap justify-between gap-y-6">
             {[
-              { label: '총운', icon: Star, color: 'text-amber-500', bg: 'bg-amber-100' },
+              // { label: '총운', icon: Star, color: 'text-amber-500', bg: 'bg-amber-100' },
               { label: '연애운', icon: Heart, color: 'text-rose-500', bg: 'bg-rose-100' },
               { label: '금전운', icon: Coins, color: 'text-yellow-600', bg: 'bg-yellow-100' },
               { label: '결혼운', icon: HeartHandshake, color: 'text-pink-500', bg: 'bg-pink-100' },
               { label: '직업운', icon: Briefcase, color: 'text-blue-500', bg: 'bg-blue-100' },
               { label: '건강운', icon: Activity, color: 'text-green-500', bg: 'bg-green-100' },
               { label: '대인운', icon: User, color: 'text-purple-500', bg: 'bg-purple-100' },
-              { label: '신년운세', icon: Sparkles, color: 'text-cyan-500', bg: 'bg-cyan-100' },
+              // { label: '신년운세', icon: Sparkles, color: 'text-cyan-500', bg: 'bg-cyan-100' },
             ].map((item, index) => (
               <TouchableOpacity
                 key={index}

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Circle, CircleHelp, CircleX } from 'lucide-react-native';
+import { Circle, CircleHelp, CircleX, Coffee } from 'lucide-react-native';
 import Svg, {
   Circle as SvgCircle,
   ClipPath,
@@ -16,6 +16,7 @@ import Svg, {
 import { Modal, ScrollView, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { getMonthList, getMyEightSaju, getYearList } from '@/lib/utils/latte';
+import { interpretSaju } from '@/lib/utils/interpreter';
 
 interface SajuResultProps {
   name: string;
@@ -124,7 +125,9 @@ export const SajuResultView = ({
   return (
     <ScrollView contentContainerClassName="p-6 gap-10" className="flex-1 bg-background">
       <View className="gap-2">
-        <Text className="mb-2 text-xl font-bold text-foreground">{name}님의 사주명식</Text>
+        <Text className="mb-2 text-xl font-bold text-foreground">
+          {name}님의 사주명식 <Coffee size={20} color="black" />
+        </Text>
         <View className="gap-2 rounded-lg border border-border bg-card p-4">
           <View className="flex-row items-center gap-2">
             <View className="rounded bg-red-100 px-1.5 py-0.5">
@@ -592,6 +595,89 @@ export const SajuResultView = ({
                 );
               })}
             </Svg>
+          </View>
+        </View>
+
+        {/* Basic Interpretation */}
+        <View className="gap-2">
+          <Text className="text-lg font-semibold text-foreground">기본 운세 분석</Text>
+          <View className="gap-4 rounded-xl border border-border bg-card p-5">
+            {(() => {
+              // Extract Sipsin and Shinsal lists for simple analysis
+              const sipsinList = [
+                saju.year.gan.sipsin,
+                saju.year.ji.sipsin,
+                saju.month.gan.sipsin,
+                saju.month.ji.sipsin,
+                saju.day.gan.sipsin,
+                saju.day.ji.sipsin,
+                saju.hour.gan.sipsin,
+                saju.hour.ji.sipsin,
+              ].filter(Boolean) as string[];
+
+              // Helper to flatten shinsal (which might be array or string)
+              const extractShinsal = (pillar: any) => {
+                const s = pillar.ji.shinsal;
+                return Array.isArray(s) ? s : s ? [s] : [];
+              };
+
+              const shinsalList = [
+                ...extractShinsal(saju.year),
+                ...extractShinsal(saju.month),
+                ...extractShinsal(saju.day),
+                ...extractShinsal(saju.hour),
+              ];
+
+              const interpretation = interpretSaju(
+                saju.meta.ilgan,
+                saju.distributions,
+                sipsinList,
+                shinsalList,
+                gender
+              );
+
+              return (
+                <>
+                  <View>
+                    <Text className="mb-1 text-sm font-bold text-blue-600">🔔 나의 성향</Text>
+                    <Text className="text-sm leading-6 text-foreground">
+                      {interpretation.summary}
+                    </Text>
+                  </View>
+                  <View className="h-[1px] bg-border" />
+                  <View>
+                    <Text className="mb-1 text-sm font-bold text-yellow-600">💰 금전운</Text>
+                    <Text className="text-sm leading-6 text-foreground">
+                      {interpretation.money}
+                    </Text>
+                  </View>
+                  <View className="h-[1px] bg-border" />
+                  <View>
+                    <Text className="mb-1 text-sm font-bold text-pink-500">💕 연애 스타일</Text>
+                    <Text className="text-sm leading-6 text-foreground">{interpretation.love}</Text>
+                  </View>
+                  <View className="h-[1px] bg-border" />
+                  <View>
+                    <Text className="mb-1 text-sm font-bold text-purple-600">💍 결혼/배우자운</Text>
+                    <Text className="text-sm leading-6 text-foreground">
+                      {interpretation.marriage}
+                    </Text>
+                  </View>
+                  <View className="h-[1px] bg-border" />
+                  <View>
+                    <Text className="mb-1 text-sm font-bold text-green-600">💼 직업운</Text>
+                    <Text className="text-sm leading-6 text-foreground">{interpretation.work}</Text>
+                  </View>
+                  <View className="h-[1px] bg-border" />
+                  <View>
+                    <Text className="mb-1 text-sm font-bold text-teal-600">🌿 건강운</Text>
+                    <Text className="text-sm leading-6 text-foreground">
+                      {interpretation.health}
+                    </Text>
+                  </View>
+                </>
+              );
+            })()}
           </View>
         </View>
 
