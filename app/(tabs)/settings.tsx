@@ -34,6 +34,7 @@ import {
   Activity,
   User,
   Star,
+  Check, // Added Check icon
   X, // Close icon
   Edit2, // Edit icon
 } from 'lucide-react-native';
@@ -71,9 +72,18 @@ export default function SettingsScreen() {
   const [editIsLeap, setEditIsLeap] = useState(false); // 윤달 여부
   const [isSaving, setIsSaving] = useState(false);
 
+  // Toast State
+  const [toastVisible, setToastVisible] = useState(false);
+
+  const showToast = () => {
+    setToastVisible(true);
+    setTimeout(() => setToastVisible(false), 3000);
+  };
+
   useEffect(() => {
     // Check initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('getSessions', session);
       setSession(session);
     });
 
@@ -100,19 +110,30 @@ export default function SettingsScreen() {
       if (event === 'SIGNED_IN' && session) {
         // Sync profile (Fetch from DB > Local, or Upload Local > DB)
         console.log('sync');
+        console.log('session', session);
         // Pass the session directly to avoid another getSession() call
-        const syncedProfile = await syncUserProfile(session);
-        console.log('Synced Profile:', syncedProfile);
-        if (syncedProfile) {
-          setUserProfile(syncedProfile);
-        } else {
-          // Fallback to reloading local just in case
-          loadProfile();
-        }
       } else if (event === 'SIGNED_OUT') {
         setUserProfile(null);
       }
     });
+
+    console.log('ddddd');
+
+    setTimeout(async () => {
+      const syncedProfile = await syncUserProfile();
+      console.log('Synced Profile:', syncedProfile);
+
+      if (syncedProfile) {
+        setUserProfile(syncedProfile);
+        // If mandatory info is missing, open edit modal
+        if (!syncedProfile.gender || !syncedProfile.birth_year) {
+          setTimeout(() => setShowProfileEdit(true), 500);
+        }
+      } else {
+        // Fallback to reloading local just in case
+        loadProfile();
+      }
+    }, 1000);
 
     return () => subscription.unsubscribe();
   }, []);
@@ -161,13 +182,13 @@ export default function SettingsScreen() {
 
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'kakao',
-        options: {
-          redirectTo: redirectUrl,
-          skipBrowserRedirect: true, // We will handle the browser via WebView
-          queryParams: {
-            // Add any additional query params if needed
-          },
-        },
+        // options: {
+        //   redirectTo: redirectUrl,
+        //   skipBrowserRedirect: true, // We will handle the browser via WebView
+        //   // queryParams: {
+        //   //   prompt: 'login',
+        //   // },
+        // },
       });
 
       if (error) {
@@ -239,19 +260,6 @@ export default function SettingsScreen() {
         } else if (error) {
           errorMessage = `오류: ${error}`;
         }
-
-        // Add specific guidance for "Unable to exchange external code"
-        if (
-          errorDescription?.includes('Unable to exchange external code') ||
-          errorCode === 'unexpected_failure'
-        ) {
-          errorMessage += '\n\n이 오류는 보통 다음 원인으로 발생합니다:\n';
-          errorMessage += '1. 카카오 OAuth Client ID/Secret이 잘못 설정됨\n';
-          errorMessage +=
-            '2. 카카오 개발자 콘솔의 Redirect URI가 Supabase Callback URL과 일치하지 않음\n';
-          errorMessage += '3. Supabase 대시보드의 카카오 OAuth 설정 확인 필요';
-        }
-
         Alert.alert('로그인 오류', errorMessage);
       } catch (e) {
         console.error('Error parsing error URL:', e);
@@ -305,7 +313,7 @@ export default function SettingsScreen() {
             console.error('setSession error:', error);
             throw error;
           }
-          Alert.alert('알림', '로그인이 완료되었습니다.');
+          showToast();
         } else if (code) {
           console.log('Exchanging code for session...');
           const { error } = await supabase.auth.exchangeCodeForSession(code);
@@ -313,7 +321,7 @@ export default function SettingsScreen() {
             console.error('exchangeCodeForSession error:', error);
             throw error;
           }
-          Alert.alert('알림', '로그인이 완료되었습니다.');
+          showToast();
         } else {
           console.warn('No tokens or code found in URL');
           Alert.alert('알림', '인증 정보를 찾을 수 없습니다.');
@@ -555,9 +563,19 @@ export default function SettingsScreen() {
             </TouchableOpacity>
           </View>
           <WebView
+            key={authUrl}
             source={{ uri: authUrl }}
+            javaScriptEnabled={true}
+            domStorageEnabled={true}
+            userAgent="Mozilla/5.0 (Linux; Android 10; Android SDK built for x86) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36"
             onShouldStartLoadWithRequest={(request) => {
               const { url } = request;
+
+              // Prevent opening external apps (KakaoTalk, etc.) -> Force Web Login
+              if (url.startsWith('kakaotalk://') || url.startsWith('intent://')) {
+                return false;
+              }
+
               // If the redirect URL is our app scheme, intercept it!
               if (url.startsWith('sajulatte://') || url.includes('/settings')) {
                 console.log('Intercepting redirect:', url);
@@ -633,8 +651,17 @@ export default function SettingsScreen() {
                       일{userProfile.birth_hour ? ` ${userProfile.birth_hour}시` : ''}
                     </Text>
                     <Text className="mt-1 text-xs text-gray-400">
-                      {userProfile.calendar_type === 'lunar' ? '음력' : '양력'} /{' '}
-                      {userProfile.gender === 'male' ? '남성' : '여성'}
+                      {userProfile.calendar_type === 'lunar'
+                        ? '음력'
+                        : userProfile.calendar_type === 'solar'
+                          ? '양력'
+                          : '일력'}{' '}
+                      /{' '}
+                      {userProfile.gender === 'male'
+                        ? '남성'
+                        : userProfile.gender === 'female'
+                          ? '여성'
+                          : '성별'}
                     </Text>
                   </View>
                 ) : (
@@ -705,6 +732,20 @@ export default function SettingsScreen() {
           </View>
         </View>
       </ScrollView>
+      {/* Shadcn-style Toast */}
+      {toastVisible && (
+        <View className="absolute bottom-10 left-4 right-4 z-50">
+          <View className="flex-row items-center gap-3 rounded-lg bg-zinc-900 px-4 py-4 shadow-lg">
+            <View className="rounded-full bg-green-500 p-1">
+              <Check size={16} color="white" strokeWidth={3} />
+            </View>
+            <View>
+              <Text className="font-semibold text-white">성공</Text>
+              <Text className="text-zinc-400">로그인이 완료되었습니다.</Text>
+            </View>
+          </View>
+        </View>
+      )}
     </View>
   );
 }

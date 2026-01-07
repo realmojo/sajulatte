@@ -34,10 +34,22 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: true,
+    flowType: 'implicit',
   },
 });
 
-// AppState listener removed to prevent potential conflicts/deadlocks with auto-refresh
+// Tells Supabase Auth to continuously refresh the session automatically if
+// the app is in the foreground. When this is added, you will continue to receive
+// `onAuthStateChange` events with the `TOKEN_REFRESHED` or `SIGNED_IN` events
+// if the user's session is valid.
+AppState.addEventListener('change', (state) => {
+  console.log('state', state);
+  if (state === 'active') {
+    supabase.auth.startAutoRefresh();
+  } else {
+    supabase.auth.stopAutoRefresh();
+  }
+});
 
 /**
  * Logged-in user's Main Saju Profile -> Upload to Supabase
@@ -97,18 +109,19 @@ export const uploadMainProfileToSupabase = async () => {
 export const fetchMainProfileFromSupabase = async () => {
   try {
     console.log('Fetching remote profile...');
-    console.log('supabase.auth', supabase.auth);
+    await supabase.auth.startAutoRefresh();
 
+    console.log('Auth state');
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    console.log('사용자 정보:', user);
-    if (!user) return null;
+      data: { session },
+    } = await supabase.auth.getSession();
+    console.log('사용자 정보:', session);
+    if (!session?.user) return null;
 
     const { data, error } = await supabase
       .from('sajulatte_users')
       .select('*')
-      .eq('id', user.id)
+      .eq('id', session.user.id)
       .single();
 
     console.log('Fetched remote profile:', data);
