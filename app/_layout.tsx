@@ -13,6 +13,11 @@ export {
   ErrorBoundary,
 } from 'expo-router';
 
+import { LogBox } from 'react-native';
+
+// Suppress known warnings from dependencies
+LogBox.ignoreLogs(['SafeAreaView has been deprecated']);
+
 export default function RootLayout() {
   const { setColorScheme } = useColorScheme();
 

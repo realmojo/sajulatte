@@ -15,7 +15,8 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.mojoday.sajulatte"
     },
     "android": {
       "edgeToEdgeEnabled": true,
@@ -30,8 +31,7 @@
           "autoVerify": true,
           "data": [
             {
-              "scheme": "sajulatte",
-              "host": "login-callback"
+              "scheme": "sajulatte"
             }
           ],
           "category": ["BROWSABLE", "DEFAULT"]
