@@ -43,6 +43,7 @@ import {
   Share2,
   Volume2,
   MessageSquare,
+  Users, // Added Users icon
 } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -52,6 +53,7 @@ import {
   syncUserProfile,
   updateRemoteProfile,
 } from '@/lib/supabase'; // Import updateRemoteProfile
+import { getTodayLuck, interpretSaju, getTimeZodiac, isSummerTime } from '@/lib/utils/latte';
 import { userService } from '@/lib/services/userService';
 
 export default function SettingsScreen() {
@@ -163,6 +165,7 @@ export default function SettingsScreen() {
   // Update Edit Form when profile changes or modal opens
   useEffect(() => {
     if (showProfileEdit && userProfile) {
+      console.log(userProfile);
       setEditName(userProfile.name || '');
       setEditYear(userProfile.birth_year?.toString() || userProfile.year?.toString() || '');
       setEditMonth(userProfile.birth_month?.toString() || userProfile.month?.toString() || '');
@@ -666,10 +669,43 @@ export default function SettingsScreen() {
 
                 {userProfile ? (
                   <View className="mt-1">
-                    <Text className="text-sm text-muted-foreground">
-                      {userProfile.birth_year}년 {userProfile.birth_month}월 {userProfile.birth_day}
-                      일{userProfile.birth_hour ? ` ${userProfile.birth_hour}시` : ''}
-                    </Text>
+                    {(() => {
+                      const isSummerTimeApplied =
+                        userProfile.birth_year &&
+                        userProfile.birth_month &&
+                        userProfile.birth_day &&
+                        userProfile.birth_hour !== undefined &&
+                        userProfile.birth_hour !== null
+                          ? isSummerTime(
+                              userProfile.birth_year,
+                              userProfile.birth_month,
+                              userProfile.birth_day,
+                              userProfile.birth_hour,
+                              userProfile.birth_minute || 0
+                            )
+                          : false;
+
+                      return (
+                        <View className="mt-1 flex-row flex-wrap items-center gap-2">
+                          <Text className="text-sm text-muted-foreground">
+                            {userProfile.birth_year}년 {userProfile.birth_month}월{' '}
+                            {userProfile.birth_day}일
+                            {userProfile.birth_hour !== undefined && userProfile.birth_hour !== null
+                              ? ` ${userProfile.birth_hour}시`
+                              : ''}
+                            {userProfile.birth_minute ? ` ${userProfile.birth_minute}분` : ''}
+                          </Text>
+                          {isSummerTimeApplied && (
+                            <View className="rounded-full bg-orange-100 px-2 py-0.5">
+                              <Text className="text-xs font-medium text-orange-600">
+                                ☀️ 서머타임 적용
+                              </Text>
+                            </View>
+                          )}
+                        </View>
+                      );
+                    })()}
+
                     <Text className="mt-1 text-xs text-gray-400">
                       {userProfile.calendar_type === 'lunar'
                         ? '음력'
@@ -717,6 +753,24 @@ export default function SettingsScreen() {
 
         {/* Menu Sections */}
         <View className="gap-6">
+          {/* Section: 사주 관리 */}
+          <View className="gap-3">
+            <Text className="ml-1 text-lg font-bold text-gray-900">🗂️ 사주 관리</Text>
+            <View className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+              <TouchableOpacity
+                className="flex-row items-center justify-between bg-white p-4 active:bg-gray-50"
+                onPress={() => router.push('/saved')}>
+                <View className="flex-row items-center gap-3">
+                  <View className="h-10 w-10 items-center justify-center rounded-full bg-indigo-50">
+                    <Users size={20} color="#6366f1" />
+                  </View>
+                  <Text className="text-base font-medium text-gray-800">친구/가족 사주 저장</Text>
+                </View>
+                <ChevronRight size={20} color="#9ca3af" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
           {/* Section: 즐길거리 */}
           <View className="gap-3">
             <Text className="ml-1 text-lg font-bold text-gray-900">✨ 즐길거리</Text>

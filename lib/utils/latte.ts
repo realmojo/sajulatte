@@ -160,7 +160,7 @@ const getSipsin = (ilganHanja: string, targetHanja: string, isJi = false) => {
 /**
  * 글자를 입력받아 오행 정보를 반환하는 함수
  */
-const getElementInfo = (char: string) => {
+export const getElementInfo = (char: string) => {
   const map = {
     // 천간
     甲: 'WOOD',
@@ -248,10 +248,67 @@ const convertCharToKorean = (char: string) => {
 };
 
 /**
- * 시간(HH, mm)을 받아 지지 인덱스 반환
+ * 서머타임 적용 여부 확인
+ * 대한민국 서머타임 역사에 따른 적용 기간 체크
  */
-const getBranchIndex = (hour: number, minute: number) => {
-  const totalMinutes = hour * 60 + minute;
+export const isSummerTime = (
+  year: number,
+  month: number,
+  day: number,
+  hour: number,
+  minute: number
+): boolean => {
+  const date = new Date(year, month - 1, day, hour, minute);
+  const time = date.getTime();
+
+  const periods = [
+    // 1948 (06.01 00:00 ~ 09.13 00:00)
+    { start: new Date(1948, 5, 1, 0, 0).getTime(), end: new Date(1948, 8, 13, 0, 0).getTime() },
+    // 1949 (04.03 00:00 ~ 09.11 00:00)
+    { start: new Date(1949, 3, 3, 0, 0).getTime(), end: new Date(1949, 8, 11, 0, 0).getTime() },
+    // 1950 (04.01 00:00 ~ 09.10 00:00)
+    { start: new Date(1950, 3, 1, 0, 0).getTime(), end: new Date(1950, 8, 10, 0, 0).getTime() },
+    // 1951 (05.06 00:00 ~ 09.09 00:00)
+    { start: new Date(1951, 4, 6, 0, 0).getTime(), end: new Date(1951, 8, 9, 0, 0).getTime() },
+    // 1955 (05.05 00:00 ~ 09.09 00:00) - 표준시 변경으로 인해 실제 적용시각 확인 필요하나 통상 기간 적용
+    { start: new Date(1955, 4, 5, 0, 0).getTime(), end: new Date(1955, 8, 9, 0, 0).getTime() },
+    // 1956 (05.20 00:00 ~ 09.30 00:00)
+    { start: new Date(1956, 4, 20, 0, 0).getTime(), end: new Date(1956, 8, 30, 0, 0).getTime() },
+    // 1957 (05.05 00:00 ~ 09.22 00:00)
+    { start: new Date(1957, 4, 5, 0, 0).getTime(), end: new Date(1957, 8, 22, 0, 0).getTime() },
+    // 1958 (05.04 00:00 ~ 09.21 00:00)
+    { start: new Date(1958, 4, 4, 0, 0).getTime(), end: new Date(1958, 8, 21, 0, 0).getTime() },
+    // 1959 (05.03 00:00 ~ 09.20 00:00)
+    { start: new Date(1959, 4, 3, 0, 0).getTime(), end: new Date(1959, 8, 20, 0, 0).getTime() },
+    // 1960 (05.01 00:00 ~ 09.18 00:00)
+    { start: new Date(1960, 4, 1, 0, 0).getTime(), end: new Date(1960, 8, 18, 0, 0).getTime() },
+    // 1987 (05.10 02:00 ~ 10.11 03:00)
+    { start: new Date(1987, 4, 10, 2, 0).getTime(), end: new Date(1987, 9, 11, 3, 0).getTime() },
+    // 1988 (05.08 02:00 ~ 10.09 03:00)
+    { start: new Date(1988, 4, 8, 2, 0).getTime(), end: new Date(1988, 9, 9, 3, 0).getTime() },
+  ];
+
+  return periods.some((period) => time >= period.start && time < period.end);
+};
+
+/**
+ * 시간(HH, mm)을 받아 지지 인덱스 반환
+ * 서머타임 적용 시 1시간을 빼서 계산
+ */
+const getBranchIndex = (
+  hour: number,
+  minute: number,
+  birthDate?: { year: number; month: number; day: number }
+) => {
+  let adjustedHour = hour;
+
+  // 서머타임 체크 및 보정
+  if (birthDate && isSummerTime(birthDate.year, birthDate.month, birthDate.day, hour, minute)) {
+    adjustedHour = hour - 1;
+    if (adjustedHour < 0) adjustedHour += 24; // 자정 이전으로 넘어갈 경우
+  }
+
+  const totalMinutes = adjustedHour * 60 + minute;
   if (totalMinutes >= 1410 || totalMinutes < 90) return 0;
   return Math.floor((totalMinutes - 90) / 120) + 1;
 };
@@ -259,11 +316,19 @@ const getBranchIndex = (hour: number, minute: number) => {
 /**
  * 시주(Hour Pillar) 계산 - 한글과 한자를 모두 반환하도록 수정
  */
-export const calculateSidu = (dayStemHanja: string, hour: number, minute: number) => {
+/**
+ * 시주(Hour Pillar) 계산 - 한글과 한자를 모두 반환하도록 수정
+ */
+export const calculateSidu = (
+  dayStemHanja: string,
+  hour: number,
+  minute: number,
+  birthDate?: { year: number; month: number; day: number }
+) => {
   const dayStemIdx = STEMS_EN.indexOf(dayStemHanja);
   if (dayStemIdx === -1) throw new Error('올바른 일간을 입력하세요.');
 
-  const branchIdx = getBranchIndex(hour, minute);
+  const branchIdx = getBranchIndex(hour, minute, birthDate);
   const startStemIdx = ((dayStemIdx % 5) * 2) % 10;
   const hourStemIdx = (startStemIdx + branchIdx) % 10;
 
@@ -961,7 +1026,8 @@ export const getMyEightSaju = (
 
   // 시주 계산
   // 1. 기본 시주 및 대운 기초 정보 계산
-  const siPillar = calculateSidu(ilganHanja, hour, minute);
+  // 1. 기본 시주 및 대운 기초 정보 계산
+  const siPillar = calculateSidu(ilganHanja, hour, minute, { year, month, day });
   const { daewunSu, isForward } = calculateDaewunInfo(solar, gender);
 
   // 2. 대운 리스트(10단계) 생성
