@@ -1,11 +1,19 @@
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { Stack } from 'expo-router';
-import { View, Image, TouchableOpacity, ScrollView, Alert, AppState } from 'react-native';
-import * as WebBrowser from 'expo-web-browser';
+import {
+  View,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+  AppState,
+  Modal,
+  ActivityIndicator,
+} from 'react-native';
+import { WebView } from 'react-native-webview'; // Import WebView
 import * as Linking from 'expo-linking';
 
-WebBrowser.maybeCompleteAuthSession();
 import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Session } from '@supabase/supabase-js';
@@ -21,6 +29,7 @@ import {
   Activity,
   User,
   Star,
+  X, // Close icon
 } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -29,9 +38,14 @@ import { supabase, uploadMainProfileToSupabase } from '@/lib/supabase';
 export default function SettingsScreen() {
   const { colorScheme } = useColorScheme();
   const insets = useSafeAreaInsets();
+
   const iconColor = colorScheme === 'dark' ? '#fff' : '#000';
   const [session, setSession] = useState<Session | null>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
+
+  // WebView State
+  const [showWebView, setShowWebView] = useState(false);
+  const [authUrl, setAuthUrl] = useState('');
 
   useEffect(() => {
     // Check initial session
@@ -43,6 +57,7 @@ export default function SettingsScreen() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth state changed:', event, session ? 'Session Exists' : 'No Session');
       setSession(session);
       if (event === 'SIGNED_IN' && session) {
         uploadMainProfileToSupabase();
@@ -66,69 +81,113 @@ export default function SettingsScreen() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // useEffect(() => {
-  //   WebBrowser.warmUpAsync();
-  //   return () => {
-  //     WebBrowser.coolDownAsync();
-  //   };
-  // }, []);
+  // 1. Start Login Process
+  const signInWithKakao = async () => {
+    try {
+      // Use a consistent redirect URL for WebView flow
+      // Even if this deep link doesn't work natively, we will intercept it in WebView
+      const redirectUrl = Linking.createURL('login-callback');
+      console.log('Redirect URL for WebView:', redirectUrl);
 
-  // Handle deep links (Login callback)
-  useEffect(() => {
-    const handleDeepLink = async (url: string | null) => {
-      if (!url) return;
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'kakao',
+        options: {
+          redirectTo: redirectUrl,
+          skipBrowserRedirect: true, // We will handle the browser via WebView
+        },
+      });
 
-      console.log('Incoming Deep Link:', url);
-      // Alert.alert('Debug Link', url); // Uncomment if needed for on-device debugging
+      if (error) throw error;
+
+      if (data?.url) {
+        setAuthUrl(data.url);
+        setShowWebView(true);
+      }
+    } catch (error) {
+      if (error instanceof Error) Alert.alert('로그인 오류', error.message);
+    }
+  };
+
+  // 2. Intercept URL in WebView
+  const handleNavigationStateChange = async (navState: any) => {
+    const { url } = navState;
+
+    // Check if the URL contains the access_token (Implicit Flow) or code (PKCE)
+    // Supabase usually returns #access_token=... for Implicit Flow
+    if (url.includes('access_token=') || url.includes('refresh_token=') || url.includes('code=')) {
+      console.log('WebView Intercepted Tokens/Code:', url);
+
+      // Hide WebView immediately to improve UX
+      setShowWebView(false);
 
       try {
-        // Extract code from any part of the URL manually to be robust
-        if (url.includes('code=')) {
-          const match = url.match(/[?&]code=([^&]+)/);
-          const code = match ? match[1] : null;
+        // Extract tokens manually
+        let accessToken = null;
+        let refreshToken = null;
+        let code = null;
 
-          if (code) {
-            console.log('Detected code:', code);
-            const { error } = await supabase.auth.exchangeCodeForSession(code);
-            if (error) throw error;
+        // Handle Hash (#) based tokens
+        if (url.includes('#')) {
+          const params = new URLSearchParams(url.split('#')[1]);
+          accessToken = params.get('access_token');
+          refreshToken = params.get('refresh_token');
+        }
 
-            Alert.alert('알림', '로그인이 완료되었습니다.');
-          }
-        } else if (url.includes('error=')) {
-          // Basic error logging
-          console.error('Deep link error:', url);
+        // Handle Query (?) based tokens/code (just in case)
+        if (!accessToken && url.includes('?')) {
+          const params = new URLSearchParams(url.split('?')[1]);
+          accessToken = params.get('access_token');
+          refreshToken = params.get('refresh_token');
+          code = params.get('code');
+        }
+
+        if (accessToken && refreshToken) {
+          const { error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+          if (error) throw error;
+          Alert.alert('알림', '로그인이 완료되었습니다.');
+        } else if (code) {
+          const { error } = await supabase.auth.exchangeCodeForSession(code);
+          if (error) throw error;
+          Alert.alert('알림', '로그인이 완료되었습니다.');
         }
       } catch (e) {
-        console.error('Deep link processing error:', e);
-        if (e instanceof Error) Alert.alert('로그인 오류', e.message);
+        console.error('WebView Auth Error:', e);
+        Alert.alert('로그인 실패', '인증 정보를 처리하는 중 오류가 발생했습니다.');
       }
-    };
-
-    AppState.addEventListener('change', (state) => {
-      if (state === 'active') {
-        Linking.getInitialURL().then((url) => {
-          if (url) console.log('Foreground Initial URL:', url);
-        });
-      }
-    });
-
-    // 1. Check if app was opened by a link (cold start)
-    Linking.getInitialURL().then(handleDeepLink);
-
-    // 2. Listen for incoming links (warm resume)
-    const subscription = Linking.addEventListener('url', (event) => {
-      console.log('Deep link received:', event.url);
-      Alert.alert('Debug', `Link received: ${event.url}`);
-      handleDeepLink(event.url);
-    });
-
-    return () => {
-      subscription.remove();
-    };
-  }, []);
+    }
+  };
 
   return (
     <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
+      {/* Login WebView Modal */}
+      <Modal
+        visible={showWebView}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowWebView(false)}>
+        <View className="flex-1 bg-white">
+          <View className="flex-row items-center justify-between border-b border-gray-200 px-4 py-3">
+            <Text className="text-lg font-bold">카카오 로그인</Text>
+            <TouchableOpacity onPress={() => setShowWebView(false)}>
+              <X size={24} color="#000" />
+            </TouchableOpacity>
+          </View>
+          <WebView
+            source={{ uri: authUrl }}
+            onNavigationStateChange={handleNavigationStateChange}
+            startInLoadingState={true}
+            renderLoading={() => (
+              <View className="absolute inset-0 items-center justify-center bg-white">
+                <ActivityIndicator size="large" color="#FEE500" />
+              </View>
+            )}
+          />
+        </View>
+      </Modal>
+
       {/* Custom Header */}
       <View className="flex-row items-center justify-between px-4 py-3">
         <View className="flex-row items-center gap-2">
@@ -201,42 +260,10 @@ export default function SettingsScreen() {
 
             <TouchableOpacity
               activeOpacity={0.8}
-              onPress={async () => {
-                try {
-                  const { data, error } = await supabase.auth.signInWithOAuth({
-                    provider: 'kakao',
-                    options: {
-                      redirectTo: 'sajulatte://login-callback',
-                      skipBrowserRedirect: true,
-                    },
-                  });
-                  if (error) throw error;
-
-                  console.log('SignIn initiated, data:', data);
-
-                  if (data?.url) {
-                    // Fix: Add delay to ensure code_verifier is persisted to AsyncStorage before context switch
-                    await new Promise((resolve) => setTimeout(resolve, 500));
-
-                    // Use openBrowserAsync for reliable redirection on Android
-                    const result = await WebBrowser.openBrowserAsync(data.url);
-                    console.log('Browser result:', result);
-                  }
-                } catch (e) {
-                  console.error('Login error:', e);
-                  if (e instanceof Error) alert(e.message);
-                  else alert('로그인 중 오류가 발생했습니다.');
-                }
-              }}
+              onPress={signInWithKakao}
               className="h-12 w-full flex-row items-center justify-center gap-2 rounded-lg bg-[#FEE500] px-4">
               <MessageCircle size={20} color="#000000" fill="#000000" />
               <Text className="text-base font-bold text-[#000000]">카카오 로그인</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => Linking.openURL('sajulatte://login-callback?code=test-code')}
-              className="mt-4 self-center rounded bg-gray-200 p-2">
-              <Text>Deep Link Test (Self)</Text>
             </TouchableOpacity>
           </View>
         )}
