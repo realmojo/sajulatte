@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient } from '@supabase/supabase-js';
 
 import { Platform, AppState } from 'react-native';
+import { userService } from './services/userService';
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';
@@ -35,6 +36,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     persistSession: true,
     detectSessionInUrl: true,
     flowType: 'implicit',
+    // flowType: 'pkce',
   },
 });
 
@@ -111,18 +113,19 @@ export const fetchMainProfileFromSupabase = async () => {
     console.log('Fetching remote profile...');
     await supabase.auth.startAutoRefresh();
 
-    console.log('Auth state');
     const {
       data: { session },
     } = await supabase.auth.getSession();
     console.log('사용자 정보:', session);
     if (!session?.user) return null;
 
-    const { data, error } = await supabase
-      .from('sajulatte_users')
-      .select('*')
-      .eq('id', session.user.id)
-      .single();
+    // const { data, error } = await supabase
+    //   .from('sajulatte_users')
+    //   .select('*')
+    //   .eq('id', session.user.id)
+    //   .single();
+
+    const { data, error } = await userService.getUser(session.user.id);
 
     console.log('Fetched remote profile:', data);
 
@@ -193,7 +196,7 @@ export const syncUserProfile = async () => {
     } = await supabase.auth.getSession();
 
     if (sessionError || !session?.user) {
-      console.error('Failed to get auth session for registration:', sessionError);
+      console.log('Failed to get auth session for registration:', sessionError);
       return null;
     }
 

@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Text } from '@/components/ui/text';
 import { Input } from '@/components/ui/input'; // Import Input
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import {
   View,
   Image,
@@ -37,6 +37,12 @@ import {
   Check, // Added Check icon
   X, // Close icon
   Edit2, // Edit icon
+  BookOpen,
+  ChevronRight,
+  CalendarDays,
+  Share2,
+  Volume2,
+  MessageSquare,
 } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -46,9 +52,11 @@ import {
   syncUserProfile,
   updateRemoteProfile,
 } from '@/lib/supabase'; // Import updateRemoteProfile
+import { userService } from '@/lib/services/userService';
 
 export default function SettingsScreen() {
   const { colorScheme } = useColorScheme();
+  const router = useRouter();
   const insets = useSafeAreaInsets();
 
   const iconColor = colorScheme === 'dark' ? '#fff' : '#000';
@@ -111,22 +119,36 @@ export default function SettingsScreen() {
         // Sync profile (Fetch from DB > Local, or Upload Local > DB)
         console.log('sync');
         console.log('session', session);
+
+        // 여기에
+        const { data, error } = await userService.getUser(session.user.id);
+        console.log('data Profile:', data);
+
+        if (!data) {
+          const { data, error } = await userService.upsertUser({
+            id: session.user.id,
+            email: session.user.email,
+          });
+          console.log('data Profile:', data);
+        }
+
+        // setShowProfileEdit(true);
         // Pass the session directly to avoid another getSession() call
       } else if (event === 'SIGNED_OUT') {
         setUserProfile(null);
       }
     });
 
-    console.log('ddddd');
-
     setTimeout(async () => {
+      const { data: currentUser } = await supabase.auth.getUser();
+      console.log('currentUser');
       const syncedProfile = await syncUserProfile();
-      console.log('Synced Profile:', syncedProfile);
+      console.log('Synced Profile');
 
       if (syncedProfile) {
         setUserProfile(syncedProfile);
         // If mandatory info is missing, open edit modal
-        if (!syncedProfile.gender || !syncedProfile.birth_year) {
+        if (currentUser.user && (!syncedProfile.gender || !syncedProfile.birth_year)) {
           setTimeout(() => setShowProfileEdit(true), 500);
         }
       } else {
@@ -182,13 +204,14 @@ export default function SettingsScreen() {
 
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'kakao',
-        // options: {
-        //   redirectTo: redirectUrl,
-        //   skipBrowserRedirect: true, // We will handle the browser via WebView
-        //   // queryParams: {
-        //   //   prompt: 'login',
-        //   // },
-        // },
+        options: {
+          // redirectTo: redirectUrl,
+          // skipBrowserRedirect: true, // We will handle the browser via WebView
+          // queryParams: {
+          //   // response_type: 'token',
+          //   prompt: 'login',
+          // },
+        },
       });
 
       if (error) {
@@ -223,8 +246,6 @@ export default function SettingsScreen() {
   // 2. Intercept URL in WebView
   const handleNavigationStateChange = async (navState: any) => {
     const { url } = navState;
-
-    console.log('WebView URL:', url);
 
     // Check for errors first
     if (url.includes('error=')) {
@@ -565,9 +586,8 @@ export default function SettingsScreen() {
           <WebView
             key={authUrl}
             source={{ uri: authUrl }}
-            javaScriptEnabled={true}
-            domStorageEnabled={true}
-            userAgent="Mozilla/5.0 (Linux; Android 10; Android SDK built for x86) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36"
+            // javaScriptEnabled={true}
+            // domStorageEnabled={true}
             onShouldStartLoadWithRequest={(request) => {
               const { url } = request;
 
@@ -608,13 +628,13 @@ export default function SettingsScreen() {
           <TouchableOpacity>
             <Bell size={24} color={iconColor} />
           </TouchableOpacity>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push('/preferences')}>
             <Settings size={24} color={iconColor} />
           </TouchableOpacity>
         </View>
       </View>
       {/* Content */}
-      <ScrollView className="flex-1" contentContainerClassName="p-4 gap-8">
+      <ScrollView className="flex-1" contentContainerClassName="p-4 pb-20 gap-8">
         {/* Login CTA or Profile Section */}
         {session ? (
           <View className="w-full gap-4 rounded-2xl border border-border bg-card p-6 shadow-sm">
@@ -673,16 +693,6 @@ export default function SettingsScreen() {
                 )}
               </View>
             </View>
-            <Button
-              variant="outline"
-              className="mt-2 h-10 w-full"
-              onPress={async () => {
-                await supabase.auth.signOut();
-                setSession(null);
-                setUserProfile(null);
-              }}>
-              <Text>로그아웃</Text>
-            </Button>
           </View>
         ) : (
           <View className="items-center gap-6 rounded-2xl border border-border bg-card p-6 shadow-sm">
@@ -705,30 +715,131 @@ export default function SettingsScreen() {
           </View>
         )}
 
-        {/* Categories Grid */}
-        <View className="gap-4">
-          <Text className="px-1 text-lg font-bold text-foreground">전체 카테고리</Text>
-          <View className="flex-row flex-wrap justify-between gap-y-6">
-            {[
-              // { label: '총운', icon: Star, color: 'text-amber-500', bg: 'bg-amber-100' },
-              { label: '연애운', icon: Heart, color: 'text-rose-500', bg: 'bg-rose-100' },
-              { label: '금전운', icon: Coins, color: 'text-yellow-600', bg: 'bg-yellow-100' },
-              { label: '결혼운', icon: HeartHandshake, color: 'text-pink-500', bg: 'bg-pink-100' },
-              { label: '직업운', icon: Briefcase, color: 'text-blue-500', bg: 'bg-blue-100' },
-              { label: '건강운', icon: Activity, color: 'text-green-500', bg: 'bg-green-100' },
-              { label: '대인운', icon: User, color: 'text-purple-500', bg: 'bg-purple-100' },
-              // { label: '신년운세', icon: Sparkles, color: 'text-cyan-500', bg: 'bg-cyan-100' },
-            ].map((item, index) => (
+        {/* Menu Sections */}
+        <View className="gap-6">
+          {/* Section: 즐길거리 */}
+          <View className="gap-3">
+            <Text className="ml-1 text-lg font-bold text-gray-900">✨ 즐길거리</Text>
+            <View className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
               <TouchableOpacity
-                key={index}
-                className="w-[22%] items-center gap-2 active:opacity-70">
-                <View
-                  className={`h-14 w-14 items-center justify-center rounded-2xl ${item.bg} shadow-sm`}>
-                  <item.icon size={24} className={item.color} strokeWidth={2.5} />
+                className="flex-row items-center justify-between bg-white p-4 active:bg-gray-50"
+                onPress={() => router.push('/encyclopedia')}>
+                <View className="flex-row items-center gap-3">
+                  <View className="h-10 w-10 items-center justify-center rounded-full bg-blue-50">
+                    <BookOpen size={20} color="#3b82f6" />
+                  </View>
+                  <Text className="text-base font-medium text-gray-800">사주 용어 백과</Text>
                 </View>
-                <Text className="text-xs font-medium text-foreground">{item.label}</Text>
+                <ChevronRight size={20} color="#9ca3af" />
               </TouchableOpacity>
-            ))}
+              <View className="mx-4 h-[1px] bg-gray-100" />
+              <TouchableOpacity
+                className="flex-row items-center justify-between bg-white p-4 active:bg-gray-50"
+                onPress={() =>
+                  Alert.alert('준비 중', '내 행운을 높여줄 디지털 부적 기능이 준비 중입니다.')
+                }>
+                <View className="flex-row items-center gap-3">
+                  <View className="h-10 w-10 items-center justify-center rounded-full bg-amber-50">
+                    <Sparkles size={20} color="#d97706" />
+                  </View>
+                  <Text className="text-base font-medium text-gray-800">디지털 부적</Text>
+                </View>
+                <ChevronRight size={20} color="#9ca3af" />
+              </TouchableOpacity>
+              <View className="mx-4 h-[1px] bg-gray-100" />
+              <TouchableOpacity
+                className="flex-row items-center justify-between bg-white p-4 active:bg-gray-50"
+                onPress={() =>
+                  Alert.alert(
+                    '준비 중',
+                    '나의 운세 흐름을 한눈에 보는 만세력 달력이 곧 오픈됩니다.'
+                  )
+                }>
+                <View className="flex-row items-center gap-3">
+                  <View className="h-10 w-10 items-center justify-center rounded-full bg-emerald-50">
+                    <CalendarDays size={20} color="#10b981" />
+                  </View>
+                  <Text className="text-base font-medium text-gray-800">만세력 달력</Text>
+                </View>
+                <ChevronRight size={20} color="#9ca3af" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Section: 앱 설정 */}
+          <View className="gap-3">
+            <Text className="ml-1 text-lg font-bold text-gray-900">⚙️ 앱 설정</Text>
+            <View className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+              <TouchableOpacity
+                className="flex-row items-center justify-between bg-white p-4 active:bg-gray-50"
+                onPress={() => Alert.alert('알림 설정', '푸시 알림 설정 페이지로 이동합니다.')}>
+                <View className="flex-row items-center gap-3">
+                  <View className="h-10 w-10 items-center justify-center rounded-full bg-gray-100">
+                    <Bell size={20} color="#4b5563" />
+                  </View>
+                  <Text className="text-base font-medium text-gray-800">알림 설정</Text>
+                </View>
+                <ChevronRight size={20} color="#9ca3af" />
+              </TouchableOpacity>
+              <View className="mx-4 h-[1px] bg-gray-100" />
+              <TouchableOpacity
+                className="flex-row items-center justify-between bg-white p-4 active:bg-gray-50"
+                onPress={() => router.push('/preferences')}>
+                <View className="flex-row items-center gap-3">
+                  <View className="h-10 w-10 items-center justify-center rounded-full bg-gray-100">
+                    <Settings size={20} color="#4b5563" />
+                  </View>
+                  <Text className="text-base font-medium text-gray-800">환경 설정</Text>
+                </View>
+                <ChevronRight size={20} color="#9ca3af" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Section: 고객지원 */}
+          <View className="gap-3">
+            <Text className="ml-1 text-lg font-bold text-gray-900">📢 고객지원</Text>
+            <View className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+              <TouchableOpacity
+                className="flex-row items-center justify-between bg-white p-4 active:bg-gray-50"
+                onPress={() => Alert.alert('공지사항', '새로운 소식이 없습니다.')}>
+                <View className="flex-row items-center gap-3">
+                  <View className="h-10 w-10 items-center justify-center rounded-full bg-purple-50">
+                    <Volume2 size={20} color="#9333ea" />
+                  </View>
+                  <Text className="text-base font-medium text-gray-800">공지사항</Text>
+                </View>
+                <ChevronRight size={20} color="#9ca3af" />
+              </TouchableOpacity>
+              <View className="mx-4 h-[1px] bg-gray-100" />
+              <TouchableOpacity
+                className="flex-row items-center justify-between bg-white p-4 active:bg-gray-50"
+                onPress={() => Linking.openURL('mailto:support@sajulatte.com')}>
+                <View className="flex-row items-center gap-3">
+                  <View className="h-10 w-10 items-center justify-center rounded-full bg-pink-50">
+                    <MessageSquare size={20} color="#db2777" />
+                  </View>
+                  <Text className="text-base font-medium text-gray-800">의견 보내기</Text>
+                </View>
+                <ChevronRight size={20} color="#9ca3af" />
+              </TouchableOpacity>
+              <View className="mx-4 h-[1px] bg-gray-100" />
+              <TouchableOpacity
+                className="flex-row items-center justify-between bg-white p-4 active:bg-gray-50"
+                onPress={() => Alert.alert('공유하기', '친구에게 앱 추천 링크를 복사했습니다.')}>
+                <View className="flex-row items-center gap-3">
+                  <View className="h-10 w-10 items-center justify-center rounded-full bg-indigo-50">
+                    <Share2 size={20} color="#4f46e5" />
+                  </View>
+                  <Text className="text-base font-medium text-gray-800">친구에게 추천하기</Text>
+                </View>
+                <ChevronRight size={20} color="#9ca3af" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <View className="items-center pb-8 pt-4">
+            <Text className="text-xs text-gray-400">앱 버전 1.0.0</Text>
           </View>
         </View>
       </ScrollView>

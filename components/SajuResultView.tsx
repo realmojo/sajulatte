@@ -124,7 +124,7 @@ export const SajuResultView = ({
 
   return (
     <ScrollView contentContainerClassName="p-6 gap-10" className="flex-1 bg-background">
-      <View className="gap-2">
+      <View className="gap-2 py-6">
         <Text className="mb-2 text-xl font-bold text-foreground">
           {name}님의 사주명식 <Coffee size={20} color="black" />
         </Text>
@@ -152,137 +152,151 @@ export const SajuResultView = ({
       </View>
 
       {/* Four Pillars Table */}
-      <View className="overflow-hidden rounded-xl border border-gray-300 bg-white">
-        {/* Header Row */}
-        <View className="flex-row border-b border-gray-200 bg-gray-50">
-          <View className="w-12 items-center justify-center p-2" />
-          {['생시', '생일', '생월', '생년'].map((title, i) => (
-            <View
-              key={i}
-              className={`flex-1 items-center justify-center p-2 ${
-                i > 0 ? 'border-l border-gray-200' : ''
-              }`}>
-              <Text className="text-sm font-medium text-gray-500">{title}</Text>
-            </View>
-          ))}
+      <View className="gap-2">
+        <View className="flex-row items-center gap-2">
+          <Text className="text-lg font-semibold text-foreground">만세력</Text>
+          {/* <TouchableOpacity onPress={() => openInfoModal('daewun')}>
+            <CircleHelp size={16} color="#A3A3A3" />
+          </TouchableOpacity> */}
         </View>
-
-        {/* Row 1: 천간 (Gan) */}
-        <View className="h-20 flex-row border-b border-gray-200">
-          <View className="w-12 items-center justify-center bg-gray-50">
-            <Text className="text-xs font-medium text-gray-500">천간</Text>
-          </View>
-          {columns.map((pillar, i) => (
-            <View
-              key={i}
-              className="flex-1 items-center justify-center gap-1 border-l border-gray-200">
-              <Text
-                className="text-4xl font-bold"
-                style={{
-                  color: pillar.gan.color,
-                  // @ts-ignore
-                  textShadowColor: 'rgba(0,0,0,0.1)',
-                  textShadowOffset: { width: 1, height: 1 },
-                  textShadowRadius: 1,
-                }}>
-                {pillar.gan.hanja}
-              </Text>
-              <View className="absolute bottom-1 right-2">
-                <Text className="text-[10px] font-medium text-gray-400">{pillar.gan.korean}</Text>
+        <View className="overflow-hidden rounded-xl border border-gray-300 bg-white">
+          {/* Header Row */}
+          <View className="flex-row border-b border-gray-200 bg-gray-50">
+            <View className="w-12 items-center justify-center p-2" />
+            {['생시', '생일', '생월', '생년'].map((title, i) => (
+              <View
+                key={i}
+                className={`flex-1 items-center justify-center p-2 ${
+                  i > 0 ? 'border-l border-gray-200' : ''
+                }`}>
+                <Text className="text-sm font-medium text-gray-500">{title}</Text>
               </View>
-            </View>
-          ))}
-        </View>
-
-        {/* Row 2: 십성 (Sipsin for Gan) */}
-        <View className="flex-row border-b border-gray-200 py-2">
-          <View className="w-12 items-center justify-center bg-gray-50">
-            <Text className="text-xs font-medium text-gray-500">십성</Text>
+            ))}
           </View>
-          {columns.map((pillar, i) => (
-            <View key={i} className="flex-1 items-center justify-center border-l border-gray-200">
-              <Text className="text-xs font-medium" style={{ color: pillar.gan.color }}>
-                {pillar.gan.sipsin || '일간'}
-              </Text>
-            </View>
-          ))}
-        </View>
 
-        {/* Row 3: 지지 (Ji) */}
-        <View className="h-20 flex-row border-b border-gray-200">
-          <View className="w-12 items-center justify-center bg-gray-50">
-            <Text className="text-xs font-medium text-gray-500">지지</Text>
-          </View>
-          {columns.map((pillar, i) => (
-            <View
-              key={i}
-              className="flex-1 items-center justify-center gap-1 border-l border-gray-200">
-              <Text
-                className="text-4xl font-bold"
-                style={{
-                  color: pillar.ji.color,
-                  // @ts-ignore
-                  textShadowColor: 'rgba(0,0,0,0.1)',
-                  textShadowOffset: { width: 1, height: 1 },
-                  textShadowRadius: 1,
-                }}>
-                {pillar.ji.hanja}
-              </Text>
-              <View className="absolute bottom-1 right-2">
-                <Text className="text-[10px] font-medium text-gray-400">{pillar.ji.korean}</Text>
+          {/* Row 1: 천간 (Gan) */}
+          <View className="h-20 flex-row border-b border-gray-200">
+            <View className="w-12 items-center justify-center bg-gray-50">
+              <Text className="text-xs font-medium text-gray-500">천간</Text>
+            </View>
+            {columns.map((pillar, i) => (
+              <View
+                key={i}
+                className="flex-1 items-center justify-center gap-1 border-l border-gray-200">
+                <Text
+                  className="text-4xl font-bold"
+                  style={{
+                    color: pillar.gan.color,
+                    // @ts-ignore
+                    textShadowColor: 'rgba(0,0,0,0.1)',
+                    textShadowOffset: { width: 1, height: 1 },
+                    textShadowRadius: 1,
+                  }}>
+                  {pillar.gan.hanja}
+                </Text>
+                <View className="absolute bottom-1 right-2">
+                  <Text className="text-[10px] font-medium text-gray-400">{pillar.gan.korean}</Text>
+                </View>
               </View>
-            </View>
-          ))}
-        </View>
-
-        {/* Row 4: 십성 (Sipsin for Ji) */}
-        <View className="flex-row border-b border-gray-200 py-2">
-          <View className="w-12 items-center justify-center bg-gray-50">
-            <Text className="text-xs font-medium text-gray-500">십성</Text>
+            ))}
           </View>
-          {columns.map((pillar, i) => (
-            <View key={i} className="flex-1 items-center justify-center border-l border-gray-200">
-              <Text className="text-xs font-medium" style={{ color: pillar.ji.color }}>
-                {pillar.ji.sipsin || '-'}
-              </Text>
-            </View>
-          ))}
-        </View>
 
-        {/* Row 5: 지장간 (Jijangan) */}
-        <View className="flex-row border-b border-gray-200 py-2">
-          <View className="w-12 items-center justify-center bg-gray-50">
-            <Text className="text-xs font-medium text-gray-500">지장간</Text>
-          </View>
-          {columns.map((pillar, i) => (
-            <View key={i} className="flex-1 items-center justify-center border-l border-gray-200">
-              <Text className="text-xs font-medium text-gray-600">{pillar.ji.jijangan || '-'}</Text>
+          {/* Row 2: 십성 (Sipsin for Gan) */}
+          <View className="flex-row border-b border-gray-200 py-2">
+            <View className="w-12 items-center justify-center bg-gray-50">
+              <Text className="text-xs font-medium text-gray-500">십성</Text>
             </View>
-          ))}
-        </View>
+            {columns.map((pillar, i) => (
+              <View key={i} className="flex-1 items-center justify-center border-l border-gray-200">
+                <Text className="text-xs font-medium" style={{ color: pillar.gan.color }}>
+                  {pillar.gan.sipsin || '일간'}
+                </Text>
+              </View>
+            ))}
+          </View>
 
-        {/* Row 6: 12운성 (12Wunsung) */}
-        <View className="flex-row border-b border-gray-200 py-2">
-          <View className="w-12 items-center justify-center bg-gray-50">
-            <Text className="text-xs font-medium text-gray-500">12운성</Text>
-          </View>
-          {columns.map((pillar, i) => (
-            <View key={i} className="flex-1 items-center justify-center border-l border-gray-200">
-              <Text className="text-xs font-medium text-gray-600">{pillar.ji.wunsung || '-'}</Text>
+          {/* Row 3: 지지 (Ji) */}
+          <View className="h-20 flex-row border-b border-gray-200">
+            <View className="w-12 items-center justify-center bg-gray-50">
+              <Text className="text-xs font-medium text-gray-500">지지</Text>
             </View>
-          ))}
-        </View>
+            {columns.map((pillar, i) => (
+              <View
+                key={i}
+                className="flex-1 items-center justify-center gap-1 border-l border-gray-200">
+                <Text
+                  className="text-4xl font-bold"
+                  style={{
+                    color: pillar.ji.color,
+                    // @ts-ignore
+                    textShadowColor: 'rgba(0,0,0,0.1)',
+                    textShadowOffset: { width: 1, height: 1 },
+                    textShadowRadius: 1,
+                  }}>
+                  {pillar.ji.hanja}
+                </Text>
+                <View className="absolute bottom-1 right-2">
+                  <Text className="text-[10px] font-medium text-gray-400">{pillar.ji.korean}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
 
-        {/* Row 7: 12신살 (12Shinsal) */}
-        <View className="flex-row py-2">
-          <View className="w-12 items-center justify-center bg-gray-50">
-            <Text className="text-xs font-medium text-gray-500">12신살</Text>
-          </View>
-          {columns.map((pillar, i) => (
-            <View key={i} className="flex-1 items-center justify-center border-l border-gray-200">
-              <Text className="text-xs font-medium text-gray-600">{pillar.ji.shinsal || '-'}</Text>
+          {/* Row 4: 십성 (Sipsin for Ji) */}
+          <View className="flex-row border-b border-gray-200 py-2">
+            <View className="w-12 items-center justify-center bg-gray-50">
+              <Text className="text-xs font-medium text-gray-500">십성</Text>
             </View>
-          ))}
+            {columns.map((pillar, i) => (
+              <View key={i} className="flex-1 items-center justify-center border-l border-gray-200">
+                <Text className="text-xs font-medium" style={{ color: pillar.ji.color }}>
+                  {pillar.ji.sipsin || '-'}
+                </Text>
+              </View>
+            ))}
+          </View>
+
+          {/* Row 5: 지장간 (Jijangan) */}
+          <View className="flex-row border-b border-gray-200 py-2">
+            <View className="w-12 items-center justify-center bg-gray-50">
+              <Text className="text-xs font-medium text-gray-500">지장간</Text>
+            </View>
+            {columns.map((pillar, i) => (
+              <View key={i} className="flex-1 items-center justify-center border-l border-gray-200">
+                <Text className="text-xs font-medium text-gray-600">
+                  {pillar.ji.jijangan || '-'}
+                </Text>
+              </View>
+            ))}
+          </View>
+
+          {/* Row 6: 12운성 (12Wunsung) */}
+          <View className="flex-row border-b border-gray-200 py-2">
+            <View className="w-12 items-center justify-center bg-gray-50">
+              <Text className="text-xs font-medium text-gray-500">12운성</Text>
+            </View>
+            {columns.map((pillar, i) => (
+              <View key={i} className="flex-1 items-center justify-center border-l border-gray-200">
+                <Text className="text-xs font-medium text-gray-600">
+                  {pillar.ji.wunsung || '-'}
+                </Text>
+              </View>
+            ))}
+          </View>
+
+          {/* Row 7: 12신살 (12Shinsal) */}
+          <View className="flex-row py-2">
+            <View className="w-12 items-center justify-center bg-gray-50">
+              <Text className="text-xs font-medium text-gray-500">12신살</Text>
+            </View>
+            {columns.map((pillar, i) => (
+              <View key={i} className="flex-1 items-center justify-center border-l border-gray-200">
+                <Text className="text-xs font-medium text-gray-600">
+                  {pillar.ji.shinsal || '-'}
+                </Text>
+              </View>
+            ))}
+          </View>
         </View>
       </View>
 
@@ -599,7 +613,7 @@ export const SajuResultView = ({
         </View>
 
         {/* Basic Interpretation */}
-        <View className="gap-2">
+        {/* <View className="gap-2">
           <Text className="text-lg font-semibold text-foreground">기본 운세 분석</Text>
           <View className="gap-4 rounded-xl border border-border bg-card p-5">
             {(() => {
@@ -679,7 +693,7 @@ export const SajuResultView = ({
               );
             })()}
           </View>
-        </View>
+        </View> */}
 
         {/* Detailed Interpretations */}
         <View className="gap-2">

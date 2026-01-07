@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { View } from 'react-native';
-import { CalendarDays, ScrollText, Sparkles, Ellipsis } from 'lucide-react-native';
+import { CalendarDays, ScrollText, Sparkles, Ellipsis, HeartHandshake } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { NAV_THEME } from '@/lib/theme';
 
@@ -22,21 +22,10 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: '만세력',
+          title: '사주',
           tabBarIcon: ({ focused, color }) => (
             <View className={focused ? 'rounded-full bg-amber-100 px-4 py-1' : ''}>
               <CalendarDays color={focused ? '#d97706' : color} size={20} />
-            </View>
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="saved"
-        options={{
-          title: '저장목록',
-          tabBarIcon: ({ focused, color }) => (
-            <View className={focused ? 'rounded-full bg-amber-100 px-4 py-1' : ''}>
-              <ScrollText color={focused ? '#d97706' : color} size={20} />
             </View>
           ),
         }}
@@ -53,6 +42,17 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="compatibility"
+        options={{
+          title: '궁합',
+          tabBarIcon: ({ focused, color }) => (
+            <View className={focused ? 'rounded-full bg-amber-100 px-4 py-1' : ''}>
+              <HeartHandshake color={focused ? '#d97706' : color} size={20} />
+            </View>
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="settings"
         options={{
           title: '더보기',
@@ -61,6 +61,15 @@ export default function TabLayout() {
               <Ellipsis color={focused ? '#d97706' : color} size={20} />
             </View>
           ),
+        }}
+      />
+
+      {/* Hidden Tabs */}
+      <Tabs.Screen
+        name="saved"
+        options={{
+          href: null,
+          title: '저장목록',
         }}
       />
     </Tabs>
