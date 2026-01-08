@@ -9,22 +9,111 @@ import {
   ScrollView,
   TouchableOpacity,
   View,
-  KeyboardAvoidingView,
-  Platform,
-  TouchableWithoutFeedback,
-  Keyboard,
   ActivityIndicator,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
-import { Trash2, Plus, X, Pencil, Star } from 'lucide-react-native';
+import { Trash2, Plus, X, Pencil, Star, Moon, Sun, Calendar } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from 'nativewind';
+import { ProfileEditModal, ProfileData } from '@/components/modal/ProfileEditModal';
+
+// --- Helpers ---
+
+// 12간지 (띠) 계산
+const getZodiacEmoji = (year: number) => {
+  const animals = ['🐵', '🐔', '🐶', '🐷', '🐭', '🐮', '🐯', '🐰', '🐲', '🐍', '🐴', '🐑'];
+  return animals[year % 12];
+};
+
+const getZodiacName = (year: number) => {
+  const animals = [
+    '원숭이',
+    '닭',
+    '개',
+    '돼지',
+    '쥐',
+    '소',
+    '호랑이',
+    '토끼',
+    '용',
+    '뱀',
+    '말',
+    '양',
+  ];
+  return animals[year % 12];
+};
+
+// 관계 라벨 변환
+const getRelationshipLabel = (key?: string) => {
+  const map: Record<string, string> = {
+    me: '본인',
+    family: '가족',
+    friend: '친구',
+    partner: '연인',
+    colleague: '동료',
+    other: '기타',
+  };
+  return map[key || 'me'] || '본인';
+};
+
+// 오행 색상 계산 (생년 끝자리 기준)
+const getElementColor = (year: number, isDark: boolean) => {
+  const lastDigit = year % 10;
+  // 0,1: 금(Metal) - White/Silver
+  // 2,3: 수(Water) - Black/Blue
+  // 4,5: 목(Wood) - Green
+  // 6,7: 화(Fire) - Red
+  // 8,9: 토(Earth) - Yellow/Brown
+
+  if (lastDigit === 0 || lastDigit === 1) {
+    // 금
+    return {
+      bg: isDark ? 'bg-slate-800' : 'bg-slate-100',
+      border: 'border-slate-300',
+      text: 'text-slate-600',
+      icon: '#64748b',
+    };
+  } else if (lastDigit === 2 || lastDigit === 3) {
+    // 수
+    return {
+      bg: isDark ? 'bg-blue-950' : 'bg-blue-50',
+      border: 'border-blue-200',
+      text: 'text-blue-600',
+      icon: '#2563eb',
+    };
+  } else if (lastDigit === 4 || lastDigit === 5) {
+    // 목
+    return {
+      bg: isDark ? 'bg-emerald-950' : 'bg-emerald-50',
+      border: 'border-emerald-200',
+      text: 'text-emerald-600',
+      icon: '#059669',
+    };
+  } else if (lastDigit === 6 || lastDigit === 7) {
+    // 화
+    return {
+      bg: isDark ? 'bg-rose-950' : 'bg-rose-50',
+      border: 'border-rose-200',
+      text: 'text-rose-600',
+      icon: '#e11d48',
+    };
+  } else {
+    // 토 (8, 9)
+    return {
+      bg: isDark ? 'bg-amber-500/10' : 'bg-amber-50',
+      border: 'border-amber-200',
+      text: 'text-amber-600',
+      icon: '#d97706',
+    };
+  }
+};
 
 export default function SavedScreen() {
   const insets = useSafeAreaInsets();
   const { colorScheme } = useColorScheme();
-  const iconColor = colorScheme === 'dark' ? '#fff' : '#000';
+  const isDark = colorScheme === 'dark';
+  const iconColor = isDark ? '#fff' : '#000';
 
   const [list, setList] = React.useState<any[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
@@ -32,17 +121,8 @@ export default function SavedScreen() {
 
   // Modal State
   const [isModalVisible, setIsModalVisible] = React.useState(false);
-  const [name, setName] = React.useState('');
-  const [year, setYear] = React.useState('');
-  const [month, setMonth] = React.useState('');
-  const [day, setDay] = React.useState('');
-  const [hour, setHour] = React.useState('');
-  const [minute, setMinute] = React.useState('');
-  const [gender, setGender] = React.useState<'male' | 'female'>('male');
-  const [calendarType, setCalendarType] = React.useState<'solar' | 'lunar'>('solar');
-  const [isLeapMonth, setIsLeapMonth] = React.useState(false);
+  const [editingItem, setEditingItem] = React.useState<any | null>(null);
 
-  const [editingId, setEditingId] = React.useState<string | null>(null);
   const [deleteId, setDeleteId] = React.useState<string | null>(null);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = React.useState(false);
 
@@ -66,7 +146,7 @@ export default function SavedScreen() {
   );
 
   const handleDelete = (id: string, e: any) => {
-    e.stopPropagation(); // prevent item press
+    e.stopPropagation();
     setDeleteId(id);
     setIsDeleteModalVisible(true);
   };
@@ -102,54 +182,32 @@ export default function SavedScreen() {
   };
 
   const openCreateModal = () => {
-    setEditingId(null);
-    setName('');
-    setYear('');
-    setMonth('');
-    setDay('');
-    setHour('');
-    setMinute('');
-    setGender('male');
-    setCalendarType('solar');
-    setIsLeapMonth(false);
+    setEditingItem(null);
     setIsModalVisible(true);
   };
 
   const openEditModal = (item: any) => {
-    setEditingId(item.id);
-    setName(item.name);
-    setYear(item.birth_year ? String(item.birth_year) : '');
-    setMonth(item.birth_month ? String(item.birth_month) : '');
-    setDay(item.birth_day ? String(item.birth_day) : '');
-    setHour(item.birth_hour ? String(item.birth_hour) : '');
-    setMinute(item.birth_minute ? String(item.birth_minute) : '');
-    setGender(item.gender);
-    setCalendarType(item.calendar_type || 'solar');
-    setIsLeapMonth(item.is_leap_month || false);
+    setEditingItem(item);
     setIsModalVisible(true);
   };
 
-  const handleSave = async () => {
-    if (!name || !year || !month || !day) {
-      alert('이름과 생년월일을 모두 입력해주세요.');
-      return;
-    }
-
-    if (editingId) {
+  const handleSave = async (data: ProfileData) => {
+    if (editingItem) {
       // Edit existing
       const updatedList = list.map((item) => {
-        if (item.id === editingId) {
+        if (item.id === editingItem.id) {
           return {
             ...item,
-            name,
-            gender,
-            birth_year: parseInt(year),
-            birth_month: parseInt(month),
-            birth_day: parseInt(day),
-            birth_hour: hour ? parseInt(hour) : null,
-            birth_minute: minute ? parseInt(minute) : null,
-            calendar_type: calendarType,
-            is_leap_month: isLeapMonth,
+            name: data.name,
+            gender: data.gender,
+            birth_year: data.birth_year,
+            birth_month: data.birth_month,
+            birth_day: data.birth_day,
+            birth_hour: data.birth_hour,
+            birth_minute: data.birth_minute,
+            calendar_type: data.calendar_type,
+            is_leap_month: data.is_leap,
+            relationship: data.relationship,
           };
         }
         return item;
@@ -166,20 +224,21 @@ export default function SavedScreen() {
       // Create new
       const newProfile = {
         id: Date.now().toString(),
-        name,
-        gender,
-        birth_year: parseInt(year),
-        birth_month: parseInt(month),
-        birth_day: parseInt(day),
-        birth_hour: hour ? parseInt(hour) : null,
-        birth_minute: minute ? parseInt(minute) : null,
-        calendar_type: calendarType,
-        is_leap_month: isLeapMonth,
+        name: data.name,
+        gender: data.gender,
+        birth_year: data.birth_year,
+        birth_month: data.birth_month,
+        birth_day: data.birth_day,
+        birth_hour: data.birth_hour,
+        birth_minute: data.birth_minute,
+        calendar_type: data.calendar_type,
+        is_leap_month: data.is_leap,
+        relationship: data.relationship,
         created_at: new Date().toISOString(),
       };
 
       try {
-        const newList = [newProfile, ...list];
+        const newList = [...list, newProfile];
         await AsyncStorage.setItem('saju_list', JSON.stringify(newList));
         setList(newList);
         setIsModalVisible(false);
@@ -189,278 +248,190 @@ export default function SavedScreen() {
     }
   };
 
+  const renderItem = ({ item, index }: { item: any; index: number }) => {
+    const isMain = index === 0;
+    const colors = getElementColor(item.birth_year, isDark);
+    const zodiacEmoji = getZodiacEmoji(item.birth_year);
+    const zodiacName = getZodiacName(item.birth_year);
+    const relationshipLabel = getRelationshipLabel(item.relationship);
+
+    return (
+      <TouchableOpacity
+        activeOpacity={0.9}
+        onPress={() => handlePress(item)}
+        className={`mb-4 w-full overflow-hidden rounded-3xl border ${colors.bg} ${
+          isMain ? 'border-2 border-amber-400' : 'border-transparent' // Remove border from non-main items for cleaner look or use colors.border
+        } shadow-sm`}
+        style={!isMain ? { borderWidth: 1, borderColor: isDark ? '#333' : '#e5e7eb' } : {}}>
+        {/* Card Background Pattern (Abstract) */}
+        <View className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/10" />
+        <View className="absolute -bottom-10 -left-10 h-24 w-24 rounded-full bg-black/5" />
+
+        <View className="p-5">
+          {/* Header: Name and Actions */}
+          <View className="mb-4 flex-row items-start justify-between">
+            <View>
+              <View className="mb-1 flex-row items-center gap-2">
+                {isMain && (
+                  <View className="rounded-full bg-amber-100 px-2 py-0.5">
+                    <Text className="text-[10px] font-bold text-amber-600">나의 명식</Text>
+                  </View>
+                )}
+                {/* Relationship Badge */}
+                {!isMain && (
+                  <View className="rounded-full bg-black/5 px-2 py-0.5">
+                    <Text
+                      className={`text-[10px] font-bold ${isDark ? 'text-gray-300' : 'text-gray-500'}`}>
+                      {relationshipLabel}
+                    </Text>
+                  </View>
+                )}
+              </View>
+              <Text className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                {item.name}
+              </Text>
+              <Text className={`text-xs ${colors.text} mt-0.5 font-medium`}>
+                {item.gender === 'male' ? '남성' : '여성'} • {zodiacEmoji} {zodiacName}띠
+              </Text>
+            </View>
+
+            <View className="flex-row gap-1">
+              <TouchableOpacity
+                onPress={() => openEditModal(item)}
+                className="rounded-full bg-white/20 p-2 active:bg-white/40">
+                <Pencil size={16} color={isDark ? '#aaa' : '#666'} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={(e) => handleDelete(item.id, e)}
+                className="rounded-full bg-white/20 p-2 active:bg-white/40">
+                <Trash2 size={16} color={isDark ? '#ff6b6b' : '#ef4444'} />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Body: Date Info */}
+          <View
+            className={`mt-2 flex-row items-center justify-between rounded-2xl bg-white/50 p-4 ${isDark ? 'bg-black/20' : ''}`}>
+            <View className="flex-row items-center gap-3">
+              <View className="h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm">
+                <Calendar size={20} color={colors.icon} />
+              </View>
+              <View>
+                <Text className="text-xs text-gray-500">
+                  {item.calendar_type === 'lunar' ? '음력' : '양력'}
+                </Text>
+                <Text
+                  className={`text-base font-semibold ${isDark ? 'text-gray-200' : 'text-gray-800'}`}>
+                  {item.birth_year}.{String(item.birth_month).padStart(2, '0')}.
+                  {String(item.birth_day).padStart(2, '0')}
+                </Text>
+              </View>
+            </View>
+
+            <View className="items-end">
+              <Text className="text-xs text-gray-500">태어난 시간</Text>
+              <Text
+                className={`text-base font-semibold ${isDark ? 'text-gray-200' : 'text-gray-800'}`}>
+                {item.birth_hour
+                  ? `${String(item.birth_hour).padStart(2, '0')}:${String(item.birth_minute).padStart(2, '0')}`
+                  : '미정'}
+              </Text>
+            </View>
+          </View>
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
   return (
     <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
-      <View className="flex-1 px-4">
+      {/* Static Header */}
+      <View className="border-b border-border/50 px-6 py-4">
+        <Text className="text-2xl font-bold text-foreground">저장된 명식</Text>
+      </View>
+
+      <View className="flex-1 px-4 pt-4">
         {isLoading ? (
           <View className="flex-1 items-center justify-center">
             <ActivityIndicator size="large" color={iconColor} />
             <Text className="mt-4 text-muted-foreground">목록을 불러오는 중...</Text>
           </View>
         ) : list.length === 0 ? (
-          <View className="flex-1 items-center justify-center">
-            <Text className="text-muted-foreground">저장된 사주가 없습니다.</Text>
-            <Button variant="outline" className="mt-4" onPress={openCreateModal}>
-              <Text>새로운 사주 추가하기</Text>
-            </Button>
+          <View className="flex-1 items-center justify-center gap-4">
+            <View className="h-32 w-32 items-center justify-center rounded-full bg-muted/20">
+              <Star size={48} color="#9ca3af" />
+            </View>
+            <View className="items-center">
+              <Text className="text-xl font-bold text-foreground">아직 저장된 사주가 없어요</Text>
+              <Text className="mt-2 text-center text-muted-foreground">
+                소중한 사람들의 생일을 등록하고{'\n'}사주와 운세를 확인해보세요.
+              </Text>
+            </View>
           </View>
         ) : (
           <FlatList
             data={list}
             keyExtractor={(item) => item.id}
-            contentContainerClassName="gap-3 pb-20"
-            renderItem={({ item, index }) => (
-              <TouchableOpacity
-                activeOpacity={0.7}
-                className={`rounded-xl border bg-card p-4 shadow-sm ${
-                  index === 0 ? 'border-2 border-amber-400 bg-amber-50/10' : 'border-border'
-                }`}
-                onPress={() => handlePress(item)}>
-                {index === 0 && (
-                  <View className="absolute right-4 top-4 rounded-full bg-amber-100 px-2 py-0.5">
-                    <Text className="text-[10px] font-bold text-amber-600">대표 사주</Text>
-                  </View>
-                )}
-                <View className="flex-row items-center gap-3">
-                  {/* Gender Icon */}
-                  <View
-                    className={`h-12 w-12 items-center justify-center rounded-full ${
-                      item.gender === 'male' ? 'bg-blue-100' : 'bg-red-100'
-                    }`}>
-                    <Text className="text-xl">{item.gender === 'male' ? '👨' : '👩'}</Text>
-                  </View>
-
-                  <View className="gap-0.5">
-                    <View className="flex-row items-center gap-1.5">
-                      <Text className="text-lg font-semibold text-foreground">{item.name}</Text>
-                      {index === 0 && <Star size={14} color="#F59E0B" fill="#F59E0B" />}
-                    </View>
-                    <Text className="text-xs text-muted-foreground">
-                      {item.birth_year}.{item.birth_month}.{item.birth_day} (
-                      {item.calendar_type === 'lunar' ? '음' : '양'})
-                    </Text>
-                  </View>
-                </View>
-
-                <View className="mt-3 flex-row items-center justify-between border-t border-border pt-2">
-                  <View className="flex-1" />
-                  <View className="flex-row items-center gap-1">
-                    <TouchableOpacity onPress={() => openEditModal(item)} className="p-2">
-                      <Pencil size={18} color="#9CA3AF" />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={(e) => handleDelete(item.id, e)} className="p-2">
-                      <Trash2 size={18} color="#ef4444" />
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            )}
+            contentContainerClassName="pb-32"
+            showsVerticalScrollIndicator={false}
+            renderItem={renderItem}
           />
         )}
-        <View className="items-center px-6 py-4">
-          <TouchableOpacity
-            onPress={openCreateModal}
-            activeOpacity={0.7}
-            className="flex-row items-center gap-2 rounded-full border border-border bg-card px-5 py-3 shadow-sm">
-            <Text className="text-xl font-bold text-foreground">추가</Text>
-            <View className="rounded-full bg-secondary/20 p-1">
-              <Plus size={18} color={iconColor} />
-            </View>
-          </TouchableOpacity>
-        </View>
+      </View>
 
-        <Modal
-          visible={isModalVisible}
-          animationType="slide"
-          transparent={true}
-          onRequestClose={() => setIsModalVisible(false)}>
-          <View className="flex-1 justify-end bg-black/50">
-            <TouchableOpacity
-              className="absolute inset-0"
-              activeOpacity={1}
-              onPress={() => setIsModalVisible(false)}
-            />
-            <KeyboardAvoidingView
-              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-              className="rounded-t-3xl bg-background p-6 shadow-xl">
-              {/* Modal Header */}
-              <View className="mb-6 flex-row items-center justify-between">
-                <Text className="text-xl font-bold text-foreground">새로운 사주 추가</Text>
-                <TouchableOpacity onPress={() => setIsModalVisible(false)}>
-                  <X size={24} color="#9CA3AF" />
-                </TouchableOpacity>
+      {/* Floating Action Button (FAB) */}
+      <View className="absolute bottom-8 right-6">
+        <TouchableOpacity
+          onPress={openCreateModal}
+          activeOpacity={0.8}
+          className="h-14 w-14 items-center justify-center rounded-full bg-primary shadow-lg shadow-black/30"
+          style={{ elevation: 5 }}>
+          <Plus size={32} color="#fff" strokeWidth={2.5} />
+        </TouchableOpacity>
+      </View>
+
+      {/* Modals */}
+      <ProfileEditModal
+        visible={isModalVisible}
+        onClose={() => setIsModalVisible(false)}
+        onSave={handleSave}
+        initialData={editingItem}
+        showRelationship={true}
+      />
+
+      <Modal
+        visible={isDeleteModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setIsDeleteModalVisible(false)}>
+        <View className="flex-1 items-center justify-center bg-black/60 p-6 backdrop-blur-sm">
+          <View className="w-full max-w-sm gap-4 rounded-2xl border border-white/10 bg-background p-6 shadow-2xl">
+            <View className="items-center gap-3">
+              <View className="h-12 w-12 items-center justify-center rounded-full bg-red-100">
+                <Trash2 size={24} color="#ef4444" />
               </View>
-
-              <ScrollView
-                contentContainerClassName="gap-6 px-2 pb-8"
-                showsVerticalScrollIndicator={false}>
-                {/* Name Input */}
-                <View className="gap-2">
-                  <Text className="font-medium text-foreground">이름</Text>
-                  <Input
-                    placeholder="이름을 입력하세요"
-                    value={name}
-                    onChangeText={setName}
-                    className="bg-muted/30"
-                  />
-                </View>
-
-                {/* Gender Input */}
-                <View className="gap-2">
-                  <Text className="font-medium text-foreground">성별</Text>
-                  <View className="flex-row gap-3">
-                    <Button
-                      variant={gender === 'male' ? 'default' : 'outline'}
-                      className="flex-1"
-                      onPress={() => setGender('male')}>
-                      <Text>남성</Text>
-                    </Button>
-                    <Button
-                      variant={gender === 'female' ? 'default' : 'outline'}
-                      className="flex-1"
-                      onPress={() => setGender('female')}>
-                      <Text>여성</Text>
-                    </Button>
-                  </View>
-                </View>
-
-                {/* Calendar Type Input */}
-                <View className="gap-2">
-                  <Text className="font-medium text-foreground">양력/음력</Text>
-                  <View className="flex-row gap-3">
-                    <Button
-                      variant={calendarType === 'solar' ? 'default' : 'outline'}
-                      className="flex-1"
-                      onPress={() => setCalendarType('solar')}>
-                      <Text>양력</Text>
-                    </Button>
-                    <Button
-                      variant={calendarType === 'lunar' ? 'default' : 'outline'}
-                      className="flex-1"
-                      onPress={() => setCalendarType('lunar')}>
-                      <Text>음력</Text>
-                    </Button>
-                  </View>
-                  {calendarType === 'lunar' && (
-                    <TouchableOpacity
-                      onPress={() => setIsLeapMonth(!isLeapMonth)}
-                      className="mt-1 flex-row items-center gap-2">
-                      <View
-                        className={`h-5 w-5 items-center justify-center rounded border ${
-                          isLeapMonth
-                            ? 'border-primary bg-primary'
-                            : 'border-gray-400 bg-transparent'
-                        }`}>
-                        {isLeapMonth && <Plus size={14} color="white" />}
-                      </View>
-                      <Text className="text-sm text-foreground">윤달</Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
-
-                {/* Birth Date Input */}
-                <View className="gap-2">
-                  <Text className="font-medium text-foreground">생년월일</Text>
-                  <View className="flex-row gap-2">
-                    <View className="flex-1 gap-1">
-                      <Input
-                        placeholder="YYYY"
-                        keyboardType="numeric"
-                        maxLength={4}
-                        value={year}
-                        onChangeText={(t) => setYear(t.replace(/[^0-9]/g, ''))}
-                        className="bg-muted/30 text-center"
-                      />
-                      <Text className="text-center text-xs text-muted-foreground">년</Text>
-                    </View>
-                    <View className="flex-1 gap-1">
-                      <Input
-                        placeholder="MM"
-                        keyboardType="numeric"
-                        maxLength={2}
-                        value={month}
-                        onChangeText={(t) => setMonth(t.replace(/[^0-9]/g, ''))}
-                        className="bg-muted/30 text-center"
-                      />
-                      <Text className="text-center text-xs text-muted-foreground">월</Text>
-                    </View>
-                    <View className="flex-1 gap-1">
-                      <Input
-                        placeholder="DD"
-                        keyboardType="numeric"
-                        maxLength={2}
-                        value={day}
-                        onChangeText={(t) => setDay(t.replace(/[^0-9]/g, ''))}
-                        className="bg-muted/30 text-center"
-                      />
-                      <Text className="text-center text-xs text-muted-foreground">일</Text>
-                    </View>
-                  </View>
-                </View>
-
-                {/* Birth Time Input */}
-                <View className="gap-2">
-                  <Text className="font-medium text-foreground">태어난 시간 (선택)</Text>
-                  <View className="flex-row gap-2">
-                    <View className="flex-1 gap-1">
-                      <Input
-                        placeholder="00"
-                        keyboardType="numeric"
-                        maxLength={2}
-                        value={hour}
-                        onChangeText={(t) => setHour(t.replace(/[^0-9]/g, ''))}
-                        className="bg-muted/30 text-center"
-                      />
-                      <Text className="text-center text-xs text-muted-foreground">시</Text>
-                    </View>
-                    <View className="flex-1 gap-1">
-                      <Input
-                        placeholder="00"
-                        keyboardType="numeric"
-                        maxLength={2}
-                        value={minute}
-                        onChangeText={(t) => setMinute(t.replace(/[^0-9]/g, ''))}
-                        className="bg-muted/30 text-center"
-                      />
-                      <Text className="text-center text-xs text-muted-foreground">분</Text>
-                    </View>
-                  </View>
-                </View>
-
-                <Button size="lg" onPress={handleSave} className="mt-2">
-                  <Text>{editingId ? '수정하기' : '저장하기'}</Text>
-                </Button>
-              </ScrollView>
-            </KeyboardAvoidingView>
-          </View>
-        </Modal>
-
-        {/* Delete Confirmation Modal */}
-        <Modal
-          visible={isDeleteModalVisible}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setIsDeleteModalVisible(false)}>
-          <View className="flex-1 items-center justify-center bg-black/50 p-6">
-            <View className="w-full max-w-sm gap-4 rounded-xl border border-border bg-background p-6 shadow-lg">
-              <View className="gap-2">
-                <Text className="text-lg font-bold text-foreground">사주 삭제</Text>
-                <Text className="text-muted-foreground">
-                  정말로 이 사주를 삭제하시겠습니까?{'\n'}삭제된 데이터는 복구할 수 없습니다.
+              <View className="items-center gap-1">
+                <Text className="text-lg font-bold text-foreground">사주 명식 삭제</Text>
+                <Text className="text-center text-muted-foreground">
+                  정말로 삭제하시겠습니까?{'\n'}삭제된 정보는 되돌릴 수 없습니다.
                 </Text>
               </View>
-              <View className="flex-row justify-end gap-3">
-                <Button variant="outline" onPress={() => setIsDeleteModalVisible(false)}>
-                  <Text>취소</Text>
-                </Button>
-                <Button variant="destructive" onPress={confirmDelete}>
-                  <Text>삭제</Text>
-                </Button>
-              </View>
+            </View>
+            <View className="flex-row gap-3 pt-2">
+              <TouchableOpacity
+                className="flex-1 items-center justify-center rounded-xl bg-muted py-3.5"
+                onPress={() => setIsDeleteModalVisible(false)}>
+                <Text className="font-semibold text-foreground">취소</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="flex-1 items-center justify-center rounded-xl bg-red-500 py-3.5"
+                onPress={confirmDelete}>
+                <Text className="font-semibold text-white">삭제</Text>
+              </TouchableOpacity>
             </View>
           </View>
-        </Modal>
-      </View>
+        </View>
+      </Modal>
     </View>
   );
 }

@@ -30,19 +30,9 @@ export default function DailyScreen() {
       {/* Header */}
       <View className="flex-row items-center justify-between px-4 py-3">
         <View className="flex-row items-center gap-2">
-          <Image
-            source={require('../../assets/images/logo.png')}
-            style={{ width: 28, height: 28 }}
-            resizeMode="contain"
-            className="h-6 w-6 rounded-full"
-          />
+          <Sparkles size={24} className="text-foreground" color={iconColor} />
           <Text className="text-xl font-bold text-foreground">운세</Text>
         </View>
-        {/* <View className="flex-row items-center gap-4">
-          <TouchableOpacity>
-            <Bell size={24} color={iconColor} />
-          </TouchableOpacity>
-        </View> */}
       </View>
 
       <ScrollView className="flex-1" contentContainerClassName="p-4 gap-8">

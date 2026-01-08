@@ -10,8 +10,11 @@ import {
   FlatList,
   Image,
 } from 'react-native';
+import { Stack } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 import {
   ChevronRight,
   X,
@@ -23,13 +26,16 @@ import {
   Share,
   Search,
   Star,
+  HeartHandshake,
 } from 'lucide-react-native';
+import { useColorScheme } from 'nativewind';
 import { getMyEightSaju, isSummerTime, getElementInfo } from '@/lib/utils/latte';
 import { supabase } from '@/lib/supabase';
 import { userService, UserProfile } from '@/lib/services/userService';
 import ViewShot from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 import { CELEBS, Celebrity } from '@/lib/data/celebs';
+import { ProfileEditModal, ProfileData } from '@/components/modal/ProfileEditModal';
 
 type Gender = 'male' | 'female';
 type CalendarType = 'solar' | 'lunar';
@@ -189,6 +195,7 @@ const calculateRealCompatibility = (meSaju: any, youSaju: any) => {
 
 export default function CompatibilityScreen() {
   const insets = useSafeAreaInsets();
+  const { colorScheme } = useColorScheme();
   const viewShotRef = useRef<ViewShot>(null);
   const [partner, setPartner] = useState<PartnerProfile | null>(null);
   const [showInputModal, setShowInputModal] = useState(false);
@@ -196,17 +203,28 @@ export default function CompatibilityScreen() {
   const [result, setResult] = useState<CompatibilityResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [myProfile, setMyProfile] = useState<UserProfile | null>(null);
+  const [savedList, setSavedList] = useState<any[]>([]);
 
-  // Input form states
-  const [name, setName] = useState('');
-  const [gender, setGender] = useState<Gender>('female');
-  const [birthDate, setBirthDate] = useState('');
-  const [birthTime, setBirthTime] = useState('');
-  const [calendarType, setCalendarType] = useState<CalendarType>('solar');
-
-  useEffect(() => {
-    fetchMyProfile();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      const loadSavedList = async () => {
+        try {
+          const json = await AsyncStorage.getItem('saju_list');
+          if (json) {
+            const list = JSON.parse(json);
+            // Filter out 'me' relationships if marked, assuming first item is user if not strictly marked
+            // But let's verify via 'relationship' field if available, or just show all excluding index 0 if that's the convention
+            // Based on saved.tsx, index 0 is main. Let's exclude relationship === 'me'
+            const filtered = list.filter((item: any) => item.relationship !== 'me');
+            setSavedList(filtered);
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      };
+      loadSavedList();
+    }, [])
+  );
 
   const fetchMyProfile = async () => {
     try {
@@ -272,14 +290,6 @@ export default function CompatibilityScreen() {
         setResult(compResult);
         setShowInputModal(false);
         setShowCelebModal(false);
-
-        // Update input fields to match calculation
-        setName(targetPartner.name);
-        setGender(targetPartner.gender);
-        setBirthDate(
-          `${targetPartner.birthYear}${targetPartner.birthMonth.padStart(2, '0')}${targetPartner.birthDay.padStart(2, '0')}`
-        );
-        setBirthTime(targetPartner.birthHour ? targetPartner.birthHour.replace(':', '') : '');
       } catch (e) {
         Alert.alert('계산 오류', '사주 분석 중 오류가 발생했습니다.');
         console.error(e);
@@ -289,36 +299,39 @@ export default function CompatibilityScreen() {
     }, 1000);
   };
 
-  const handleCalculateFromForm = () => {
-    if (!name || birthDate.length !== 8) {
-      Alert.alert('입력 오류', '이름과 생년월일(8자리)을 정확히 입력해주세요.');
-      return;
-    }
-
-    const year = birthDate.substring(0, 4);
-    const month = birthDate.substring(4, 6);
-    const day = birthDate.substring(6, 8);
-
-    if (isNaN(parseInt(year)) || isNaN(parseInt(month)) || isNaN(parseInt(day))) {
-      Alert.alert('입력 오류', '올바른 날짜 형식이 아닙니다.');
-      return;
-    }
-
-    let hourStr = '';
-    if (birthTime.length === 4) {
-      const h = birthTime.substring(0, 2);
-      const m = birthTime.substring(2, 4);
-      hourStr = `${h}:${m}`;
-    }
+  const handleSelectFromList = (item: any) => {
+    // Convert saved item to PartnerProfile
+    const hourStr =
+      item.birth_hour !== null && item.birth_minute !== null
+        ? `${String(item.birth_hour).padStart(2, '0')}:${String(item.birth_minute).padStart(2, '0')}`
+        : '';
 
     executeCalculate({
-      name,
-      gender,
-      birthYear: year,
-      birthMonth: month,
-      birthDay: day,
+      name: item.name,
+      gender: item.gender,
+      birthYear: String(item.birth_year),
+      birthMonth: String(item.birth_month),
+      birthDay: String(item.birth_day),
       birthHour: hourStr,
-      calendarType,
+      calendarType: item.calendar_type,
+    });
+  };
+
+  const handleSavePartner = async (data: ProfileData) => {
+    // Convert ProfileData to PartnerProfile format for calculation
+    const hourStr =
+      data.birth_hour !== null && data.birth_minute !== null
+        ? `${String(data.birth_hour).padStart(2, '0')}:${String(data.birth_minute).padStart(2, '0')}`
+        : '';
+
+    executeCalculate({
+      name: data.name,
+      gender: data.gender,
+      birthYear: String(data.birth_year),
+      birthMonth: String(data.birth_month),
+      birthDay: String(data.birth_day),
+      birthHour: hourStr,
+      calendarType: data.calendar_type,
     });
   };
 
@@ -335,7 +348,7 @@ export default function CompatibilityScreen() {
   };
 
   const handleShare = async () => {
-    if (viewShotRef.current) {
+    if (viewShotRef.current?.capture) {
       try {
         const uri = await viewShotRef.current.capture();
         await Sharing.shareAsync(uri);
@@ -347,57 +360,95 @@ export default function CompatibilityScreen() {
   };
 
   const resetForm = () => {
-    setName('');
-    setGender('female');
-    setBirthDate('');
-    setBirthTime('');
-    setCalendarType('solar');
     setResult(null);
     setPartner(null);
   };
 
   return (
-    <View className="flex-1 bg-gray-50" style={{ paddingTop: insets.top }}>
-      <ScrollView contentContainerClassName="p-4 pb-20">
-        {/* Header */}
-        <View className="mb-6 mt-2">
-          <Text className="text-2xl font-bold text-gray-900">나의 인연 찾기 💕</Text>
-          <Text className="mt-1 text-gray-500">오행 분석을 통해 상세한 궁합을 확인합니다.</Text>
+    <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
+      <Stack.Screen options={{ headerShown: false }} />
+
+      {/* Header */}
+      <View className="flex-row items-center justify-between px-4 py-3">
+        <View className="flex-row items-center gap-2">
+          <HeartHandshake
+            size={24}
+            className="text-foreground"
+            color={colorScheme === 'dark' ? '#fff' : '#000'}
+          />
+          <Text className="text-xl font-bold text-foreground">궁합</Text>
         </View>
+      </View>
 
-        {/* Main Card */}
-        <View className="mb-6 overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm">
+      <ScrollView contentContainerClassName="pb-20">
+        {/* Main Content */}
+        <View>
           {!result ? (
-            <View className="items-center px-6 py-8">
-              <View className="mb-4 h-20 w-20 items-center justify-center rounded-full bg-rose-50">
-                <Heart size={32} color="#fb7185" fill="#fb7185" />
+            <View className="px-6 py-8">
+              <Text className="mb-6 text-xl font-bold text-gray-900">누구와 궁합을 볼까요?</Text>
+
+              {/* Saved List */}
+              {savedList.length > 0 ? (
+                <View className="mb-6 gap-3">
+                  {savedList.map((item) => (
+                    <TouchableOpacity
+                      key={item.id}
+                      onPress={() => handleSelectFromList(item)}
+                      activeOpacity={0.7}
+                      className="flex-row items-center justify-between rounded-2xl border border-gray-100 bg-gray-50 p-4">
+                      <View className="flex-row items-center gap-4">
+                        <View
+                          className={`h-12 w-12 items-center justify-center rounded-full ${
+                            item.gender === 'male' ? 'bg-blue-100' : 'bg-rose-100'
+                          }`}>
+                          <Text className="text-xl">{item.gender === 'male' ? '👨' : '👩'}</Text>
+                        </View>
+                        <View>
+                          <Text className="text-lg font-bold text-gray-900">{item.name}</Text>
+                          <Text className="text-xs text-gray-500">
+                            {item.birth_year}.{item.birth_month}.{item.birth_day} ·{' '}
+                            {item.relationship === 'family'
+                              ? '가족'
+                              : item.relationship === 'partner'
+                                ? '연인'
+                                : item.relationship === 'colleague'
+                                  ? '동료'
+                                  : '친구/기타'}
+                          </Text>
+                        </View>
+                      </View>
+                      <ChevronRight size={20} color="#9ca3af" />
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              ) : (
+                <View className="mb-8 items-center justify-center p-4">
+                  <Text className="text-gray-400">저장된 상대가 없습니다.</Text>
+                </View>
+              )}
+
+              {/* Action Buttons */}
+              <View className="gap-3">
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  onPress={() => setShowInputModal(true)}
+                  className="w-full flex-row items-center justify-center gap-2 rounded-full bg-gray-900 px-6 py-4 shadow-sm">
+                  <Plus size={20} color="white" />
+                  <Text className="text-base font-bold text-white">새로운 상대 추가하기</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  onPress={() => setShowCelebModal(true)}
+                  className="w-full flex-row items-center justify-center gap-2 rounded-full border border-rose-100 bg-rose-50 px-6 py-4">
+                  <Star size={20} color="#e11d48" />
+                  <Text className="text-base font-bold text-rose-600">유명인과 궁합 보기</Text>
+                </TouchableOpacity>
               </View>
-              <Text className="mb-2 text-lg font-bold text-gray-800">
-                아직 등록된 상대가 없어요
-              </Text>
-              <Text className="mb-6 text-center text-gray-500">
-                상대방의 정보를 입력하고{'\n'}두 사람의 오행 궁합을 확인해보세요!
-              </Text>
-
-              <TouchableOpacity
-                activeOpacity={0.8}
-                onPress={() => setShowInputModal(true)}
-                className="mb-3 w-full flex-row items-center justify-center gap-2 rounded-full bg-gray-900 px-6 py-3">
-                <Plus size={18} color="white" />
-                <Text className="font-bold text-white">상대방 추가하기</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                activeOpacity={0.8}
-                onPress={() => setShowCelebModal(true)}
-                className="w-full flex-row items-center justify-center gap-2 rounded-full bg-rose-100 px-6 py-3">
-                <Star size={18} color="#e11d48" />
-                <Text className="font-bold text-rose-600">유명인과 궁합 보기</Text>
-              </TouchableOpacity>
             </View>
           ) : (
             <ViewShot ref={viewShotRef} options={{ format: 'jpg', quality: 0.9 }}>
-              <View className="bg-white p-6">
+              <View className="bg-background px-6 pb-20 pt-4">
                 {/* Top: Names & Reset */}
                 <View className="mb-6 flex-row items-start justify-between">
                   <View>
@@ -543,116 +594,16 @@ export default function CompatibilityScreen() {
       </ScrollView>
 
       {/* Input Modal */}
-      <Modal
+      {/* Input Modal using ProfileEditModal */}
+      <ProfileEditModal
         visible={showInputModal}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={() => setShowInputModal(false)}>
-        <View className="flex-1 bg-white">
-          <View className="flex-row items-center justify-between border-b border-gray-100 p-4">
-            <Text className="text-lg font-bold">상대방 정보 입력</Text>
-            <TouchableOpacity onPress={() => setShowInputModal(false)} className="p-2">
-              <X size={24} color="#000" />
-            </TouchableOpacity>
-          </View>
-
-          <ScrollView className="flex-1 p-6" keyboardShouldPersistTaps="handled">
-            <View className="gap-6 pb-10">
-              <View>
-                <Text className="mb-2 text-sm font-semibold text-gray-600">이름</Text>
-                <TextInput
-                  value={name}
-                  onChangeText={setName}
-                  placeholder="상대방의 이름을 입력하세요"
-                  className="w-full rounded-xl bg-gray-50 p-4 text-base text-gray-900"
-                />
-              </View>
-
-              <View>
-                <Text className="mb-2 text-sm font-semibold text-gray-600">성별</Text>
-                <View className="flex-row gap-3">
-                  <TouchableOpacity
-                    onPress={() => setGender('male')}
-                    className={`flex-1 items-center rounded-xl border p-4 ${gender === 'male' ? 'border-blue-200 bg-blue-50' : 'border-transparent bg-gray-50'}`}>
-                    <Text
-                      className={`font-semibold ${gender === 'male' ? 'text-blue-600' : 'text-gray-500'}`}>
-                      남성
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => setGender('female')}
-                    className={`flex-1 items-center rounded-xl border p-4 ${gender === 'female' ? 'border-rose-200 bg-rose-50' : 'border-transparent bg-gray-50'}`}>
-                    <Text
-                      className={`font-semibold ${gender === 'female' ? 'text-rose-600' : 'text-gray-500'}`}>
-                      여성
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-
-              <View>
-                <Text className="mb-2 text-sm font-semibold text-gray-600">생년월일 (8자리)</Text>
-                <TextInput
-                  value={birthDate}
-                  onChangeText={setBirthDate}
-                  placeholder="예: 19950815"
-                  keyboardType="number-pad"
-                  maxLength={8}
-                  className="w-full rounded-xl bg-gray-50 p-4 text-base text-gray-900"
-                />
-              </View>
-
-              <View>
-                <Text className="mb-2 text-sm font-semibold text-gray-600">
-                  태어난 시간 (4자리, 선택)
-                </Text>
-                <TextInput
-                  value={birthTime}
-                  onChangeText={setBirthTime}
-                  placeholder="예: 1430 (오후 2시 30분)"
-                  keyboardType="number-pad"
-                  maxLength={4}
-                  className="w-full rounded-xl bg-gray-50 p-4 text-base text-gray-900"
-                />
-              </View>
-
-              <View>
-                <Text className="mb-2 text-sm font-semibold text-gray-600">양력/음력</Text>
-                <View className="flex-row gap-3">
-                  <TouchableOpacity
-                    onPress={() => setCalendarType('solar')}
-                    className={`flex-1 items-center rounded-xl border p-3 ${calendarType === 'solar' ? 'border-amber-200 bg-amber-50' : 'border-transparent bg-gray-50'}`}>
-                    <Text
-                      className={`font-medium ${calendarType === 'solar' ? 'text-amber-700' : 'text-gray-500'}`}>
-                      양력
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => setCalendarType('lunar')}
-                    className={`flex-1 items-center rounded-xl border p-3 ${calendarType === 'lunar' ? 'border-amber-200 bg-amber-50' : 'border-transparent bg-gray-50'}`}>
-                    <Text
-                      className={`font-medium ${calendarType === 'lunar' ? 'text-amber-700' : 'text-gray-500'}`}>
-                      음력
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-
-              <TouchableOpacity
-                activeOpacity={0.8}
-                onPress={handleCalculateFromForm}
-                disabled={loading}
-                className={`mt-6 w-full items-center rounded-xl p-4 shadow-sm ${loading ? 'bg-gray-400' : 'bg-gray-900'}`}>
-                {loading ? (
-                  <ActivityIndicator color="white" />
-                ) : (
-                  <Text className="text-lg font-bold text-white">궁합 보기</Text>
-                )}
-              </TouchableOpacity>
-            </View>
-          </ScrollView>
-        </View>
-      </Modal>
+        onClose={() => setShowInputModal(false)}
+        onSave={async (data) => {
+          await handleSavePartner(data);
+        }}
+        initialData={null}
+        showRelationship={false} // Compatibility usually implies a specific relationship, or we can enable it if needed
+      />
 
       {/* Celeb Modal */}
       <Modal

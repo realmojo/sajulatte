@@ -44,17 +44,19 @@ import {
   Volume2,
   MessageSquare,
   Users, // Added Users icon
+  Ellipsis,
 } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { supabase } from '@/lib/supabase';
 import {
-  supabase,
   uploadMainProfileToSupabase,
   syncUserProfile,
   updateRemoteProfile,
-} from '@/lib/supabase'; // Import updateRemoteProfile
+} from '@/lib/services/authService';
 import { getTodayLuck, interpretSaju, getTimeZodiac, isSummerTime } from '@/lib/utils/latte';
 import { userService } from '@/lib/services/userService';
+import { ProfileEditModal, ProfileData } from '@/components/modal/ProfileEditModal';
 
 export default function SettingsScreen() {
   const { colorScheme } = useColorScheme();
@@ -71,16 +73,6 @@ export default function SettingsScreen() {
 
   // Profile Edit State
   const [showProfileEdit, setShowProfileEdit] = useState(false);
-  const [editName, setEditName] = useState('');
-  const [editYear, setEditYear] = useState('');
-  const [editMonth, setEditMonth] = useState('');
-  const [editDay, setEditDay] = useState('');
-  const [editHour, setEditHour] = useState('');
-  const [editMinute, setEditMinute] = useState('');
-  const [editGender, setEditGender] = useState<'male' | 'female'>('male');
-  const [editType, setEditType] = useState<'solar' | 'lunar'>('solar');
-  const [editIsLeap, setEditIsLeap] = useState(false); // 윤달 여부
-  const [isSaving, setIsSaving] = useState(false);
 
   // Toast State
   const [toastVisible, setToastVisible] = useState(false);
@@ -162,87 +154,45 @@ export default function SettingsScreen() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Update Edit Form when profile changes or modal opens
-  useEffect(() => {
-    if (showProfileEdit && userProfile) {
-      console.log(userProfile);
-      setEditName(userProfile.name || '');
-      setEditYear(userProfile.birth_year?.toString() || userProfile.year?.toString() || '');
-      setEditMonth(userProfile.birth_month?.toString() || userProfile.month?.toString() || '');
-      setEditDay(userProfile.birth_day?.toString() || userProfile.day?.toString() || '');
-      setEditHour(userProfile.birth_hour?.toString() || userProfile.hour?.toString() || '');
-      setEditMinute(userProfile.birth_minute?.toString() || userProfile.minute?.toString() || '');
-      setEditGender(userProfile.gender || 'male');
-
-      const cType = userProfile.calendar_type || 'solar';
-      if (cType === 'lunar-leap') {
-        setEditType('lunar');
-        setEditIsLeap(true);
-      } else {
-        setEditType(cType === 'lunar' ? 'lunar' : 'solar');
-        setEditIsLeap(false);
-      }
-    } else if (showProfileEdit && !userProfile) {
-      // Default to empty if no profile
-      setEditName('');
-      setEditYear('');
-      setEditMonth('');
-      setEditDay('');
-      setEditHour('');
-      setEditMinute('');
-      setEditGender('male');
-      setEditType('solar');
-      setEditIsLeap(false);
-    }
-  }, [showProfileEdit, userProfile]);
-
   // 1. Start Login Process
   const signInWithKakao = async () => {
     try {
-      // Use a consistent redirect URL for WebView flow
-      // Even if this deep link doesn't work natively, we will intercept it in WebView
-      const redirectUrl = Linking.createURL('settings');
-      console.log('Redirect URL for WebView:', redirectUrl);
-      console.log('Starting Kakao OAuth login...');
+      // Platform specific configuration
+      const isWeb = Platform.OS === 'web';
+
+      const redirectUrl = isWeb
+        ? typeof window !== 'undefined'
+          ? window.location.origin + '/settings'
+          : ''
+        : Linking.createURL('settings');
+
+      console.log('Target Redirect URL:', redirectUrl);
 
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'kakao',
         options: {
-          // redirectTo: redirectUrl,
-          // skipBrowserRedirect: true, // We will handle the browser via WebView
-          // queryParams: {
-          //   // response_type: 'token',
-          //   prompt: 'login',
-          // },
+          redirectTo: redirectUrl,
+          skipBrowserRedirect: !isWeb,
+          queryParams: {
+            prompt: 'login',
+          },
         },
       });
 
       if (error) {
         console.error('OAuth signIn error:', error);
-        console.error('Error message:', error.message);
-        console.error('Error status:', (error as any).status);
         throw error;
       }
 
-      console.log('OAuth URL generated:', data?.url ? 'Yes' : 'No');
-      console.log('Full OAuth URL:', data?.url);
-
-      if (data?.url) {
+      // Native only: Open WebView with the received URL
+      if (!isWeb && data?.url) {
         setAuthUrl(data.url);
         setShowWebView(true);
-      } else {
-        Alert.alert('로그인 오류', 'OAuth URL을 생성할 수 없습니다.');
       }
     } catch (error) {
       console.error('Sign in error details:', error);
-      if (error instanceof Error) {
-        Alert.alert(
-          '로그인 오류',
-          `카카오 로그인 중 오류가 발생했습니다.\n\n${error.message}\n\nSupabase 대시보드에서 카카오 OAuth 설정을 확인해주세요.`
-        );
-      } else {
-        Alert.alert('로그인 오류', '카카오 로그인 중 알 수 없는 오류가 발생했습니다.');
-      }
+      const message = error instanceof Error ? error.message : '알 수 없는 오류';
+      Alert.alert('로그인 오류', message);
     }
   };
 
@@ -361,24 +311,18 @@ export default function SettingsScreen() {
     }
   };
 
-  const handleSaveProfile = async () => {
-    if (!editName || !editYear || !editMonth || !editDay) {
-      Alert.alert('알림', '이름과 생년월일은 필수 입력 항목입니다.');
-      return;
-    }
-
-    setIsSaving(true);
+  const handleSaveProfile = async (data: ProfileData) => {
     try {
       const updatedProfile = await updateRemoteProfile({
-        name: editName,
-        gender: editGender,
-        birth_year: parseInt(editYear),
-        birth_month: parseInt(editMonth),
-        birth_day: parseInt(editDay),
-        birth_hour: editHour ? parseInt(editHour) : null,
-        birth_minute: editMinute ? parseInt(editMinute) : null,
-        calendar_type: editType,
-        is_leap: editIsLeap,
+        name: data.name,
+        gender: data.gender,
+        birth_year: data.birth_year,
+        birth_month: data.birth_month,
+        birth_day: data.birth_day,
+        birth_hour: data.birth_hour,
+        birth_minute: data.birth_minute,
+        calendar_type: data.calendar_type,
+        is_leap: data.is_leap,
       });
 
       setUserProfile(updatedProfile);
@@ -386,191 +330,35 @@ export default function SettingsScreen() {
       Alert.alert('완료', '사주 정보가 저장되었습니다.');
     } catch (e) {
       Alert.alert('오류', '저장 중 문제가 발생했습니다.');
-    } finally {
-      setIsSaving(false);
     }
   };
 
   return (
     <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
-      {/* Profile Edit Modal */}
-      <Modal
-        visible={showProfileEdit}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={() => setShowProfileEdit(false)}>
-        <View
-          className="flex-1 bg-white"
-          style={{ paddingTop: Platform.OS === 'android' ? insets.top : 0 }}>
-          <View className="flex-row items-center justify-between border-b border-gray-200 px-4 py-3">
-            <Text className="text-lg font-bold">사주 정보 {userProfile ? '수정' : '등록'}</Text>
-            <TouchableOpacity onPress={() => setShowProfileEdit(false)}>
-              <X size={24} color="#000" />
-            </TouchableOpacity>
-          </View>
-          <KeyboardAwareScrollView
-            enableOnAndroid={true}
-            extraScrollHeight={120}
-            enableAutomaticScroll={true}
-            contentContainerStyle={{ padding: 24, paddingBottom: 150, gap: 24 }}
-            keyboardShouldPersistTaps="handled">
-            <View className="gap-2">
-              <Text className="font-medium text-gray-700">이름</Text>
-              <Input
-                placeholder="이름을 입력하세요"
-                value={editName}
-                onChangeText={setEditName}
-                className="bg-gray-50"
-              />
-            </View>
+      <Stack.Screen options={{ headerShown: false }} />
 
-            <View className="gap-2">
-              <Text className="font-medium text-gray-700">성별</Text>
-              <View className="flex-row gap-3">
-                <TouchableOpacity
-                  onPress={() => setEditGender('male')}
-                  className={`flex-1 items-center rounded-lg border py-3 ${
-                    editGender === 'male'
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 bg-white'
-                  }`}>
-                  <Text
-                    className={editGender === 'male' ? 'font-bold text-blue-600' : 'text-gray-500'}>
-                    남성
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => setEditGender('female')}
-                  className={`flex-1 items-center rounded-lg border py-3 ${
-                    editGender === 'female'
-                      ? 'border-red-500 bg-red-50'
-                      : 'border-gray-200 bg-white'
-                  }`}>
-                  <Text
-                    className={
-                      editGender === 'female' ? 'font-bold text-red-600' : 'text-gray-500'
-                    }>
-                    여성
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            <View className="gap-2">
-              <Text className="font-medium text-gray-700">생년월일 (양력/음력)</Text>
-              <View className="mb-2 flex-row gap-3">
-                <TouchableOpacity
-                  onPress={() => {
-                    setEditType('solar');
-                    setEditIsLeap(false);
-                  }}
-                  className={`flex-1 items-center rounded-lg border py-2 ${
-                    editType === 'solar'
-                      ? 'border-amber-500 bg-amber-50'
-                      : 'border-gray-200 bg-white'
-                  }`}>
-                  <Text
-                    className={editType === 'solar' ? 'font-bold text-amber-600' : 'text-gray-500'}>
-                    양력
-                  </Text>
-                </TouchableOpacity>
-                <View className="flex-1 flex-row gap-2">
-                  <TouchableOpacity
-                    onPress={() => setEditType('lunar')}
-                    className={`flex-1 items-center rounded-lg border py-2 ${
-                      editType === 'lunar'
-                        ? 'border-indigo-500 bg-indigo-50'
-                        : 'border-gray-200 bg-white'
-                    }`}>
-                    <Text
-                      className={
-                        editType === 'lunar' ? 'font-bold text-indigo-600' : 'text-gray-500'
-                      }>
-                      음력
-                    </Text>
-                  </TouchableOpacity>
-                  {editType === 'lunar' && (
-                    <TouchableOpacity
-                      onPress={() => setEditIsLeap(!editIsLeap)}
-                      className={`w-16 items-center justify-center rounded-lg border py-2 ${
-                        editIsLeap ? 'border-indigo-500 bg-indigo-500' : 'border-gray-200 bg-white'
-                      }`}>
-                      <Text className={editIsLeap ? 'font-bold text-white' : 'text-gray-500'}>
-                        윤달
-                      </Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
-              </View>
-              <View className="flex-row gap-2">
-                <View className="flex-1">
-                  <Input
-                    placeholder="YYYY"
-                    value={editYear}
-                    onChangeText={(t) => setEditYear(t.replace(/[^0-9]/g, ''))}
-                    keyboardType="numeric"
-                    maxLength={4}
-                    className="bg-gray-50 text-center"
-                  />
-                  <Text className="mt-1 text-center text-xs text-gray-400">년</Text>
-                </View>
-                <View className="flex-1">
-                  <Input
-                    placeholder="MM"
-                    value={editMonth}
-                    onChangeText={(t) => setEditMonth(t.replace(/[^0-9]/g, ''))}
-                    keyboardType="numeric"
-                    maxLength={2}
-                    className="bg-gray-50 text-center"
-                  />
-                  <Text className="mt-1 text-center text-xs text-gray-400">월</Text>
-                </View>
-                <View className="flex-1">
-                  <Input
-                    placeholder="DD"
-                    value={editDay}
-                    onChangeText={(t) => setEditDay(t.replace(/[^0-9]/g, ''))}
-                    keyboardType="numeric"
-                    maxLength={2}
-                    className="bg-gray-50 text-center"
-                  />
-                  <Text className="mt-1 text-center text-xs text-gray-400">일</Text>
-                </View>
-              </View>
-            </View>
-
-            <View className="gap-2">
-              <Text className="font-medium text-gray-700">태어난 시간 (선택)</Text>
-              <View className="flex-row gap-2">
-                <View className="flex-1">
-                  <Input
-                    placeholder="시"
-                    value={editHour}
-                    onChangeText={(t) => setEditHour(t.replace(/[^0-9]/g, ''))}
-                    keyboardType="numeric"
-                    maxLength={2}
-                    className="bg-gray-50 text-center"
-                  />
-                </View>
-                <View className="flex-1">
-                  <Input
-                    placeholder="분"
-                    value={editMinute}
-                    onChangeText={(t) => setEditMinute(t.replace(/[^0-9]/g, ''))}
-                    keyboardType="numeric"
-                    maxLength={2}
-                    className="bg-gray-50 text-center"
-                  />
-                </View>
-              </View>
-            </View>
-
-            <Button size="lg" className="mt-4" onPress={handleSaveProfile} disabled={isSaving}>
-              {isSaving ? <ActivityIndicator color="#fff" /> : <Text>저장하기</Text>}
-            </Button>
-          </KeyboardAwareScrollView>
+      {/* Header */}
+      <View className="flex-row items-center justify-between px-4 py-3">
+        <View className="flex-row items-center gap-2">
+          <Ellipsis size={24} className="text-foreground" color={iconColor} />
+          <Text className="text-xl font-bold text-foreground">설정</Text>
         </View>
-      </Modal>
+        <View className="flex-row items-center gap-4">
+          <TouchableOpacity>
+            <Bell size={24} color={iconColor} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push('/preferences')}>
+            <Settings size={24} color={iconColor} />
+          </TouchableOpacity>
+        </View>
+      </View>
+      {/* Profile Edit Modal Component */}
+      <ProfileEditModal
+        visible={showProfileEdit}
+        onClose={() => setShowProfileEdit(false)}
+        onSave={handleSaveProfile}
+        initialData={userProfile}
+      />
       {/* Login WebView Modal */}
       <Modal
         visible={showWebView}
@@ -617,25 +405,7 @@ export default function SettingsScreen() {
           />
         </View>
       </Modal>
-      {/* Custom Header */}
-      <View className="flex-row items-center justify-between px-4 py-3">
-        <View className="flex-row items-center gap-2">
-          <Image
-            source={require('../../assets/images/logo.png')}
-            style={{ width: 28, height: 28 }}
-            resizeMode="contain"
-            className="h-6 w-6 rounded-full"
-          />
-        </View>
-        <View className="flex-row items-center gap-4">
-          <TouchableOpacity>
-            <Bell size={24} color={iconColor} />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => router.push('/preferences')}>
-            <Settings size={24} color={iconColor} />
-          </TouchableOpacity>
-        </View>
-      </View>
+
       {/* Content */}
       <ScrollView className="flex-1" contentContainerClassName="p-4 pb-20 gap-8">
         {/* Login CTA or Profile Section */}

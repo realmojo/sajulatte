@@ -3,7 +3,28 @@ import { View } from 'react-native';
 import { CalendarDays, ScrollText, Sparkles, Ellipsis, HeartHandshake } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { NAV_THEME } from '@/lib/theme';
-
+const TABS = [
+  {
+    name: 'index',
+    title: '사주',
+    icon: CalendarDays,
+  },
+  {
+    name: 'daily',
+    title: '운세',
+    icon: Sparkles,
+  },
+  {
+    name: 'compatibility',
+    title: '궁합',
+    icon: HeartHandshake,
+  },
+  {
+    name: 'settings',
+    title: '더보기',
+    icon: Ellipsis,
+  },
+];
 export default function TabLayout() {
   const { colorScheme } = useColorScheme();
   const theme = NAV_THEME[colorScheme ?? 'light'];
@@ -11,58 +32,53 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: '#d97706', // Amber-600
-        tabBarInactiveTintColor: '#9ca3af', // Gray-400
+        headerShown: true,
+        headerTitleAlign: 'left',
+        headerShadowVisible: false,
+        headerStyle: {
+          backgroundColor: theme.colors.background,
+          borderBottomWidth: 1,
+          borderBottomColor: theme.colors.border,
+          elevation: 0,
+          shadowOpacity: 0,
+        },
+        headerTitleStyle: {
+          fontSize: 24,
+          fontWeight: 'bold',
+          color: theme.colors.text,
+        },
+        headerTitleContainerStyle: {
+          paddingLeft: 12,
+        },
+        tabBarActiveTintColor: '#d97706',
+        tabBarInactiveTintColor: '#9ca3af',
         tabBarStyle: {
           backgroundColor: theme.colors.background,
           borderTopColor: theme.colors.border,
         },
       }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: '사주',
-          tabBarIcon: ({ focused, color }) => (
-            <View className={focused ? 'rounded-full bg-amber-100 px-4 py-1' : ''}>
-              <CalendarDays color={focused ? '#d97706' : color} size={20} />
-            </View>
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="daily"
-        options={{
-          title: '운세',
-          tabBarIcon: ({ focused, color }) => (
-            <View className={focused ? 'rounded-full bg-amber-100 px-4 py-1' : ''}>
-              <Sparkles color={focused ? '#d97706' : color} size={20} />
-            </View>
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="compatibility"
-        options={{
-          title: '궁합',
-          tabBarIcon: ({ focused, color }) => (
-            <View className={focused ? 'rounded-full bg-amber-100 px-4 py-1' : ''}>
-              <HeartHandshake color={focused ? '#d97706' : color} size={20} />
-            </View>
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="settings"
-        options={{
-          title: '더보기',
-          tabBarIcon: ({ focused, color }) => (
-            <View className={focused ? 'rounded-full bg-amber-100 px-4 py-1' : ''}>
-              <Ellipsis color={focused ? '#d97706' : color} size={20} />
-            </View>
-          ),
-        }}
-      />
+      {TABS.map((tab) => (
+        <Tabs.Screen
+          key={tab.name}
+          name={tab.name}
+          options={{
+            title: tab.title,
+            headerLeft: () => (
+              <View className="pl-4">
+                <tab.icon size={24} color={theme.colors.text} />
+              </View>
+            ),
+            headerTitleContainerStyle: {
+              paddingLeft: 4,
+            },
+            tabBarIcon: ({ focused, color }) => (
+              <View className={focused ? 'rounded-full bg-amber-100 px-4 py-1' : ''}>
+                <tab.icon color={focused ? '#d97706' : color} size={20} />
+              </View>
+            ),
+          }}
+        />
+      ))}
 
       {/* Hidden Tabs */}
       <Tabs.Screen
