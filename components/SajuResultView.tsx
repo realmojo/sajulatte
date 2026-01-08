@@ -149,7 +149,7 @@ export const SajuResultView = ({
 
       <ScrollView contentContainerClassName="px-6 gap-10" className="flex-1 bg-background">
         <View className="pt-2">
-          <View className="relative overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm">
+          <View className="relative overflow-hidden rounded-3xl border border-gray-300 bg-white">
             {/* Top Accent Bar */}
             <View
               className="h-3 w-full opacity-80"
