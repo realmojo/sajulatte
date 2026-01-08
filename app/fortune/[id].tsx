@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getMyEightSaju } from '@/lib/utils/latte';
 import { interpretSaju } from '@/lib/utils/interpreter';
+import { getDailyFortune } from '@/lib/utils/dailyFortuneLogic';
 
 const fortuneTitles: Record<string, string> = {
   today: '종합',
@@ -60,13 +61,13 @@ export default function FortuneDetailScreen() {
         profile.birth_hour,
         profile.birth_minute,
         profile.gender,
-        profile.calendar_type === 'lunar',
+        profile.calendar_type?.startsWith('lunar') ? 'lunar' : 'solar',
         profile.calendar_type === 'lunar-leap'
       );
 
-      // 3. Prepare Params for Interpreter
-      // Extract data from the result object structure (year, month, day, hour)
+      // 3. Prepare Params
       const ilgan = result.day.gan.hanja;
+      const ilji = result.day.ji.hanja;
 
       const pillars = [result.year, result.month, result.day, result.hour];
       const sipsinList = pillars.flatMap((p) => [p.gan.sipsin, p.ji.sipsin]);
@@ -75,37 +76,40 @@ export default function FortuneDetailScreen() {
 
       const analysis = interpretSaju(ilgan, distributions, sipsinList, shinsalList, profile.gender);
 
+      // Calculate Daily Fortune
+      const dailyResult = getDailyFortune(ilgan, ilji);
+
       // 4. Map ID to Content
       let resultText = '';
       const safeId = id as string;
 
       switch (safeId) {
         case 'today':
-          resultText = analysis.summary;
+          resultText = dailyResult.summary;
           break;
         case 'love':
-          resultText = analysis.love;
+          resultText = dailyResult.love;
           break;
         case 'money':
-          resultText = analysis.money;
+          resultText = dailyResult.money;
           break;
         case 'marriage':
-          resultText = analysis.marriage;
+          resultText = dailyResult.marriage;
           break;
         case 'job':
-          resultText = analysis.work;
+          resultText = dailyResult.job;
           break;
         case 'health':
-          resultText = analysis.health;
+          resultText = dailyResult.health;
           break;
         case 'human':
-          resultText = analysis.human;
+          resultText = dailyResult.human;
           break;
         case 'newyear':
           resultText = analysis.newyear;
           break;
         default:
-        // resultText = analysis.summary;
+          resultText = dailyResult.summary;
       }
 
       setContent(resultText || '해석 결과가 없습니다.');

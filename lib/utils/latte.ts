@@ -15,7 +15,7 @@ const ELEMENT_COLORS = {
   FIRE: { name: '화', color: '#e85555ff', bgClass: 'bg-red-400' }, // 빨강
   EARTH: { name: '토', color: '#df8825ff', bgClass: 'bg-yellow-300' }, // 황토색 (가독성 위해 등색/진한 노랑)
   METAL: { name: '금', color: '#9CA3AF', bgClass: 'bg-white' }, // 회색 (가독성 위해 변경)
-  WATER: { name: '수', color: '#0e0e0eff', bgClass: 'bg-blue-500' }, // 파랑/검정
+  WATER: { name: '수', color: '#384db8ff', bgClass: 'bg-blue-500' }, // 파랑/검정
 };
 
 /**

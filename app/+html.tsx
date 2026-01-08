@@ -33,6 +33,20 @@ export default function Root({ children }: PropsWithChildren) {
             `,
           }}
         />
+
+        {/* Naver Analytics */}
+        <script type="text/javascript" src="//wcs.pstatic.net/wcslog.js"></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if(!wcs_add) var wcs_add = {};
+              wcs_add["wa"] = "17d0cced19df3c0";
+              if(window.wcs) {
+                wcs_do();
+              }
+            `,
+          }}
+        />
       </head>
       <body>{children}</body>
     </html>
