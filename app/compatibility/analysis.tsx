@@ -40,14 +40,7 @@ const ANIMAL_IMAGES: Record<string, any> = {
   개: require('@/assets/images/zodiac_transparent/dog.png'),
   돼지: require('@/assets/images/zodiac_transparent/pig.png'),
 };
-
-const WebSEO = ({ title }: { title: string }) => {
-  if (Platform.OS !== 'web') return null;
-  useEffect(() => {
-    document.title = title;
-  }, [title]);
-  return null;
-};
+import { WebSEO } from '@/components/ui/WebSEO';
 
 export default function CompatibilityAnalysisScreen() {
   const insets = useSafeAreaInsets();

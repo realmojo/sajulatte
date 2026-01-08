@@ -18,6 +18,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from 'nativewind';
 import { ProfileEditModal, ProfileData } from '@/components/modal/ProfileEditModal';
 import { updateRemoteProfile } from '@/lib/services/authService';
+import { WebSEO } from '@/components/ui/WebSEO';
 
 // --- Helpers ---
 
@@ -316,176 +317,152 @@ export default function SavedScreen() {
 
     return (
       <TouchableOpacity
-        activeOpacity={0.9}
+        activeOpacity={0.7}
         onPress={() => handlePress(item)}
-        className={`mb-4 w-full overflow-hidden rounded-3xl border ${colors.bg} ${
+        className={`mb-3 w-full flex-row items-center justify-between rounded-2xl border ${colors.bg} ${
           isMain ? 'border-2 border-amber-400' : 'border-transparent' // Remove border from non-main items for cleaner look or use colors.border
-        } shadow-sm`}
+        } p-4 shadow-sm`}
         style={!isMain ? { borderWidth: 1, borderColor: isDark ? '#333' : '#e5e7eb' } : {}}>
-        {/* Card Background Pattern (Abstract) */}
-        <View className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/10" />
-        <View className="absolute -bottom-10 -left-10 h-24 w-24 rounded-full bg-black/5" />
+        <View className="flex-1 flex-row items-center gap-3">
+          {/* Avatar / Icon */}
+          <View
+            className={`h-12 w-12 items-center justify-center rounded-full border border-gray-100 bg-white shadow-sm`}>
+            <Text className="text-xl">{zodiacEmoji}</Text>
+          </View>
 
-        <View className="p-5">
-          {/* Header: Name and Actions */}
-          <View className="mb-4 flex-row items-start justify-between">
-            <View>
-              <View className="mb-1 flex-row items-center gap-2">
-                {isMain && (
-                  <View className="rounded-full bg-amber-100 px-2 py-0.5">
-                    <Text className="text-[10px] font-bold text-amber-600">나의 명식</Text>
-                  </View>
-                )}
-                {/* Relationship Badge */}
-                {!isMain && (
-                  <View className="rounded-full bg-black/5 px-2 py-0.5">
-                    <Text
-                      className={`text-[10px] font-bold ${isDark ? 'text-gray-300' : 'text-gray-500'}`}>
-                      {relationshipLabel}
-                    </Text>
-                  </View>
-                )}
-              </View>
-              <Text className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+          {/* Text Info */}
+          <View className="flex-1">
+            <View className="mb-0.5 flex-row items-center gap-2">
+              <Text
+                className={`text-lg font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}
+                numberOfLines={1}>
                 {item.name}
               </Text>
-              <Text className={`text-xs ${colors.text} mt-0.5 font-medium`}>
-                {item.gender === 'male' ? '남성' : '여성'} • {zodiacEmoji} {zodiacName}띠
-              </Text>
-            </View>
-
-            <View className="flex-row gap-1">
-              <TouchableOpacity
-                onPress={() => openEditModal(item)}
-                className="rounded-full bg-white/20 p-2 active:bg-white/40">
-                <Pencil size={16} color={isDark ? '#aaa' : '#666'} />
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={(e) => handleDelete(item.id, e)}
-                className="rounded-full bg-white/20 p-2 active:bg-white/40">
-                <Trash2 size={16} color={isDark ? '#ff6b6b' : '#ef4444'} />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* Body: Date Info */}
-          <View
-            className={`mt-2 flex-row items-center justify-between rounded-2xl bg-white/50 p-4 ${isDark ? 'bg-black/20' : ''}`}>
-            <View className="flex-row items-center gap-3">
-              <View className="h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm">
-                <Calendar size={20} color={colors.icon} />
-              </View>
-              <View>
-                <Text className="text-xs text-gray-500">
-                  {item.calendar_type === 'lunar' ? '음력' : '양력'}
-                </Text>
+              {/* Relationship Badge */}
+              <View
+                className={`rounded-full px-2 py-0.5 ${isMain ? 'bg-amber-100' : 'bg-gray-100'}`}>
                 <Text
-                  className={`text-base font-semibold ${isDark ? 'text-gray-200' : 'text-gray-800'}`}>
-                  {item.birth_year}.{String(item.birth_month).padStart(2, '0')}.
-                  {String(item.birth_day).padStart(2, '0')}
+                  className={`text-[10px] font-bold ${isMain ? 'text-amber-600' : 'text-gray-500'}`}>
+                  {isMain ? '나의 명식' : relationshipLabel}
                 </Text>
               </View>
             </View>
-
-            <View className="items-end">
-              <Text className="text-xs text-gray-500">태어난 시간</Text>
-              <Text
-                className={`text-base font-semibold ${isDark ? 'text-gray-200' : 'text-gray-800'}`}>
-                {item.birth_hour
-                  ? `${String(item.birth_hour).padStart(2, '0')}:${String(item.birth_minute).padStart(2, '0')}`
-                  : '미정'}
-              </Text>
-            </View>
+            <Text className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+              {item.calendar_type === 'lunar' ? '음' : '양'} {item.birth_year.toString().slice(2)}.
+              {String(item.birth_month).padStart(2, '0')}.{String(item.birth_day).padStart(2, '0')}{' '}
+              · {zodiacName}띠
+            </Text>
           </View>
+        </View>
+
+        {/* Actions */}
+        <View className="ml-2 flex-row items-center gap-2">
+          <TouchableOpacity
+            onPress={(e) => {
+              e.stopPropagation();
+              openEditModal(item);
+            }}
+            className="rounded-full bg-white/50 p-2 active:bg-gray-200">
+            <Pencil size={16} color={isDark ? '#aaa' : '#9ca3af'} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={(e) => handleDelete(item.id, e)}
+            className="rounded-full bg-white/50 p-2 active:bg-red-200">
+            <Trash2 size={16} color={isDark ? '#ff6b6b' : '#ef4444'} />
+          </TouchableOpacity>
         </View>
       </TouchableOpacity>
     );
   };
 
   return (
-    <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
-      <View className="flex-1 px-4 pt-4">
-        {isLoading ? (
-          <View className="flex-1 items-center justify-center">
-            <ActivityIndicator size="large" color={iconColor} />
-            <Text className="mt-4 text-muted-foreground">목록을 불러오는 중...</Text>
-          </View>
-        ) : list.length === 0 ? (
-          <View className="flex-1 items-center justify-center gap-4">
-            <View className="h-32 w-32 items-center justify-center rounded-full bg-muted/20">
-              <Star size={48} color="#9ca3af" />
+    <>
+      <WebSEO title={`저장된 목록 - 사주라떼`} />
+      <Stack.Screen options={{ headerShown: false, title: '궁합 분석 결과' }} />
+      <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
+        <View className="flex-1 px-4 pt-4">
+          {isLoading ? (
+            <View className="flex-1 items-center justify-center">
+              <ActivityIndicator size="large" color={iconColor} />
+              <Text className="mt-4 text-muted-foreground">목록을 불러오는 중...</Text>
             </View>
-            <View className="items-center">
-              <Text className="text-xl font-bold text-foreground">아직 저장된 사주가 없어요</Text>
-              <Text className="mt-2 text-center text-muted-foreground">
-                소중한 사람들의 생일을 등록하고{'\n'}사주와 운세를 확인해보세요.
-              </Text>
-            </View>
-          </View>
-        ) : (
-          <FlatList
-            data={list}
-            keyExtractor={(item) => item.id}
-            contentContainerClassName="pb-32"
-            showsVerticalScrollIndicator={false}
-            renderItem={renderItem}
-          />
-        )}
-      </View>
-
-      {/* Floating Action Button (FAB) */}
-      <View className="absolute bottom-8 right-6">
-        <TouchableOpacity
-          onPress={openCreateModal}
-          activeOpacity={0.8}
-          className="h-14 w-14 items-center justify-center rounded-full bg-primary shadow-lg shadow-black/30"
-          style={{ elevation: 5 }}>
-          <Plus size={32} color="#fff" strokeWidth={2.5} />
-        </TouchableOpacity>
-      </View>
-
-      {/* Modals */}
-      <ProfileEditModal
-        visible={isModalVisible}
-        onClose={() => setIsModalVisible(false)}
-        onSave={handleSave}
-        initialData={editingItem}
-        showRelationship={true}
-      />
-
-      <Modal
-        visible={isDeleteModalVisible}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setIsDeleteModalVisible(false)}>
-        <View className="flex-1 items-center justify-center bg-black/60 p-6 backdrop-blur-sm">
-          <View className="w-full max-w-sm gap-4 rounded-2xl border border-white/10 bg-background p-6 shadow-2xl">
-            <View className="items-center gap-3">
-              <View className="h-12 w-12 items-center justify-center rounded-full bg-red-100">
-                <Trash2 size={24} color="#ef4444" />
+          ) : list.length === 0 ? (
+            <View className="flex-1 items-center justify-center gap-4">
+              <View className="h-32 w-32 items-center justify-center rounded-full bg-muted/20">
+                <Star size={48} color="#9ca3af" />
               </View>
-              <View className="items-center gap-1">
-                <Text className="text-lg font-bold text-foreground">사주 명식 삭제</Text>
-                <Text className="text-center text-muted-foreground">
-                  정말로 삭제하시겠습니까?{'\n'}삭제된 정보는 되돌릴 수 없습니다.
+              <View className="items-center">
+                <Text className="text-xl font-bold text-foreground">아직 저장된 사주가 없어요</Text>
+                <Text className="mt-2 text-center text-muted-foreground">
+                  소중한 사람들의 생일을 등록하고{'\n'}사주와 운세를 확인해보세요.
                 </Text>
               </View>
             </View>
-            <View className="flex-row gap-3 pt-2">
-              <TouchableOpacity
-                className="flex-1 items-center justify-center rounded-xl bg-muted py-3.5"
-                onPress={() => setIsDeleteModalVisible(false)}>
-                <Text className="font-semibold text-foreground">취소</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                className="flex-1 items-center justify-center rounded-xl bg-red-500 py-3.5"
-                onPress={confirmDelete}>
-                <Text className="font-semibold text-white">삭제</Text>
-              </TouchableOpacity>
+          ) : (
+            <FlatList
+              data={list}
+              keyExtractor={(item) => item.id}
+              contentContainerClassName="pb-32"
+              showsVerticalScrollIndicator={false}
+              renderItem={renderItem}
+            />
+          )}
+        </View>
+
+        {/* Floating Action Button (FAB) */}
+        <View className="absolute bottom-16 right-6">
+          <TouchableOpacity
+            onPress={openCreateModal}
+            activeOpacity={0.8}
+            className="h-14 w-14 items-center justify-center rounded-full bg-primary shadow-lg shadow-black/30"
+            style={{ elevation: 5 }}>
+            <Plus size={32} color="#fff" strokeWidth={2.5} />
+          </TouchableOpacity>
+        </View>
+
+        {/* Modals */}
+        <ProfileEditModal
+          visible={isModalVisible}
+          onClose={() => setIsModalVisible(false)}
+          onSave={handleSave}
+          initialData={editingItem}
+          showRelationship={true}
+        />
+
+        <Modal
+          visible={isDeleteModalVisible}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setIsDeleteModalVisible(false)}>
+          <View className="flex-1 items-center justify-center bg-black/60 p-6 backdrop-blur-sm">
+            <View className="w-full max-w-sm gap-4 rounded-2xl border border-white/10 bg-background p-6 shadow-2xl">
+              <View className="items-center gap-3">
+                <View className="h-12 w-12 items-center justify-center rounded-full bg-red-100">
+                  <Trash2 size={24} color="#ef4444" />
+                </View>
+                <View className="items-center gap-1">
+                  <Text className="text-lg font-bold text-foreground">사주 명식 삭제</Text>
+                  <Text className="text-center text-muted-foreground">
+                    정말로 삭제하시겠습니까?{'\n'}삭제된 정보는 되돌릴 수 없습니다.
+                  </Text>
+                </View>
+              </View>
+              <View className="flex-row gap-3 pt-2">
+                <TouchableOpacity
+                  className="flex-1 items-center justify-center rounded-xl bg-muted py-3.5"
+                  onPress={() => setIsDeleteModalVisible(false)}>
+                  <Text className="font-semibold text-foreground">취소</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  className="flex-1 items-center justify-center rounded-xl bg-red-500 py-3.5"
+                  onPress={confirmDelete}>
+                  <Text className="font-semibold text-white">삭제</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
-        </View>
-      </Modal>
-    </View>
+        </Modal>
+      </View>
+    </>
   );
 }

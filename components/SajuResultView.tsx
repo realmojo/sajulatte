@@ -193,7 +193,7 @@ export const SajuResultView = ({
                 </View>
 
                 {/* Right Symbol (Ilgan) */}
-                <View className="ml-2 shrink-0 items-center justify-center rounded-2xl border border-gray-100 bg-gray-50/50 p-3 shadow-sm">
+                <View className="ml-2 shrink-0 items-center justify-center rounded-2xl border border-gray-100 bg-gray-50/50 p-3">
                   <Text className="mb-1 text-[10px] font-medium text-gray-400">본원(나)</Text>
                   <View className="mb-1 h-12 w-12 items-center justify-center rounded-full bg-white shadow-sm">
                     <Text className="text-2xl font-black" style={{ color: saju.day.gan.color }}>
@@ -234,18 +234,18 @@ export const SajuResultView = ({
                     };
 
                     const ZODIAC_IMAGES: Record<string, any> = {
-                      子: require('../assets/images/zodiac/rat.png'),
-                      丑: require('../assets/images/zodiac/ox.png'),
-                      寅: require('../assets/images/zodiac/tiger.png'),
-                      卯: require('../assets/images/zodiac/rabbit.png'),
-                      辰: require('../assets/images/zodiac/dragon.png'),
-                      巳: require('../assets/images/zodiac/snake.png'),
-                      午: require('../assets/images/zodiac/horse.png'),
-                      未: require('../assets/images/zodiac/sheep.png'),
-                      申: require('../assets/images/zodiac/monkey.png'),
-                      酉: require('../assets/images/zodiac/rooster.png'),
-                      戌: require('../assets/images/zodiac/dog.png'),
-                      亥: require('../assets/images/zodiac/pig.png'),
+                      子: require('../assets/images/zodiac_transparent/rat.png'),
+                      丑: require('../assets/images/zodiac_transparent/ox.png'),
+                      寅: require('../assets/images/zodiac_transparent/tiger.png'),
+                      卯: require('../assets/images/zodiac_transparent/rabbit.png'),
+                      辰: require('../assets/images/zodiac_transparent/dragon.png'),
+                      巳: require('../assets/images/zodiac_transparent/snake.png'),
+                      午: require('../assets/images/zodiac_transparent/horse.png'),
+                      未: require('../assets/images/zodiac_transparent/sheep.png'),
+                      申: require('../assets/images/zodiac_transparent/monkey.png'),
+                      酉: require('../assets/images/zodiac_transparent/rooster.png'),
+                      戌: require('../assets/images/zodiac_transparent/dog.png'),
+                      亥: require('../assets/images/zodiac_transparent/pig.png'),
                     };
 
                     const color = GAN_COLOR[saju.day.gan.hanja] || '';

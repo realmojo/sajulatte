@@ -10,6 +10,7 @@ import { supabase } from '@/lib/supabase';
 import { userService, UserProfile } from '@/lib/services/userService';
 import { CELEBS, Celebrity } from '@/lib/data/celebs';
 import { ProfileEditModal, ProfileData } from '@/components/modal/ProfileEditModal';
+import { WebSEO } from '@/components/ui/WebSEO';
 // Web SEO Helper
 import { Platform } from 'react-native';
 
@@ -25,14 +26,6 @@ interface PartnerProfile {
   birthHour: string;
   calendarType: CalendarType;
 }
-
-const WebSEO = ({ title, description }: { title: string; description: string }) => {
-  if (Platform.OS !== 'web') return null;
-  useEffect(() => {
-    document.title = title;
-  }, [title, description]);
-  return null;
-};
 
 export default function CompatibilityScreen() {
   const insets = useSafeAreaInsets();

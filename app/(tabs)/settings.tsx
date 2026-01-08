@@ -529,7 +529,7 @@ export default function SettingsScreen() {
             <View className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
               <TouchableOpacity
                 className="flex-row items-center justify-between bg-white p-4 active:bg-gray-50"
-                onPress={() => router.push('/saved')}>
+                onPress={() => router.push('/settings/saved')}>
                 <View className="flex-row items-center gap-3">
                   <View className="h-10 w-10 items-center justify-center rounded-full bg-indigo-50">
                     <Users size={20} color="#6366f1" />

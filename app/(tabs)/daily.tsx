@@ -17,22 +17,7 @@ import {
 } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 
-// Web SEO Helper
-import { Platform } from 'react-native';
-const WebSEO = ({ title, description }: { title: string; description: string }) => {
-  if (Platform.OS !== 'web') return null;
-  React.useEffect(() => {
-    document.title = title;
-    let metaDesc = document.querySelector('meta[name="description"]');
-    if (!metaDesc) {
-      metaDesc = document.createElement('meta');
-      metaDesc.setAttribute('name', 'description');
-      document.head.appendChild(metaDesc);
-    }
-    metaDesc.setAttribute('content', description);
-  }, [title, description]);
-  return null;
-};
+import { WebSEO } from '@/components/ui/WebSEO';
 
 export default function DailyScreen() {
   const insets = useSafeAreaInsets();
