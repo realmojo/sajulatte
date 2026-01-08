@@ -17,6 +17,23 @@ import {
 } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 
+// Web SEO Helper
+import { Platform } from 'react-native';
+const WebSEO = ({ title, description }: { title: string; description: string }) => {
+  if (Platform.OS !== 'web') return null;
+  React.useEffect(() => {
+    document.title = title;
+    let metaDesc = document.querySelector('meta[name="description"]');
+    if (!metaDesc) {
+      metaDesc = document.createElement('meta');
+      metaDesc.setAttribute('name', 'description');
+      document.head.appendChild(metaDesc);
+    }
+    metaDesc.setAttribute('content', description);
+  }, [title, description]);
+  return null;
+};
+
 export default function DailyScreen() {
   const insets = useSafeAreaInsets();
   const { colorScheme } = useColorScheme();
@@ -25,6 +42,10 @@ export default function DailyScreen() {
 
   return (
     <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
+      <WebSEO
+        title="오늘의 운세 - 사주라떼"
+        description="매일 매일 변화하는 나의 운세를 확인하세요. 연애운, 금전운, 직업운 등 다양한 무료 운세를 제공합니다."
+      />
       <Stack.Screen options={{ headerShown: false }} />
 
       {/* Header */}

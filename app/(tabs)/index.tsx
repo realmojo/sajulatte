@@ -19,6 +19,25 @@ import { useFocusEffect } from '@react-navigation/native';
 import { SajuResultView } from '@/components/SajuResultView';
 import { RefreshCcw } from 'lucide-react-native';
 
+// Web SEO Helper Component
+const WebSEO = ({ title, description }: { title: string; description: string }) => {
+  if (Platform.OS !== 'web') return null;
+
+  React.useEffect(() => {
+    document.title = title;
+
+    let metaDesc = document.querySelector('meta[name="description"]');
+    if (!metaDesc) {
+      metaDesc = document.createElement('meta');
+      metaDesc.setAttribute('name', 'description');
+      document.head.appendChild(metaDesc);
+    }
+    metaDesc.setAttribute('content', description);
+  }, [title, description]);
+
+  return null;
+};
+
 export default function Screen() {
   const insets = useSafeAreaInsets();
   const [name, setName] = React.useState('');
@@ -144,6 +163,10 @@ export default function Screen() {
   if (isLoading) {
     return (
       <View className="flex-1 items-center justify-center gap-6 bg-background">
+        <WebSEO
+          title="사주라떼 - 사주 분석 중..."
+          description="사용자의 사주 정보를 정밀하게 분석하고 있습니다."
+        />
         <Animated.View
           style={{
             transform: [{ rotate: spin }, { scale: pulseAnim }],
@@ -164,6 +187,10 @@ export default function Screen() {
   if (savedProfile) {
     return (
       <>
+        <WebSEO
+          title={`${savedProfile.name}님의 사주 풀이 - 사주라떼`}
+          description={`${savedProfile.name}님의 타고난 성향, 오행 분석, 대운 흐름 등 상세한 사주 분석 결과를 무료로 확인하세요.`}
+        />
         <Stack.Screen
           options={{
             title: '만세력',
@@ -189,6 +216,10 @@ export default function Screen() {
 
   return (
     <>
+      <WebSEO
+        title="사주라떼 - 무료 사주 만세력"
+        description="생년월일만 입력하면 정통 명리학 기반의 정확한 사주 풀이와 만세력을 무료로 확인할 수 있습니다. 오늘의 운세와 궁합도 확인해보세요."
+      />
       <Stack.Screen options={{ title: '만세력', headerTransparent: false }} />
       <ScrollView
         contentContainerClassName="flex-grow justify-center p-6 gap-8"

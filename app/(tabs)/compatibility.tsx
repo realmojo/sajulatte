@@ -193,6 +193,23 @@ const calculateRealCompatibility = (meSaju: any, youSaju: any) => {
   return { score, verdict, keywords, description, graphData, dateAdvice };
 };
 
+// Web SEO Helper
+import { Platform } from 'react-native';
+const WebSEO = ({ title, description }: { title: string; description: string }) => {
+  if (Platform.OS !== 'web') return null;
+  useEffect(() => {
+    document.title = title;
+    let metaDesc = document.querySelector('meta[name="description"]');
+    if (!metaDesc) {
+      metaDesc = document.createElement('meta');
+      metaDesc.setAttribute('name', 'description');
+      document.head.appendChild(metaDesc);
+    }
+    metaDesc.setAttribute('content', description);
+  }, [title, description]);
+  return null;
+};
+
 export default function CompatibilityScreen() {
   const insets = useSafeAreaInsets();
   const { colorScheme } = useColorScheme();
@@ -366,6 +383,18 @@ export default function CompatibilityScreen() {
 
   return (
     <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
+      <WebSEO
+        title={
+          result && partner
+            ? `${partner.name}님과의 궁합 결과 - 사주라떼`
+            : '무료 궁합 보기 - 사주라떼'
+        }
+        description={
+          result && partner
+            ? `두 분의 궁합 점수는 ${result.score}점입니다. ${result.verdict} 진단과 연애 조언을 무료로 확인하세요.`
+            : '연인, 친구, 동료와의 궁합을 오행 분석을 통해 무료로 확인해보세요.'
+        }
+      />
       <Stack.Screen options={{ headerShown: false }} />
 
       {/* Header */}
