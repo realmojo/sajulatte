@@ -43,6 +43,9 @@ export const Analytics = {
     if (Platform.OS === 'web') {
       // Web Initialization
       if (typeof window !== 'undefined') {
+        // @ts-ignore
+        if (window.gtag) return;
+
         const script = document.createElement('script');
         script.src = `https://www.googletagmanager.com/gtag/js?id=${MEASUREMENT_ID}`;
         script.async = true;
