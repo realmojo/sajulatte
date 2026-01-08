@@ -29,7 +29,7 @@ export default function Root({ children }: PropsWithChildren) {
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
-              gtag('config', 'G-MXR810EQ7G', { 'send_page_view': false });
+              gtag('config', 'G-MXR810EQ7G');
             `,
           }}
         />
