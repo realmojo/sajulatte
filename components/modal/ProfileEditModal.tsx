@@ -137,9 +137,7 @@ export function ProfileEditModal({
         style={{ paddingTop: Platform.OS === 'android' ? insets.top : 0 }}>
         {/* Header */}
         <View className="flex-row items-center justify-between border-b border-gray-200 px-4 py-3">
-          <Text className="text-lg font-bold text-black">
-            사주 정보 {initialData ? '수정' : '등록'}
-          </Text>
+          <Text className="text-lg font-bold text-black">사주 정보 등록</Text>
           <TouchableOpacity onPress={onClose}>
             <X size={24} color="#000" />
           </TouchableOpacity>

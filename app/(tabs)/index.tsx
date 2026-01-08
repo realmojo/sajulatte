@@ -18,6 +18,7 @@ import { supabase } from '@/lib/supabase';
 import { useFocusEffect } from '@react-navigation/native';
 import { SajuResultView } from '@/components/SajuResultView';
 import { RefreshCcw } from 'lucide-react-native';
+import { updateRemoteProfile } from '@/lib/services/authService';
 
 // Web SEO Helper Component
 const WebSEO = ({ title, description }: { title: string; description: string }) => {
@@ -58,7 +59,7 @@ export default function Screen() {
     React.useCallback(() => {
       const loadFirstProfile = async () => {
         try {
-          const jsonValue = await AsyncStorage.getItem('saju_list');
+          const jsonValue = await AsyncStorage.getItem('my_saju_list');
           if (jsonValue != null) {
             const list = JSON.parse(jsonValue);
             if (list.length > 0) {
@@ -85,31 +86,54 @@ export default function Screen() {
       return;
     }
 
-    const newProfile = {
-      id: Date.now().toString(), // 임시 ID (timestamp)
-      name,
-      gender,
-      birth_year: parseInt(year),
-      birth_month: parseInt(month),
-      birth_day: parseInt(day),
-      birth_hour: hour ? parseInt(hour) : null,
-      birth_minute: minute ? parseInt(minute) : null,
-      calendar_type: 'solar',
-      created_at: new Date().toISOString(),
-    };
-
     try {
-      // 로컬 스토리지에 리스트 형태로 저장
-      const existingData = await AsyncStorage.getItem('saju_list');
-      const list = existingData ? JSON.parse(existingData) : [];
-      list.push(newProfile);
-      await AsyncStorage.setItem('saju_list', JSON.stringify(list));
+      // Attempt to save (Update Remote matches 'me' logic: updates supabase + local my_saju_list)
+      const data = {
+        name,
+        gender,
+        birth_year: parseInt(year),
+        birth_month: parseInt(month),
+        birth_day: parseInt(day),
+        birth_hour: hour ? parseInt(hour) : null,
+        birth_minute: minute ? parseInt(minute) : null,
+        calendar_type: 'solar',
+        is_leap: false,
+      };
 
-      console.log('Saved to local list. Total:', list.length + 1);
-      // 저장 후 바로 뷰 갱신을 위해 상태 업데이트
-      setSavedProfile(newProfile);
+      try {
+        await updateRemoteProfile(data as any);
+        // Cast as any if type mismatch on strict literal vs string, but shape matches.
+      } catch (authError) {
+        // Fallback: Save locally to my_saju_list if not logged in
+        console.log('Not logged in, saving locally only');
+        const newProfile = {
+          id: Date.now().toString(),
+          ...data,
+          relationship: 'me',
+          created_at: new Date().toISOString(),
+        };
+        // Enforce singular Me
+        await AsyncStorage.setItem('my_saju_list', JSON.stringify([newProfile]));
+      }
+
+      // Reload/Set State
+      const savedData = {
+        id: Date.now().toString(),
+        name,
+        gender,
+        birth_year: parseInt(year),
+        birth_month: parseInt(month),
+        birth_day: parseInt(day),
+        birth_hour: hour ? parseInt(hour) : null,
+        birth_minute: minute ? parseInt(minute) : null,
+        calendar_type: 'solar',
+        created_at: new Date().toISOString(),
+      };
+      setSavedProfile(savedData);
+
+      console.log('Saved profile successfully');
     } catch (e) {
-      console.error('Failed to save local data:', e);
+      console.error('Failed to save data:', e);
     }
   };
 

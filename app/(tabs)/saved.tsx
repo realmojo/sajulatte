@@ -17,6 +17,7 @@ import { Trash2, Plus, X, Pencil, Star, Moon, Sun, Calendar } from 'lucide-react
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from 'nativewind';
 import { ProfileEditModal, ProfileData } from '@/components/modal/ProfileEditModal';
+import { updateRemoteProfile } from '@/lib/services/authService';
 
 // --- Helpers ---
 
@@ -128,10 +129,13 @@ export default function SavedScreen() {
 
   const loadList = async () => {
     try {
-      const existingData = await AsyncStorage.getItem('saju_list');
-      if (existingData) {
-        setList(JSON.parse(existingData));
-      }
+      const myDataRaw = await AsyncStorage.getItem('my_saju_list');
+      const otherDataRaw = await AsyncStorage.getItem('relationship_saju_list');
+
+      const myList = myDataRaw ? JSON.parse(myDataRaw) : [];
+      const otherList = otherDataRaw ? JSON.parse(otherDataRaw) : [];
+
+      setList([...myList, ...otherList]);
     } catch (e) {
       console.error(e);
     } finally {
@@ -154,9 +158,24 @@ export default function SavedScreen() {
   const confirmDelete = async () => {
     if (!deleteId) return;
     try {
-      const newList = list.filter((item) => item.id !== deleteId);
-      setList(newList);
-      await AsyncStorage.setItem('saju_list', JSON.stringify(newList));
+      // Load current lists
+      const myDataRaw = await AsyncStorage.getItem('my_saju_list');
+      const otherDataRaw = await AsyncStorage.getItem('relationship_saju_list');
+
+      let myList = myDataRaw ? JSON.parse(myDataRaw) : [];
+      let otherList = otherDataRaw ? JSON.parse(otherDataRaw) : [];
+
+      // Filter out from both (simplest way to ensure deletion regardless of where it is)
+      myList = myList.filter((item: any) => item.id !== deleteId);
+      otherList = otherList.filter((item: any) => item.id !== deleteId);
+
+      // Save back
+      await AsyncStorage.setItem('my_saju_list', JSON.stringify(myList));
+      await AsyncStorage.setItem('relationship_saju_list', JSON.stringify(otherList));
+
+      // Update state
+      setList([...myList, ...otherList]);
+
       setIsDeleteModalVisible(false);
       setDeleteId(null);
     } catch (e) {
@@ -192,12 +211,52 @@ export default function SavedScreen() {
   };
 
   const handleSave = async (data: ProfileData) => {
-    if (editingItem) {
-      // Edit existing
-      const updatedList = list.map((item) => {
-        if (item.id === editingItem.id) {
-          return {
-            ...item,
+    try {
+      // 1. Load current lists
+      const myDataRaw = await AsyncStorage.getItem('my_saju_list');
+      const otherDataRaw = await AsyncStorage.getItem('relationship_saju_list');
+      let myList = myDataRaw ? JSON.parse(myDataRaw) : [];
+      let otherList = otherDataRaw ? JSON.parse(otherDataRaw) : [];
+
+      // 2. If editing, remove the item from existing lists first (handles updates and relationship changes)
+      if (editingItem) {
+        myList = myList.filter((item: any) => item.id !== editingItem.id);
+        otherList = otherList.filter((item: any) => item.id !== editingItem.id);
+      }
+
+      // 3. Process Save based on Relationship
+      if (data.relationship === 'me') {
+        // --- CASE: Relationship is 'me' ---
+
+        // Try to update via Auth Service (Supabase + Local 'my_saju_list')
+        try {
+          await updateRemoteProfile({
+            name: data.name,
+            gender: data.gender,
+            birth_year: data.birth_year,
+            birth_month: data.birth_month,
+            birth_day: data.birth_day,
+            birth_hour: data.birth_hour,
+            birth_minute: data.birth_minute,
+            calendar_type: data.calendar_type,
+            is_leap: data.is_leap,
+          });
+
+          // Note: updateRemoteProfile overwrites 'my_saju_list' with the single profile.
+          // This is fine as 'me' should be unique.
+
+          // However, we must ensure 'relationship_saju_list' is also saved
+          // (in case we moved an item FROM 'other' TO 'me', removing it from otherList)
+          await AsyncStorage.setItem('relationship_saju_list', JSON.stringify(otherList));
+        } catch (authError) {
+          console.log(
+            'Remote update failed (likely not logged in), falling back to local only',
+            authError
+          );
+
+          // Fallback: Save to 'my_saju_list' manually
+          const newItem = {
+            id: editingItem ? editingItem.id : Date.now().toString(),
             name: data.name,
             gender: data.gender,
             birth_year: data.birth_year,
@@ -207,44 +266,44 @@ export default function SavedScreen() {
             birth_minute: data.birth_minute,
             calendar_type: data.calendar_type,
             is_leap_month: data.is_leap,
-            relationship: data.relationship,
+            relationship: 'me',
+            created_at: editingItem ? editingItem.created_at : new Date().toISOString(),
           };
+
+          // Enforce singular 'Me' locally if manual save
+          await AsyncStorage.setItem('my_saju_list', JSON.stringify([newItem]));
+          await AsyncStorage.setItem('relationship_saju_list', JSON.stringify(otherList));
         }
-        return item;
-      });
+      } else {
+        // --- CASE: Relationship is NOT 'me' ---
 
-      try {
-        await AsyncStorage.setItem('saju_list', JSON.stringify(updatedList));
-        setList(updatedList);
-        setIsModalVisible(false);
-      } catch (e) {
-        console.error(e);
-      }
-    } else {
-      // Create new
-      const newProfile = {
-        id: Date.now().toString(),
-        name: data.name,
-        gender: data.gender,
-        birth_year: data.birth_year,
-        birth_month: data.birth_month,
-        birth_day: data.birth_day,
-        birth_hour: data.birth_hour,
-        birth_minute: data.birth_minute,
-        calendar_type: data.calendar_type,
-        is_leap_month: data.is_leap,
-        relationship: data.relationship,
-        created_at: new Date().toISOString(),
-      };
+        const newItem = {
+          id: editingItem ? editingItem.id : Date.now().toString(),
+          name: data.name,
+          gender: data.gender,
+          birth_year: data.birth_year,
+          birth_month: data.birth_month,
+          birth_day: data.birth_day,
+          birth_hour: data.birth_hour,
+          birth_minute: data.birth_minute,
+          calendar_type: data.calendar_type,
+          is_leap_month: data.is_leap,
+          relationship: data.relationship,
+          created_at: editingItem ? editingItem.created_at : new Date().toISOString(),
+        };
 
-      try {
-        const newList = [...list, newProfile];
-        await AsyncStorage.setItem('saju_list', JSON.stringify(newList));
-        setList(newList);
-        setIsModalVisible(false);
-      } catch (e) {
-        console.error(e);
+        otherList.push(newItem);
+
+        await AsyncStorage.setItem('relationship_saju_list', JSON.stringify(otherList));
+        // Save myList (in case we moved an item FROM 'me' TO 'other', removing it from myList)
+        await AsyncStorage.setItem('my_saju_list', JSON.stringify(myList));
       }
+
+      // 4. Reload List
+      await loadList();
+      setIsModalVisible(false);
+    } catch (e) {
+      console.error(e);
     }
   };
 
@@ -345,11 +404,6 @@ export default function SavedScreen() {
 
   return (
     <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
-      {/* Static Header */}
-      <View className="border-b border-border/50 px-6 py-4">
-        <Text className="text-2xl font-bold text-foreground">저장된 명식</Text>
-      </View>
-
       <View className="flex-1 px-4 pt-4">
         {isLoading ? (
           <View className="flex-1 items-center justify-center">

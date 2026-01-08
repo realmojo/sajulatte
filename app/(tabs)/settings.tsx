@@ -92,7 +92,7 @@ export default function SettingsScreen() {
     // Helper to load local profile
     const loadProfile = async () => {
       try {
-        const jsonValue = await AsyncStorage.getItem('saju_list');
+        const jsonValue = await AsyncStorage.getItem('my_saju_list');
         if (jsonValue) {
           const list = JSON.parse(jsonValue);
           if (list.length > 0) setUserProfile(list[0]);

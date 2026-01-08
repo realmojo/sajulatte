@@ -31,7 +31,7 @@ export const uploadMainProfileToSupabase = async () => {
     const user = session.user;
 
     // Load local list
-    const jsonValue = await supaStorage.getItem('saju_list');
+    const jsonValue = await supaStorage.getItem('my_saju_list');
     if (!jsonValue) return;
 
     const list = JSON.parse(jsonValue);
@@ -107,10 +107,11 @@ export const fetchMainProfileFromSupabase = async () => {
         birth_minute: data.birth_minute,
         calendar_type: data.calendar_type,
         createdAt: new Date().toISOString(),
+        relationship: 'me', // Explicitly set relationship
       };
 
       // Save to AsyncStorage (overwrite/prepend)
-      await supaStorage.setItem('saju_list', JSON.stringify([profile]));
+      await supaStorage.setItem('my_saju_list', JSON.stringify([profile]));
       console.log('Fetched and saved remote profile to local storage');
       return profile;
     }
@@ -130,7 +131,7 @@ export const syncUserProfile = async () => {
   }
 
   // If no remote profile, assume we might have a local one to upload
-  const jsonValue = await supaStorage.getItem('saju_list');
+  const jsonValue = await supaStorage.getItem('my_saju_list');
   let hasLocal = false;
 
   if (jsonValue) {
@@ -229,7 +230,7 @@ export const updateRemoteProfile = async (profileData: {
       calendar_type: dbCalendarType, // Store standard string 'lunar-leap' locally too
       createdAt: new Date().toISOString(),
     };
-    await supaStorage.setItem('saju_list', JSON.stringify([newProfile]));
+    await supaStorage.setItem('my_saju_list', JSON.stringify([newProfile]));
 
     return newProfile;
   } catch (e) {

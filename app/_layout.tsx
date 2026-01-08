@@ -8,6 +8,8 @@ import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from 'nativewind';
 import * as React from 'react';
 import { View, Platform } from 'react-native';
+import { usePathname } from 'expo-router';
+import { Analytics } from '@/lib/analytics';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -25,6 +27,21 @@ export default function RootLayout() {
   React.useEffect(() => {
     setColorScheme('light');
   }, [setColorScheme]);
+
+  // Analytics Integration
+  const pathname = usePathname();
+
+  React.useEffect(() => {
+    // Initialize Analytics
+    Analytics.init();
+  }, []);
+
+  React.useEffect(() => {
+    // Track Screen Views
+    if (pathname) {
+      Analytics.logScreenView(pathname);
+    }
+  }, [pathname]);
 
   return (
     <ThemeProvider value={NAV_THEME['light']}>
