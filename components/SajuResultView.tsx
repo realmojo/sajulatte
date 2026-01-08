@@ -1127,7 +1127,7 @@ export const SajuResultView = ({
         </View>
 
         {/* Wolwun List */}
-        <View className="gap-2">
+        <View className="mb-4 gap-2">
           <View className="flex-row items-center justify-between">
             <View className="flex-row items-center gap-2">
               <Text className="text-lg font-semibold text-foreground">월운 (12개월)</Text>
