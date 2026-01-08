@@ -56,7 +56,7 @@ export const Analytics = {
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
-          gtag('config', '${MEASUREMENT_ID}', { 'send_page_view': false }); 
+          gtag('config', '${MEASUREMENT_ID}'); 
         `;
         document.head.appendChild(inlineScript);
       }
