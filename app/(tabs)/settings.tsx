@@ -54,7 +54,7 @@ import {
   syncUserProfile,
   updateRemoteProfile,
 } from '@/lib/services/authService';
-import { getTodayLuck, interpretSaju, getTimeZodiac, isSummerTime } from '@/lib/utils/latte';
+import { isSummerTime } from '@/lib/utils/latte';
 import { userService } from '@/lib/services/userService';
 import { ProfileEditModal, ProfileData } from '@/components/modal/ProfileEditModal';
 
@@ -559,9 +559,7 @@ export default function SettingsScreen() {
               <View className="mx-4 h-[1px] bg-gray-100" />
               <TouchableOpacity
                 className="flex-row items-center justify-between bg-white p-4 active:bg-gray-50"
-                onPress={() =>
-                  Alert.alert('준비 중', '내 행운을 높여줄 디지털 부적 기능이 준비 중입니다.')
-                }>
+                onPress={() => router.push('/amulet')}>
                 <View className="flex-row items-center gap-3">
                   <View className="h-10 w-10 items-center justify-center rounded-full bg-amber-50">
                     <Sparkles size={20} color="#d97706" />
@@ -573,12 +571,7 @@ export default function SettingsScreen() {
               <View className="mx-4 h-[1px] bg-gray-100" />
               <TouchableOpacity
                 className="flex-row items-center justify-between bg-white p-4 active:bg-gray-50"
-                onPress={() =>
-                  Alert.alert(
-                    '준비 중',
-                    '나의 운세 흐름을 한눈에 보는 만세력 달력이 곧 오픈됩니다.'
-                  )
-                }>
+                onPress={() => router.push('/pillarscalendar')}>
                 <View className="flex-row items-center gap-3">
                   <View className="h-10 w-10 items-center justify-center rounded-full bg-emerald-50">
                     <CalendarDays size={20} color="#10b981" />

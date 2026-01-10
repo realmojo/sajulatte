@@ -9,7 +9,9 @@ import {
   UIManager,
 } from 'react-native';
 import { useRouter, Stack } from 'expo-router';
-import { ChevronLeft, ChevronDown, ChevronUp, Search, BookOpen } from 'lucide-react-native';
+import { ChevronLeft, ChevronDown, ChevronUp, BookOpen } from 'lucide-react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { WebSEO } from '@/components/ui/WebSEO';
 
 // Enable LayoutAnimation on Android
 if (Platform.OS === 'android') {
@@ -316,6 +318,7 @@ const ENCYCLOPEDIA_DATA: Category[] = [
 ];
 
 export default function EncyclopediaScreen() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
@@ -333,11 +336,15 @@ export default function EncyclopediaScreen() {
   };
 
   return (
-    <View className="flex-1 bg-gray-50">
+    <View className="flex-1 bg-gray-50" style={{ paddingTop: insets.top }}>
+      <WebSEO
+        title="디지털 부적 - 사주라떼"
+        description="나만의 디지털 부적으로 행운을 높여보세요."
+      />
       <Stack.Screen options={{ headerShown: false }} />
 
       {/* Header */}
-      <View className="z-10 flex-row items-center justify-between bg-white px-4 pb-4 pt-14 shadow-sm">
+      <View className="flex-row items-center justify-between border-b border-gray-100 bg-white px-4 py-3">
         <TouchableOpacity onPress={() => router.back()} className="-ml-2 w-10 p-2">
           <ChevronLeft size={24} color="#000" />
         </TouchableOpacity>
