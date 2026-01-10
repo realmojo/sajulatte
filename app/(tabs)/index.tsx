@@ -233,6 +233,8 @@ export default function Screen() {
           hour={savedProfile.birth_hour || 0}
           minute={savedProfile.birth_minute || 0}
           gender={savedProfile.gender}
+          calendarType={savedProfile.calendar_type}
+          isLeapMonth={savedProfile.is_leap || savedProfile.is_leap_month}
         />
       </>
     );

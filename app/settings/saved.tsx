@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
-import { Trash2, Plus, X, Pencil, Star, Moon, Sun, Calendar } from 'lucide-react-native';
+import { Trash2, Plus, ChevronLeft, Pencil, Star } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from 'nativewind';
 import { ProfileEditModal, ProfileData } from '@/components/modal/ProfileEditModal';
@@ -186,7 +186,7 @@ export default function SavedScreen() {
 
   const handlePress = (item: any) => {
     router.push({
-      pathname: '/result',
+      pathname: '/saju',
       params: {
         name: item.name,
         year: item.birth_year,
@@ -195,8 +195,8 @@ export default function SavedScreen() {
         hour: item.birth_hour,
         minute: item.birth_minute,
         gender: item.gender,
-        calendarType: item.calendar_type,
-        isLeapMonth: item.is_leap_month,
+        calendarType: item.calendar_type || item.calendarType,
+        isLeapMonth: item.is_leap_month || item.is_leap,
       },
     });
   };
@@ -377,9 +377,22 @@ export default function SavedScreen() {
 
   return (
     <>
-      <WebSEO title={`저장된 목록 - 사주라떼`} />
-      <Stack.Screen options={{ headerShown: false, title: '궁합 분석 결과' }} />
-      <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
+      <View className="flex-1 bg-white" style={{ paddingTop: insets.top }}>
+        <WebSEO
+          title="저장된 사주 - 사주라떼"
+          description="저장된 사주 명식 목록을 확인하고 관리하세요."
+        />
+        <Stack.Screen options={{ headerShown: false }} />
+
+        {/* Header */}
+        <View className="flex-row items-center justify-between border-b border-gray-100 bg-white px-4 py-3">
+          <TouchableOpacity onPress={() => router.back()} className="-ml-2 w-10 p-2">
+            <ChevronLeft size={24} color="#000" />
+          </TouchableOpacity>
+          <Text className="text-lg font-bold text-gray-900">저장된 사주</Text>
+          <View className="w-10" />
+        </View>
+
         <View className="flex-1 px-4 pt-4">
           {isLoading ? (
             <View className="flex-1 items-center justify-center">

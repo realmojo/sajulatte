@@ -1,4 +1,4 @@
-const { Solar, Lunar, LunarUtil } = require('lunar-javascript');
+const { Solar, Lunar, LunarUtil, SolarUtil } = require('lunar-javascript');
 
 // 천간과 지지 데이터 정의
 const STEMS = ['갑', '을', '병', '정', '무', '기', '경', '신', '임', '계'];
@@ -985,30 +985,66 @@ const getExtendedDetails = (lunar: any, eightChar: any) => {
   return { nayin, xiu, pengzu, positions, chong, sha };
 };
 
-export const getMyEightSaju = (
-  year: number,
-  month: number,
-  day: number,
-  hour: number,
-  minute: number,
-  gender: string,
-  calendarType: 'solar' | 'lunar' = 'solar',
-  isLeapMonth: boolean = false
-) => {
+export const getMyEightSaju = async (params?: {
+  year: number;
+  month: number;
+  day: number;
+  hour?: number;
+  minute?: number;
+  gender?: string;
+  calendarType?: string;
+  isLeapMonth?: boolean;
+}) => {
+  let year, month, day, hour, minute, gender, calendarType, isLeapMonth;
+
+  console.log('params', params);
+
+  if (params) {
+    year = params.year;
+    month = params.month;
+    day = params.day;
+    hour = params.hour || 0;
+    minute = params.minute || 0;
+    gender = params.gender || 'male';
+    calendarType = params.calendarType || 'solar';
+    isLeapMonth = params.isLeapMonth || false;
+  } else {
+    const { fetchMainProfileFromSupabase } = require('@/lib/services/authService');
+    const profile = await fetchMainProfileFromSupabase();
+
+    if (!profile) return null;
+
+    year = parseInt(profile.birth_year);
+    month = parseInt(profile.birth_month);
+    day = parseInt(profile.birth_day);
+    hour =
+      profile.birth_hour != null
+        ? Number(profile.birth_hour)
+        : profile.birthTime
+          ? parseInt(profile.birthTime.split(':')[0])
+          : 0;
+    minute =
+      profile.birth_minute != null
+        ? Number(profile.birth_minute)
+        : profile.birthTime
+          ? parseInt(profile.birthTime.split(':')[1])
+          : 0;
+    gender = profile.gender;
+    calendarType = profile.calendar_type || profile.calendarType || 'solar';
+    isLeapMonth = profile.is_leap || profile.isLeapMonth || false;
+  }
+
   let solar;
+  console.log('calendarType', calendarType);
   if (calendarType === 'lunar') {
     // 음력 -> 양력 변환
-    // Lunar.fromYmdHms(year, month, day, hour, minute, second)
-    // 윤달 처리를 위해 Lunar 객체 생성 시 윤달 여부를 고려해야 함.
-    // lunar-javascript 라이브러리의 Lunar.fromYmd(year, month, day)는 윤달 여부를 파라미터로 받지 않으므로,
-    // 정확한 윤달 처리를 위해선 라이브러리 문서를 확인해야 함.
-    // 하지만 일반적인 사용을 위해 Lunar.fromYmdHms로 생성 후 Solar로 변환.
-    // 만약 라이브러리가 윤달 입력 방식을 다르게 지원한다면 그에 맞춰야 함.
-    // 여기서는 가장 근사한 방식으로 처리.
-    const lunar = Lunar.fromYmdHms(year, month, day, hour, minute, 0);
+    // lunar-javascript 라이브러리에서는 윤달을 음수 월로 표현합니다. (예: -6월 = 윤6월)
+    const lunarMonth = isLeapMonth ? -month : month;
+    const lunar = Lunar.fromYmdHms(year, lunarMonth, day, hour, minute, 0);
     solar = lunar.getSolar();
   } else {
     // 양력
+    console.log(year, month, day, hour, minute);
     solar = Solar.fromYmdHms(year, month, day, hour, minute, 0);
   }
   const lunar = solar.getLunar();
@@ -1068,7 +1104,11 @@ export const getMyEightSaju = (
     hour: getPillarDetail(ilganHanja, siPillar.hanja, sajuJiHjs, true),
     meta: {
       ilgan: ilganHanja,
-      lunar: `${lunar.getYear()}년 ${lunar.getMonth()}월 ${lunar.getDay()}일`,
+      lunar: `${lunar.getYear()}년 ${lunar.getMonth().toString().padStart(2, '0')}월 ${lunar.getDay().toString().padStart(2, '0')}일${
+        lunar.toString().includes('闰') ? ' (윤)' : ''
+      }`,
+      solar: `${solar.getYear()}년 ${solar.getMonth().toString().padStart(2, '0')}월 ${solar.getDay().toString().padStart(2, '0')}일`,
+      solarTime: `${solar.getHour().toString().padStart(2, '0')}:${solar.getMinute().toString().padStart(2, '0')}`,
       sajuJiHjs: sajuJiHjs,
     },
     strength, // 신강/신약 정보 추가
@@ -1091,3 +1131,65 @@ export const getMyEightSaju = (
 // --- 사용 예시 ---
 // const result = calculateSidu('갑', 8, 30); // 갑일 진시(08:30)
 // console.log(`시주: ${result.combined}`); // 결과: 무진
+
+/**
+ * 특정 연월의 만세력(일진) 달력 데이터를 반환하는 함수
+ */
+
+/**
+ * 특정 연월의 만세력(일진) 달력 데이터를 반환하는 함수
+ * @param myIlganHj 내 사주의 일간 (예: '庚'). 매칭되면 하이라이트/표시 등을 위함
+ */
+export const getMonthlyIljin = (year: number, month: number, myIlganHj?: string) => {
+  const list = [];
+
+  // 1. 해당 월의 1일
+  const startSolar = Solar.fromYmd(year, month, 1);
+  const weekDay = startSolar.getWeek(); // 0(일) ~ 6(토)
+
+  const lastDay = SolarUtil.getDaysOfMonth(year, month);
+
+  for (let i = 1; i <= lastDay; i++) {
+    const solar = Solar.fromYmd(year, month, i);
+    const lunar = solar.getLunar();
+
+    const dayGanZhi = solar.getLunar().getDayInGanZhi(); // e.g. "甲子"
+    const ganHj = dayGanZhi[0];
+    const jiHj = dayGanZhi[1];
+
+    // 내 일간과 같은지 확인
+    const isMyIlgan = myIlganHj && ganHj === myIlganHj;
+    // 내 일주와 같은지 (60갑자 중 하나) - optional functionality, usually 'Day Gan' is the main factor.
+    // Question asked for '경, 경오일주'. Meaning if my Ilgan is 'Gyeong', show it.
+    // If my full pillar matches, maybe special highlight?
+    // Just handling Ilgan check primarily.
+
+    list.push({
+      day: i,
+      weekDay: solar.getWeek(),
+      solarText: solar.toYmd(),
+      lunarText: `${lunar.getMonth().toString().padStart(2, '0')}.${lunar.getDay().toString().padStart(2, '0')}`,
+      isLunarLeap: lunar.toString().includes('闰'), // 윤달 여부 (문자열 포함 여부로 체크)
+      gan: {
+        hanja: ganHj,
+        korean: convertCharToKorean(ganHj),
+        color: getElementInfo(ganHj).color,
+      },
+      ji: {
+        hanja: jiHj,
+        korean: convertCharToKorean(jiHj),
+        color: getElementInfo(jiHj).color,
+        animal: getZodiacInfo(jiHj)?.animalKr || '',
+      },
+      isMyIlgan, // 내 일간(Day Master)과 같은 날인지
+      ganZhi: dayGanZhi, // 전체 간지 (e.g. 庚午)
+    });
+  }
+
+  return {
+    year,
+    month,
+    startWeekDay: weekDay,
+    days: list,
+  };
+};

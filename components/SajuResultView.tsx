@@ -24,6 +24,7 @@ import {
   TouchableWithoutFeedback,
   View,
   Image,
+  ActivityIndicator,
 } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { getMonthList, getMyEightSaju, getYearList } from '@/lib/utils/latte';
@@ -36,6 +37,8 @@ interface SajuResultProps {
   hour?: number; // 0-23
   minute?: number;
   gender: 'male' | 'female';
+  calendarType?: string;
+  isLeapMonth?: boolean;
 }
 
 export const SajuResultView = ({
@@ -46,18 +49,35 @@ export const SajuResultView = ({
   hour = 0,
   minute = 0,
   gender,
+  calendarType = 'solar',
+  isLeapMonth = false,
 }: SajuResultProps) => {
   const { colorScheme } = useColorScheme();
   const insets = useSafeAreaInsets();
   // Calculate Saju
-  const saju = React.useMemo(() => {
-    try {
-      return getMyEightSaju(year, month, day, hour, minute, gender);
-    } catch (e) {
-      console.error(e);
-      return null;
+  const [saju, setSaju] = React.useState<any>(null);
+
+  React.useEffect(() => {
+    async function loadSaju() {
+      try {
+        const data = await getMyEightSaju({
+          year,
+          month,
+          day,
+          hour,
+          minute,
+          gender,
+          calendarType,
+          isLeapMonth,
+        });
+        setSaju(data);
+      } catch (e) {
+        console.error(e);
+        setSaju(null);
+      }
     }
-  }, [year, month, day, hour, minute, gender]);
+    loadSaju();
+  }, [year, month, day, hour, minute, gender, calendarType, isLeapMonth]);
 
   const iconColor = colorScheme === 'dark' ? '#fff' : '#000';
   const [sewunData, setSewunData] = React.useState<any[]>([]);
@@ -127,8 +147,11 @@ export const SajuResultView = ({
 
   if (!saju) {
     return (
-      <View className="flex-1 items-center justify-center p-6">
-        <Text className="text-lg">사주 정보를 계산할 수 없습니다.</Text>
+      <View className="flex-1 items-center justify-center bg-background p-6">
+        <ActivityIndicator size="large" color="#d97706" />
+        <Text className="mt-4 text-base font-medium text-gray-500">
+          사주 정보를 분석하고 있습니다...
+        </Text>
       </View>
     );
   }
@@ -169,9 +192,8 @@ export const SajuResultView = ({
                         <Text className="text-[10px] font-bold text-rose-600">양력</Text>
                       </View>
                       <Text className="text-sm font-medium text-gray-700">
-                        {year}.{month.toString().padStart(2, '0')}.{day.toString().padStart(2, '0')}{' '}
-                        <Text className="text-gray-400">|</Text> {hour.toString().padStart(2, '0')}:
-                        {minute.toString().padStart(2, '0')}
+                        {saju.meta.solar} <Text className="text-gray-400">|</Text>{' '}
+                        {saju.meta.solarTime}
                       </Text>
                     </View>
 

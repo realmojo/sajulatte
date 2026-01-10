@@ -54,16 +54,26 @@ export default function FortuneDetailScreen() {
       }
 
       // 2. Calculate Saju Analysis
-      const result = getMyEightSaju(
-        profile.birth_year,
-        profile.birth_month,
-        profile.birth_day,
-        profile.birth_hour,
-        profile.birth_minute,
-        profile.gender,
-        profile.calendar_type?.startsWith('lunar') ? 'lunar' : 'solar',
-        profile.calendar_type === 'lunar-leap'
-      );
+      const result = await getMyEightSaju({
+        year: profile.birth_year,
+        month: profile.birth_month,
+        day: profile.birth_day,
+        hour: profile.birth_hour,
+        minute: profile.birth_minute,
+        gender: profile.gender,
+        calendarType: profile.calendar_type?.startsWith('lunar') ? 'lunar' : 'solar',
+        isLeapMonth:
+          profile.calendar_type === 'lunar-leap' ||
+          profile.is_leap ||
+          profile.is_leap_month ||
+          false,
+      });
+
+      if (!result) {
+        setErrorMsg('사주 정보를 분석할 수 없습니다.');
+        setLoading(false);
+        return;
+      }
 
       // 3. Prepare Params
       const ilgan = result.day.gan.hanja;
