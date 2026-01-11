@@ -631,7 +631,7 @@ export default function SettingsScreen() {
               <View className="mx-4 h-[1px] bg-gray-100" />
               <TouchableOpacity
                 className="flex-row items-center justify-between bg-white p-4 active:bg-gray-50"
-                onPress={() => Linking.openURL('mailto:support@sajulatte.com')}>
+                onPress={() => Linking.openURL('mailto:support@sajulatte.app')}>
                 <View className="flex-row items-center gap-3">
                   <View className="h-10 w-10 items-center justify-center rounded-full bg-pink-50">
                     <MessageSquare size={20} color="#db2777" />

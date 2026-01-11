@@ -92,7 +92,7 @@ export default function PrivacyScreen() {
             <Text className="leading-6 text-gray-600">
               회사는 고객의 개인정보를 보호하고 개인정보와 관련한 불만을 처리하기 위하여 아래와 같이
               관련 부서 및 개인정보보호책임자를 지정하고 있습니다.{'\n'}- 이메일 :
-              help@sajulatte.com
+              help@sajulatte.app
             </Text>
           </View>
         </View>

@@ -133,12 +133,12 @@ export default function PreferencesScreen() {
           <MenuItem
             icon={FileText}
             label="서비스 이용약관"
-            onPress={() => Linking.openURL('https://sajulatte.com/terms')}
+            onPress={() => Linking.openURL('https://sajulatte.app/terms')}
           />
           <MenuItem
             icon={FileText}
             label="개인정보 처리방침"
-            onPress={() => Linking.openURL('https://sajulatte.com/privacy')}
+            onPress={() => Linking.openURL('https://sajulatte.app/privacy')}
           />
         </MenuSection>
 
@@ -147,7 +147,7 @@ export default function PreferencesScreen() {
           <MenuItem
             icon={HelpCircle}
             label="1:1 문의하기"
-            onPress={() => Linking.openURL('mailto:support@sajulatte.com')}
+            onPress={() => Linking.openURL('mailto:support@sajulatte.app')}
           />
         </MenuSection>
 
