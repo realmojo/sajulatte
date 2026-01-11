@@ -60,6 +60,27 @@ export const getCurrentYearJi = () => {
   const solar = Solar.fromDate(new Date());
   const lunar = solar.getLunar();
   return lunar.getEightChar().getYear()[1]; // 지지 한자 반환
+  return lunar.getEightChar().getYear()[1]; // 지지 한자 반환
+};
+
+/**
+ * 공망 계산 함수
+ * (일주 기준이 가장 중요하지만, 년주 기준도 산출 가능)
+ */
+export const getGongmang = (gan: string, ji: string) => {
+  const ganIdx = STEMS_EN.indexOf(gan);
+  const jiIdx = BRANCHES_EN.indexOf(ji);
+
+  if (ganIdx === -1 || jiIdx === -1) return [];
+
+  // 순중(旬中) 공망 계산 로직
+  // (지 - 간)의 결과에 따라 공망 지지 인덱스 산출
+  // 공식: (10 + 지 - 간) % 12, (11 + 지 - 간) % 12
+  const diff = jiIdx - ganIdx;
+  const void1 = (10 + diff + 12) % 12;
+  const void2 = (11 + diff + 12) % 12; // void1 + 1 basically
+
+  return [BRANCHES[void1], BRANCHES[void2]]; // 한글 반환 (자, 축...)
 };
 
 const JI_INFO = {
@@ -400,7 +421,7 @@ const calculateDaewunSu = (solar: any, gender: string) => {
 /**
  * 천간과 지지를 받아 12운성을 반환하는 함수
  */
-const get12Wunsung = (ganHj: string, jiHj: string) => {
+export const get12Wunsung = (ganHj: string, jiHj: string) => {
   // 각 천간의 장생지 인덱스 (BRANCHES_EN 기준)
   const jangsaengMap = {
     甲: { start: '亥', direction: 1 },
@@ -431,6 +452,15 @@ const get12Wunsung = (ganHj: string, jiHj: string) => {
   }
 
   return WUNSUNG_ORDER[diff];
+};
+
+/**
+ * 12운성을 12신살로 변환하는 함수
+ */
+export const getShinsalFromWunsung = (wunsung: string) => {
+  const index = WUNSUNG_ORDER.indexOf(wunsung);
+  if (index === -1) return '';
+  return SHIN_SAL_LIST[index];
 };
 
 /**
@@ -512,31 +542,307 @@ const BIIN_MAP = {
 // 현침살 글자 (천간/지지)
 const HYEONCHIM_CHARS = ['甲', '申', '卯', '午', '辛'];
 
+// 복성귀인 맵 (일간 -> 지지)
+const BOKSEONG_MAP = {
+  甲: '寅',
+  乙: '丑',
+  丙: '子',
+  丁: '酉',
+  戊: '申',
+  己: '未',
+  庚: '午',
+  辛: '巳',
+  壬: '辰',
+  癸: '卯',
+};
+
+// 천복귀인 맵 (일간 -> 지지)
+const CHEONBOK_MAP = {
+  甲: '酉',
+  乙: '申',
+  丙: '子',
+  丁: '亥',
+  戊: '卯',
+  己: '寅',
+  庚: '午',
+  辛: '巳',
+  壬: '午',
+  癸: '巳',
+};
+
+// 협록 맵 (일간 -> 지지 리스트) - 건록의 양 옆 글자
+const HYEOPROK_MAP = {
+  甲: ['丑', '卯'],
+  乙: ['寅', '辰'],
+  丙: ['辰', '午'],
+  丁: ['巳', '未'],
+  戊: ['辰', '午'],
+  己: ['巳', '未'],
+  庚: ['未', '酉'],
+  辛: ['申', '戌'],
+  壬: ['戌', '子'],
+  癸: ['亥', '丑'],
+};
+
+// 태극귀인: 갑자, 갑오, ...
+const TAEGEUK_MAP = {
+  甲: ['子', '午'],
+  乙: ['子', '午'],
+  丙: ['卯', '酉'],
+  丁: ['卯', '酉'],
+  戊: ['辰', '戌', '丑', '未'],
+  己: ['辰', '戌', '丑', '未'],
+  庚: ['寅', '亥'],
+  辛: ['寅', '亥'],
+  壬: ['巳', '申'],
+  癸: ['巳', '申'],
+};
+
+// 문창귀인 (식신의 건록/임관)
+const MUNCHANG_MAP = {
+  甲: '巳',
+  乙: '午',
+  丙: '申',
+  丁: '酉',
+  戊: '申',
+  己: '酉',
+  庚: '亥',
+  辛: '子',
+  壬: '寅',
+  癸: '卯',
+};
+
+// 학당귀인 (장생)
+const HAKDANG_MAP = {
+  甲: '亥',
+  乙: '午',
+  丙: '寅',
+  丁: '酉',
+  戊: '寅',
+  己: '酉',
+  庚: '巳',
+  辛: '子',
+  壬: '申',
+  癸: '卯',
+};
+
+// 건록 (비견의 임관)
+const GEONROK_MAP = {
+  甲: '寅',
+  乙: '卯',
+  丙: '巳',
+  丁: '午',
+  戊: '巳',
+  己: '午',
+  庚: '申',
+  辛: '酉',
+  壬: '亥',
+  癸: '子',
+};
+
+// 양인살 (양간의 제왕)
+const YANGIN_MAP = {
+  甲: '卯',
+  丙: '午',
+  戊: '午',
+  庚: '酉',
+  壬: '子',
+  乙: '',
+  丁: '',
+  己: '',
+  辛: '',
+  癸: '', // 음간 양인 취급 여부는 파벌 갈림, 여기선 생략
+};
+
+// 금여 (골든 캐리지)
+const GEUMYEO_MAP = {
+  甲: '辰',
+  乙: '巳',
+  丙: '未',
+  丁: '申',
+  戊: '未',
+  己: '申',
+  庚: '戌',
+  辛: '亥',
+  壬: '丑',
+  癸: '寅',
+};
+
+// 홍염살 (매력)
+const HONGYEOM_MAP = {
+  甲: '午',
+  乙: '午',
+  丙: '寅',
+  丁: '未',
+  戊: '辰',
+  己: '辰',
+  庚: '戌',
+  辛: '酉',
+  壬: '子',
+  癸: '申',
+};
+
+// 암록 (건록과 합하는 지지)
+const AMROK_MAP = {
+  甲: '亥',
+  乙: '戌',
+  丙: '申',
+  丁: '未',
+  戊: '申',
+  己: '未',
+  庚: '巳',
+  辛: '辰',
+  壬: '寅',
+  癸: '丑',
+};
+
+// 고란살 (일주 기준이나 여기선 기둥 자체 매칭) -> 일주에만 뜨게 하려면 호출부에서 제어해야 하나,
+// 보통 신살 리스트는 해당 기둥이 그 살에 해당하는지를 봄.
+const GORAN_LIST = ['甲寅', '乙巳', '丁巳', '戊申', '辛亥'];
+
 /**
  * 특수 신살 계산 함수
  */
-export const getSpecialShinSals = (gan: string, ji: string, dayGan: string): string[] => {
-  const list: string[] = [];
+// 월덕귀인 (월지 삼합 -> 천간)
+const WOLDEOK_MAP = {
+  亥: '甲',
+  卯: '甲',
+  未: '甲',
+  寅: '丙',
+  午: '丙',
+  戌: '丙',
+  巳: '庚',
+  酉: '庚',
+  丑: '庚',
+  申: '壬',
+  子: '壬',
+  辰: '壬',
+};
+
+// 천덕귀인 (월지 -> 천간/지지)
+const CHEONDEOK_MAP = {
+  寅: '丁',
+  卯: '申',
+  辰: '壬',
+  巳: '辛',
+  午: '亥',
+  未: '甲',
+  申: '癸',
+  酉: '寅',
+  戌: '丙',
+  亥: '乙',
+  子: '巳',
+  丑: '庚',
+};
+
+// 문곡귀인 (일간 -> 지지)
+const MUNGOK_MAP = {
+  甲: '亥',
+  乙: '子',
+  丙: '寅',
+  丁: '卯',
+  戊: '寅',
+  己: '卯',
+  庚: '巳',
+  辛: '午',
+  壬: '申',
+  癸: '酉',
+};
+
+/**
+ * 특수 신살 계산 함수
+ * @param monthJi - 월지 (천덕/월덕 계산용)
+ */
+export const getSpecialShinSals = (
+  gan: string,
+  ji: string,
+  dayGan: string,
+  monthJi?: string
+): string[] => {
+  const nobleList: string[] = [];
+  const salList: string[] = [];
   const pillar = gan + ji;
 
-  // 1. 백호살 (간지 기준)
-  if (BAEKHO_LIST.includes(pillar)) list.push('백호살');
+  // --- Group 1: Noble/Primary (Top Row) ---
 
-  // 2. 괴강살 (간지 기준)
-  if (GOEGANG_LIST.includes(pillar)) list.push('괴강살');
-
-  // 3. 천을귀인 (일간 기준)
+  // 1. 천을귀인
   const cheoneuls = CHEONEUL_MAP[dayGan as keyof typeof CHEONEUL_MAP] || [];
-  if (cheoneuls.includes(ji)) list.push('천을귀인');
+  if (cheoneuls.includes(ji)) nobleList.push('천을귀인');
 
-  // 4. 현침살 (글자 기준) - 보통 주중에 해당 글자가 있으면 성립.
-  // 기둥별 표시를 위해 해당 기둥에 글자가 있으면 표시.
-  if (HYEONCHIM_CHARS.includes(gan) || HYEONCHIM_CHARS.includes(ji)) list.push('현침살');
+  // 2. 천복귀인
+  if (CHEONBOK_MAP[dayGan as keyof typeof CHEONBOK_MAP] === ji) nobleList.push('천복귀인');
 
-  // 5. 비인살 (일간 기준)
-  if (BIIN_MAP[dayGan as keyof typeof BIIN_MAP] === ji) list.push('비인살');
+  // 3. 태극귀인
+  const taegeuks = TAEGEUK_MAP[dayGan as keyof typeof TAEGEUK_MAP] || [];
+  if (taegeuks.includes(ji)) nobleList.push('태극귀인');
 
-  return list;
+  // 4. 문창귀인
+  if (MUNCHANG_MAP[dayGan as keyof typeof MUNCHANG_MAP] === ji) nobleList.push('문창귀인');
+
+  // 5. 학당귀인
+  if (HAKDANG_MAP[dayGan as keyof typeof HAKDANG_MAP] === ji) nobleList.push('학당귀인');
+
+  // 6. 관귀학관 (생략) / 문곡귀인
+  if (MUNGOK_MAP[dayGan as keyof typeof MUNGOK_MAP] === ji) nobleList.push('문곡귀인');
+
+  // 7. 협록
+  const hyeoproks = HYEOPROK_MAP[dayGan as keyof typeof HYEOPROK_MAP] || [];
+  if (hyeoproks.includes(ji)) nobleList.push('협록');
+
+  // 8. 건록
+  if (GEONROK_MAP[dayGan as keyof typeof GEONROK_MAP] === ji) nobleList.push('건록');
+
+  // 9. 금여
+  if (GEUMYEO_MAP[dayGan as keyof typeof GEUMYEO_MAP] === ji) nobleList.push('금여');
+
+  // 10. 암록
+  if (AMROK_MAP[dayGan as keyof typeof AMROK_MAP] === ji) nobleList.push('암록');
+
+  // 11. 비인살 (User image shows it top usually, but code had it top)
+  if (BIIN_MAP[dayGan as keyof typeof BIIN_MAP] === ji) nobleList.push('비인살');
+
+  // 12. 복성귀인
+  if (BOKSEONG_MAP[dayGan as keyof typeof BOKSEONG_MAP] === ji) nobleList.push('복성귀인');
+
+  // --- Group 2: Sal/Secondary (Bottom Row) ---
+
+  // 天/月德 (Moved to Secondary/Bottom to show '-' above them if top is empty)
+  if (monthJi) {
+    // 월덕
+    const woldeokGan = WOLDEOK_MAP[monthJi as keyof typeof WOLDEOK_MAP];
+    if (woldeokGan === gan) salList.push('월덕귀인');
+
+    // 천덕
+    const cheondeokChar = CHEONDEOK_MAP[monthJi as keyof typeof CHEONDEOK_MAP];
+    // Check if Cheondeok matches Gan OR Ji (it can be either depending on month)
+    if (cheondeokChar === gan || cheondeokChar === ji) salList.push('천덕귀인');
+  }
+
+  // 1. 백호살
+  if (BAEKHO_LIST.includes(pillar)) salList.push('백호살');
+
+  // 2. 괴강살
+  if (GOEGANG_LIST.includes(pillar)) salList.push('괴강살');
+
+  // 3. 양인살
+  if (YANGIN_MAP[dayGan as keyof typeof YANGIN_MAP] === ji) salList.push('양인살');
+
+  // 4. 홍염살
+  if (HONGYEOM_MAP[dayGan as keyof typeof HONGYEOM_MAP] === ji) salList.push('홍염살');
+
+  // 5. 고란살
+  if (GORAN_LIST.includes(pillar)) salList.push('고란살');
+
+  // 6. 현침살
+  if (HYEONCHIM_CHARS.includes(gan) || HYEONCHIM_CHARS.includes(ji)) salList.push('현침살');
+
+  // --- Final Assembly ---
+  // If Top group is empty but Bottom group exists, insert placeholder to push Bottom group down visually
+  if (nobleList.length === 0 && salList.length > 0) {
+    nobleList.push('-');
+  }
+
+  return [...nobleList, ...salList];
 };
 
 /**

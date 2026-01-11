@@ -37,6 +37,7 @@ import {
   View,
   Image,
   ActivityIndicator,
+  Button,
 } from 'react-native';
 import { Text } from '@/components/ui/text';
 import {
@@ -46,7 +47,11 @@ import {
   calc12ShinSal,
   getSpecialShinSals,
   getCurrentYearJi,
+  getGongmang,
+  get12Wunsung,
+  getShinsalFromWunsung,
 } from '@/lib/utils/latte';
+import { ENCYCLOPEDIA_DATA } from '@/lib/utils/encyclopedia';
 
 interface SajuResultProps {
   name: string;
@@ -164,6 +169,50 @@ export const SajuResultView = ({
       },
     };
     setInfoModal(info[type]);
+  };
+
+  const handleShinSalClick = (salName: string) => {
+    if (!salName || salName === '-') return;
+
+    // Find description in Encyclopedia
+    let foundItem = null;
+    for (const category of ENCYCLOPEDIA_DATA) {
+      // Priority 1: Exact Hanja match (Best for Stems/Branches)
+      const hanjaMatch = category.items.find((i) => i.hanja === salName);
+      if (hanjaMatch) {
+        foundItem = hanjaMatch;
+        break;
+      }
+
+      // Priority 2: Exact Korean match (e.g. '비견' === '비견')
+      const termKr = (item: any) => item.term.split(' ')[0];
+      const exactMatch = category.items.find((i) => termKr(i) === salName || i.term === salName);
+      if (exactMatch) {
+        foundItem = exactMatch;
+        break;
+      }
+
+      // Priority 3: Starts With (e.g. '역마' -> '역마살', '갑' -> '갑목')
+      const startsWithMatch = category.items.find((i) => termKr(i).startsWith(salName));
+      if (startsWithMatch) {
+        foundItem = startsWithMatch;
+        break;
+      }
+    }
+
+    if (foundItem) {
+      setInfoModal({
+        title: foundItem.term,
+        content: `${foundItem.description}\n\n${foundItem.details || ''}`,
+      });
+    } else {
+      // Fallback for known terms not in encyclopedia yet?
+      // Or just simple toast? For now, nothing or simple text.
+      setInfoModal({
+        title: salName,
+        content: '신살에 대한 상세 설명이 준비 중입니다.',
+      });
+    }
   };
 
   if (!saju) {
@@ -358,132 +407,154 @@ export const SajuResultView = ({
               {columns.map((pillar, i) => (
                 <View
                   key={i}
-                  className="flex-1 items-center justify-center gap-1 border-l border-gray-200">
-                  <Text
-                    className="text-4xl font-bold"
-                    style={{
-                      color: pillar.gan.color,
-                      // @ts-ignore
-                      textShadowColor: 'rgba(0,0,0,0.1)',
-                      textShadowOffset: { width: 1, height: 1 },
-                      textShadowRadius: 1,
-                    }}>
-                    {pillar.gan.hanja}
-                  </Text>
-                  <View className="absolute bottom-1 right-2">
-                    <Text className="text-[10px] font-medium text-gray-400">
-                      {pillar.gan.korean}
+                  className="flex-1 items-center justify-center border-l border-gray-200">
+                  <TouchableOpacity
+                    className="h-full w-full items-center justify-center gap-1"
+                    onPress={() => handleShinSalClick(pillar.gan.hanja)}>
+                    <Text
+                      className="text-4xl font-bold"
+                      style={{
+                        color: pillar.gan.color,
+                        // @ts-ignore
+                        textShadowColor: 'rgba(0,0,0,0.1)',
+                        textShadowOffset: { width: 1, height: 1 },
+                        textShadowRadius: 1,
+                      }}>
+                      {pillar.gan.hanja}
                     </Text>
-                  </View>
+                    <View className="absolute bottom-1 right-2">
+                      <Text className="text-[10px] font-medium text-gray-400 underline decoration-gray-300 decoration-dotted underline-offset-2">
+                        {pillar.gan.korean}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
                 </View>
               ))}
             </View>
 
             {/* Row 2: 십성 (Sipsin for Gan) */}
             <View className="flex-row border-b border-gray-200">
-              <View className="w-12 items-center justify-center bg-gray-50">
+              <View className="w-12 items-center justify-center bg-gray-50 py-1">
                 <Text className="text-xs font-medium text-gray-500">십성</Text>
               </View>
               {columns.map((pillar, i) => (
                 <View
                   key={i}
                   className="flex-1 items-center justify-center border-l border-gray-200">
-                  <Text className="text-xs font-medium" style={{ color: pillar.gan.color }}>
-                    {pillar.gan.sipsin || '일간'}
-                  </Text>
+                  <TouchableOpacity onPress={() => handleShinSalClick(pillar.gan.sipsin || '일간')}>
+                    <Text
+                      className="text-xs font-medium underline decoration-gray-300 decoration-dotted underline-offset-4"
+                      style={{ color: pillar.gan.color }}>
+                      {pillar.gan.sipsin || '일간'}
+                    </Text>
+                  </TouchableOpacity>
                 </View>
               ))}
             </View>
 
             {/* Row 3: 지지 (Ji) */}
             <View className="h-20 flex-row border-b border-gray-200">
-              <View className="w-12 items-center justify-center bg-gray-50">
+              <View className="w-12 items-center justify-center bg-gray-50 py-1">
                 <Text className="text-xs font-medium text-gray-500">지지</Text>
               </View>
               {columns.map((pillar, i) => (
                 <View
                   key={i}
-                  className="flex-1 items-center justify-center gap-1 border-l border-gray-200">
-                  <Text
-                    className="text-4xl font-bold"
-                    style={{
-                      color: pillar.ji.color,
-                      // @ts-ignore
-                      textShadowColor: 'rgba(0,0,0,0.1)',
-                      textShadowOffset: { width: 1, height: 1 },
-                      textShadowRadius: 1,
-                    }}>
-                    {pillar.ji.hanja}
-                  </Text>
-                  <View className="absolute bottom-1 right-2">
-                    <Text className="text-[10px] font-medium text-gray-400">
-                      {pillar.ji.korean}
+                  className="flex-1 items-center justify-center border-l border-gray-200">
+                  <TouchableOpacity
+                    className="h-full w-full items-center justify-center gap-1"
+                    onPress={() => handleShinSalClick(pillar.ji.hanja)}>
+                    <Text
+                      className="text-4xl font-bold"
+                      style={{
+                        color: pillar.ji.color,
+                        // @ts-ignore
+                        textShadowColor: 'rgba(0,0,0,0.1)',
+                        textShadowOffset: { width: 1, height: 1 },
+                        textShadowRadius: 1,
+                      }}>
+                      {pillar.ji.hanja}
                     </Text>
-                  </View>
+                    <View className="absolute bottom-1 right-2">
+                      <Text className="text-[10px] font-medium text-gray-400 underline decoration-gray-300 decoration-dotted underline-offset-2">
+                        {pillar.ji.korean}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
                 </View>
               ))}
             </View>
 
             {/* Row 4: 십성 (Sipsin for Ji) */}
             <View className="flex-row border-b border-gray-200">
-              <View className="w-12 items-center justify-center bg-gray-50">
+              <View className="w-12 items-center justify-center bg-gray-50 py-1">
                 <Text className="text-xs font-medium text-gray-500">십성</Text>
               </View>
               {columns.map((pillar, i) => (
                 <View
                   key={i}
                   className="flex-1 items-center justify-center border-l border-gray-200">
-                  <Text className="text-xs font-medium" style={{ color: pillar.ji.color }}>
-                    {pillar.ji.sipsin || '-'}
-                  </Text>
+                  <TouchableOpacity onPress={() => handleShinSalClick(pillar.ji.sipsin || '-')}>
+                    <Text
+                      className="text-xs font-medium underline decoration-gray-300 decoration-dotted underline-offset-4"
+                      style={{ color: pillar.ji.color }}>
+                      {pillar.ji.sipsin || '-'}
+                    </Text>
+                  </TouchableOpacity>
                 </View>
               ))}
             </View>
 
             {/* Row 5: 지장간 (Jijangan) */}
             <View className="flex-row border-b border-gray-200">
-              <View className="w-12 items-center justify-center bg-gray-50">
+              <View className="w-12 items-center justify-center bg-gray-50 py-1">
                 <Text className="text-xs font-medium text-gray-500">지장간</Text>
               </View>
               {columns.map((pillar, i) => (
                 <View
                   key={i}
                   className="flex-1 items-center justify-center border-l border-gray-200">
-                  <Text className="text-xs font-medium text-gray-600">
-                    {pillar.ji.jijangan || '-'}
-                  </Text>
+                  <TouchableOpacity onPress={() => handleShinSalClick('지장간')}>
+                    <Text className="text-xs font-medium text-gray-600 underline decoration-gray-300 decoration-dotted underline-offset-4">
+                      {pillar.ji.jijangan || '-'}
+                    </Text>
+                  </TouchableOpacity>
                 </View>
               ))}
             </View>
 
             {/* Row 6: 12운성 (12Wunsung) */}
             <View className="flex-row border-b border-gray-200">
-              <View className="w-12 items-center justify-center bg-gray-50">
+              <View className="w-12 items-center justify-center bg-gray-50 py-1">
                 <Text className="text-xs font-medium text-gray-500">12운성</Text>
               </View>
               {columns.map((pillar, i) => (
                 <View
                   key={i}
                   className="flex-1 items-center justify-center border-l border-gray-200">
-                  <Text className="text-xs font-medium text-gray-600">
-                    {pillar.ji.wunsung || '-'}
-                  </Text>
+                  <TouchableOpacity onPress={() => handleShinSalClick(pillar.ji.wunsung)}>
+                    <Text className="text-xs font-medium text-gray-600 underline decoration-gray-300 decoration-dotted underline-offset-4">
+                      {pillar.ji.wunsung || '-'}
+                    </Text>
+                  </TouchableOpacity>
                 </View>
               ))}
             </View>
 
             {/* Row 7: 12신살 (12Shinsal) */}
             <View className="flex-row">
-              <View className="w-12 items-center justify-center bg-gray-50">
+              <View className="w-12 items-center justify-center bg-gray-50 py-1">
                 <Text className="text-xs font-medium text-gray-500">12신살</Text>
               </View>
               {columns.map((pillar, i) => (
                 <View
                   key={i}
                   className="flex-1 items-center justify-center border-l border-gray-200">
-                  <Text className="text-xs font-medium text-gray-600">
-                    {pillar.ji.shinsal || '-'}
-                  </Text>
+                  <TouchableOpacity onPress={() => handleShinSalClick(pillar.ji.shinsal)}>
+                    <Text className="text-xs font-medium text-gray-600 underline decoration-gray-300 decoration-dotted underline-offset-4">
+                      {pillar.ji.shinsal || '-'}
+                    </Text>
+                  </TouchableOpacity>
                 </View>
               ))}
             </View>
@@ -491,65 +562,131 @@ export const SajuResultView = ({
         </View>
 
         {/* Detailed 12-Shin-sal & Special Shin-sal Table */}
-        <View className="gap-3 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-          <Text className="text-lg font-bold text-gray-900">신살 상세 분석</Text>
-          <View className="flex-row justify-between gap-2">
-            {[
-              { label: '시주', data: saju.hour },
-              { label: '일주', data: saju.day },
-              { label: '월주', data: saju.month },
-              { label: '년주', data: saju.year },
-            ].map((pillar, idx) => {
-              // 1. Calculate 12-Shin-sal
-              // Standard 1: Year Ji Base
-              const shinSalYear = calc12ShinSal(saju.year.ji.hanja, pillar.data.ji.hanja);
-              // Standard 2: Day Ji Base
-              const shinSalDay = calc12ShinSal(saju.day.ji.hanja, pillar.data.ji.hanja);
-              // Standard 3: Current Year Base (Seun)
-              const currentYearJi = getCurrentYearJi();
-              const shinSalSeun = calc12ShinSal(currentYearJi, pillar.data.ji.hanja);
+        <View className="gap-2">
+          <View className="flex-row items-center justify-between gap-2">
+            <Text className="text-lg font-semibold text-foreground">신살 상세 분석</Text>
+            <TouchableOpacity
+              onPress={() => router.push('/encyclopedia')}
+              className="flex-row items-center gap-1 active:opacity-70">
+              <Text className="text-sm font-medium text-gray-500">용어 사전</Text>
+              <ChevronRight size={16} color="#6B7280" />
+            </TouchableOpacity>
+          </View>
+          <View className="gap-3 rounded-2xl border border-gray-300 bg-white p-5">
+            <View className="flex-row justify-between gap-2">
+              {(() => {
+                const dayGongmang = getGongmang(saju.day.gan.hanja, saju.day.ji.hanja);
+                const yearGongmang = getGongmang(saju.year.gan.hanja, saju.year.ji.hanja);
 
-              // 2. Special Shin-sals
-              const specialShinSals = getSpecialShinSals(
-                pillar.data.gan.hanja,
-                pillar.data.ji.hanja,
-                saju.day.gan.hanja
-              );
+                return [
+                  { label: '시주', data: saju.hour },
+                  { label: '일주', data: saju.day },
+                  { label: '월주', data: saju.month },
+                  { label: '년주', data: saju.year },
+                ].map((pillar, idx) => {
+                  const isGongmang =
+                    dayGongmang.includes(pillar.data.ji.korean) ||
+                    yearGongmang.includes(pillar.data.ji.korean);
+                  // 1. Calculate 12-Shin-sal
+                  // Standard 1: Year Ji Base
+                  const shinSalYear = calc12ShinSal(saju.year.ji.hanja, pillar.data.ji.hanja);
+                  // Standard 2: Day Ji Base
+                  const shinSalDay = calc12ShinSal(saju.day.ji.hanja, pillar.data.ji.hanja);
+                  // Standard 3: Current Daewoon Base
+                  const currentYear = new Date().getFullYear();
+                  const mAge = currentYear - year + 1;
+                  let daewoonJi = getCurrentYearJi(); // Fallback
+                  let daewoonGan = '';
 
-              return (
-                <View key={idx} className="flex-1 items-center gap-2">
-                  {/* Header */}
-                  <View className="mb-1 rounded-full bg-gray-100 px-2.5 py-1">
-                    <Text className="text-xs font-bold text-gray-500">{pillar.label}</Text>
-                  </View>
+                  if (saju.lifeList && saju.lifeList.list) {
+                    const list = saju.lifeList.list;
+                    let active = null;
+                    // Assuming list is sorted by start age ascending
+                    for (const item of list) {
+                      const startAge = parseInt(item.age || item.startAge || '0');
+                      if (mAge >= startAge) {
+                        active = item;
+                      }
+                    }
+                    if (active) {
+                      daewoonJi = active.ji.hanja;
+                      daewoonGan = active.gan.hanja;
+                    }
+                  }
+                  // Standard 4 (User Req): Day Gan Base (12 Wunsung -> Shin-sal)
+                  const wunsung = get12Wunsung(saju.day.gan.hanja, pillar.data.ji.hanja);
+                  const wunsungShinSal = getShinsalFromWunsung(wunsung);
 
-                  {/* 12 Shin-sal Rows */}
-                  <View className="w-full items-center gap-1">
-                    <Text className="text-xs font-medium text-gray-800">{shinSalYear}</Text>
-                    <Text className="text-xs font-medium text-gray-600">{shinSalDay}</Text>
-                    <Text className="text-xs font-medium text-blue-600">{shinSalSeun}</Text>
-                  </View>
+                  // 2. Special Shin-sals
+                  const specialShinSals = getSpecialShinSals(
+                    pillar.data.gan.hanja,
+                    pillar.data.ji.hanja,
+                    saju.day.gan.hanja,
+                    saju.month.ji.hanja
+                  );
 
-                  {/* Divider */}
-                  <View className="my-1 h-[1px] w-full bg-gray-100" />
+                  return (
+                    <View key={idx} className="flex-1 items-center gap-2">
+                      {/* Header */}
+                      <View className="mb-1 rounded-full bg-gray-100 px-2.5 py-1">
+                        <Text className="text-xs font-bold text-gray-500">{pillar.label}</Text>
+                      </View>
 
-                  {/* Special Shin-sals */}
-                  <View className="min-h-[60px] w-full items-center gap-1">
-                    {specialShinSals.length > 0 ? (
-                      specialShinSals.map((sal, sIdx) => (
-                        <Text
-                          key={sIdx}
-                          className="text-center text-[11px] font-bold text-indigo-600">
-                          {sal}
-                        </Text>
-                      ))
-                    ) : (
-                      <Text className="text-[11px] text-gray-300">-</Text>
-                    )}
-                  </View>
-                </View>
-              );
-            })}
+                      {/* 12 Shin-sal Rows */}
+                      <View className="items-center gap-1">
+                        {/* (1) Gongmang */}
+                        {isGongmang ? (
+                          <View className="rounded bg-gray-500 px-1.5 py-0.5">
+                            <Text className="text-[10px] text-white">공망</Text>
+                          </View>
+                        ) : (
+                          <View className="h-4" />
+                        )}
+
+                        {/* (2) Year Ji Base */}
+                        <TouchableOpacity onPress={() => handleShinSalClick(shinSalYear)}>
+                          <Text className="text-xs font-medium text-gray-800 underline decoration-gray-300 decoration-dotted underline-offset-4">
+                            {shinSalYear}
+                          </Text>
+                        </TouchableOpacity>
+
+                        {/* (3) Day Ji Base */}
+                        <TouchableOpacity onPress={() => handleShinSalClick(shinSalDay)}>
+                          <Text className="text-xs font-medium text-gray-600 underline decoration-gray-300 decoration-dotted underline-offset-4">
+                            {shinSalDay}
+                          </Text>
+                        </TouchableOpacity>
+
+                        {/* (4) Day Gan Base (Wunsung -> Shin-sal) */}
+                        <TouchableOpacity onPress={() => handleShinSalClick(wunsungShinSal)}>
+                          <Text className="text-xs font-bold text-teal-600 underline decoration-teal-200 decoration-dotted underline-offset-4">
+                            {wunsungShinSal}
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+
+                      {/* Divider */}
+                      <View className="my-1 h-[1px] w-full bg-gray-100" />
+
+                      {/* Special Shin-sals */}
+                      <View className="min-h-[60px] w-full items-center gap-1">
+                        {specialShinSals.length > 0 ? (
+                          specialShinSals.map((sal, sIdx) => (
+                            <TouchableOpacity key={sIdx} onPress={() => handleShinSalClick(sal)}>
+                              <Text className="text-center text-[11px] font-bold text-indigo-600 underline decoration-indigo-200 decoration-dotted underline-offset-4">
+                                {sal}
+                              </Text>
+                            </TouchableOpacity>
+                          ))
+                        ) : (
+                          <Text className="text-[11px] text-gray-300">-</Text>
+                        )}
+                      </View>
+                    </View>
+                  );
+                });
+              })()}
+            </View>
           </View>
         </View>
 
