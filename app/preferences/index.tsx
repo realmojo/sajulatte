@@ -154,13 +154,13 @@ export default function PreferencesScreen() {
         {/* 계정 관리 */}
         <MenuSection title="계정">
           <MenuItem icon={LogOut} label="로그아웃" onPress={handleLogout} showArrow={false} />
-          <MenuItem
+          {/* <MenuItem
             icon={Trash2}
             label="회원 탈퇴"
             isDestructive
             onPress={handleDeleteAccount}
             showArrow={false}
-          />
+          /> */}
         </MenuSection>
 
         <View className="h-10" />
