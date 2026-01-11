@@ -5,37 +5,37 @@
   xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
   xmlns:video="http://www.google.com/schemas/sitemap-video/1.1"
   ><url
-    ><loc>https://sajulatte.com/</loc><changefreq>daily</changefreq
+    ><loc>https://sajulatte.app/</loc><changefreq>daily</changefreq
     ><priority>1.0</priority></url
   ><url
-    ><loc>https://sajulatte.com/daily</loc><changefreq>daily</changefreq
+    ><loc>https://sajulatte.app/daily</loc><changefreq>daily</changefreq
     ><priority>0.8</priority></url
   ><url
-    ><loc>https://sajulatte.com/compatibility</loc
+    ><loc>https://sajulatte.app/compatibility</loc
     ><changefreq>weekly</changefreq><priority>0.8</priority></url
   ><url
-    ><loc>https://sajulatte.com/compatibility/analysis</loc
+    ><loc>https://sajulatte.app/compatibility/analysis</loc
     ><changefreq>weekly</changefreq><priority>0.7</priority></url
   ><url
-    ><loc>https://sajulatte.com/settings</loc><changefreq>weekly</changefreq
+    ><loc>https://sajulatte.app/settings</loc><changefreq>weekly</changefreq
     ><priority>0.5</priority></url
   ><url
-    ><loc>https://sajulatte.com/preferences</loc><changefreq>monthly</changefreq
+    ><loc>https://sajulatte.app/preferences</loc><changefreq>monthly</changefreq
     ><priority>0.3</priority></url
   ><url
-    ><loc>https://sajulatte.com/privacy</loc><changefreq>monthly</changefreq
+    ><loc>https://sajulatte.app/privacy</loc><changefreq>monthly</changefreq
     ><priority>0.3</priority></url
   ><url
-    ><loc>https://sajulatte.com/terms</loc><changefreq>monthly</changefreq
+    ><loc>https://sajulatte.app/terms</loc><changefreq>monthly</changefreq
     ><priority>0.3</priority></url
   ><url
-    ><loc>https://sajulatte.com/pillarscalendar</loc
+    ><loc>https://sajulatte.app/pillarscalendar</loc
     ><changefreq>weekly</changefreq><priority>0.7</priority></url
   ><url
-    ><loc>https://sajulatte.com/encyclopedia</loc><changefreq>weekly</changefreq
+    ><loc>https://sajulatte.app/encyclopedia</loc><changefreq>weekly</changefreq
     ><priority>0.7</priority></url
   ><url
-    ><loc>https://sajulatte.com/amulet</loc><changefreq>weekly</changefreq
+    ><loc>https://sajulatte.app/amulet</loc><changefreq>weekly</changefreq
     ><priority>0.6</priority></url
   ></urlset
 >
