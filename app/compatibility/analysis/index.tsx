@@ -6,19 +6,11 @@ import {
   Image,
   ActivityIndicator,
   Alert,
-  Platform,
 } from 'react-native';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useState, useEffect, useRef } from 'react';
-import {
-  ChevronLeft,
-  Share,
-  TrendingUp,
-  Sparkles,
-  HeartHandshake,
-  Star,
-} from 'lucide-react-native';
+import { ChevronLeft, Share, TrendingUp, Sparkles, HeartHandshake } from 'lucide-react-native';
 import ViewShot from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 import { supabase } from '@/lib/supabase';

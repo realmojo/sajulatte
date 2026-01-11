@@ -3,28 +3,18 @@ import {
   Circle,
   CircleHelp,
   CircleX,
-  Coffee,
-  ChevronLeft,
   ChevronRight,
   Calendar as CalendarIcon,
-  X,
-  Share2,
-  Download,
-  Info,
 } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from 'nativewind';
 import Svg, {
   Circle as SvgCircle,
-  ClipPath,
   Defs,
   G,
   Line,
   Marker,
-  Path,
   Polygon,
-  Polyline,
-  Rect,
   Text as SvgText,
 } from 'react-native-svg';
 import { CalendarDays } from 'lucide-react-native';
@@ -37,7 +27,6 @@ import {
   View,
   Image,
   ActivityIndicator,
-  Button,
 } from 'react-native';
 import { Text } from '@/components/ui/text';
 import {

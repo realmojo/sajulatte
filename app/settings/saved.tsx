@@ -1,16 +1,7 @@
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
 import { Stack, useRouter } from 'expo-router';
 import * as React from 'react';
-import {
-  FlatList,
-  Modal,
-  ScrollView,
-  TouchableOpacity,
-  View,
-  ActivityIndicator,
-} from 'react-native';
+import { FlatList, Modal, TouchableOpacity, View, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { Trash2, Plus, ChevronLeft, Pencil, Star } from 'lucide-react-native';

@@ -1,7 +1,7 @@
 import { View, Text, TouchableOpacity, ScrollView, Modal, Alert, FlatList } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { ChevronRight, X, Plus, Star, HeartHandshake } from 'lucide-react-native';

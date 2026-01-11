@@ -7,7 +7,6 @@ import {
   FileText,
   HelpCircle,
   LogOut,
-  Trash2,
   Info,
 } from 'lucide-react-native';
 import { useState } from 'react';

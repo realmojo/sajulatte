@@ -5,14 +5,13 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Modal,
-  TextInput,
   TouchableWithoutFeedback,
   Keyboard,
   FlatList,
 } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react-native';
+import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { WebSEO } from '@/components/ui/WebSEO';
 import { useState, useEffect, useMemo } from 'react';
 import { getMonthlyIljin, getMyEightSaju } from '@/lib/utils/latte';

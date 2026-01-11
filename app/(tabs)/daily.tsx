@@ -1,7 +1,7 @@
 import { Text } from '@/components/ui/text';
 import { Stack, useRouter } from 'expo-router';
 import * as React from 'react';
-import { View, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { View, ScrollView, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Heart,
@@ -12,11 +12,8 @@ import {
   User,
   Sparkles,
   Star,
-  Bell,
-  Settings,
 } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
-
 import { WebSEO } from '@/components/ui/WebSEO';
 import { STORY_DATA } from '@/lib/data/storyData';
 

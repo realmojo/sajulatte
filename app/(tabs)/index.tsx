@@ -14,7 +14,6 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { supabase } from '@/lib/supabase';
 import { useFocusEffect } from '@react-navigation/native';
 import { SajuResultView } from '@/components/SajuResultView';
 import { RefreshCcw } from 'lucide-react-native';

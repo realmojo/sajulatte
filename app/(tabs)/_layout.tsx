@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { View } from 'react-native';
-import { CalendarDays, ScrollText, Sparkles, Ellipsis, HeartHandshake } from 'lucide-react-native';
+import { CalendarDays, Sparkles, Ellipsis, HeartHandshake } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { NAV_THEME } from '@/lib/theme';
 const TABS = [

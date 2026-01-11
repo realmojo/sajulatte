@@ -1,7 +1,4 @@
-import { Button } from '@/components/ui/button';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Text } from '@/components/ui/text';
-import { Input } from '@/components/ui/input'; // Import Input
 import { Stack, useRouter } from 'expo-router';
 import {
   View,
@@ -9,11 +6,8 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
-  AppState,
   Modal,
   ActivityIndicator,
-  TouchableWithoutFeedback,
-  KeyboardAvoidingView,
   Platform,
 } from 'react-native';
 import { WebView } from 'react-native-webview'; // Import WebView
@@ -27,14 +21,7 @@ import {
   Bell,
   MessageCircle,
   Sparkles,
-  Heart,
-  Coins,
-  HeartHandshake,
-  Briefcase,
-  Activity,
   User,
-  Star,
-  Check, // Added Check icon
   X, // Close icon
   Edit2, // Edit icon
   BookOpen,
@@ -49,11 +36,7 @@ import {
 import { useColorScheme } from 'nativewind';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '@/lib/supabase';
-import {
-  uploadMainProfileToSupabase,
-  syncUserProfile,
-  updateRemoteProfile,
-} from '@/lib/services/authService';
+import { syncUserProfile, updateRemoteProfile } from '@/lib/services/authService';
 import { isSummerTime } from '@/lib/utils/latte';
 import { userService } from '@/lib/services/userService';
 import { ProfileEditModal, ProfileData } from '@/components/modal/ProfileEditModal';
