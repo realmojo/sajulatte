@@ -12,6 +12,12 @@ export default function Root({ children }: PropsWithChildren) {
         <meta charSet="utf-8" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="google-adsense-account" content="ca-pub-9130836798889522" />
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9130836798889522"
+          crossOrigin="anonymous"
+        />
 
         {/*
           Disable body scrolling on web. This makes ScrollView components work closer to how they do on native.
