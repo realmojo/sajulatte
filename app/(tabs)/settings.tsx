@@ -393,7 +393,7 @@ export default function SettingsScreen() {
       <ScrollView className="flex-1" contentContainerClassName="p-4 pb-20 gap-8">
         {/* Login CTA or Profile Section */}
         {session ? (
-          <View className="w-full gap-4 rounded-2xl border border-border bg-card p-6 shadow-sm">
+          <View className="w-full gap-4 rounded-2xl border border-border bg-card p-6">
             <View className="flex-row items-center gap-4">
               {session.user.user_metadata.avatar_url ? (
                 <Image
@@ -484,7 +484,7 @@ export default function SettingsScreen() {
             </View>
           </View>
         ) : (
-          <View className="items-center gap-6 rounded-2xl border border-border bg-card p-6 shadow-sm">
+          <View className="items-center gap-6 rounded-2xl border border-border bg-card p-6">
             <View className="items-center gap-2">
               <Text className="text-center text-xl font-bold text-foreground">
                 로그인을 하시면{'\n'}더욱더 많은 내용을 볼 수 있어요!
@@ -509,7 +509,7 @@ export default function SettingsScreen() {
           {/* Section: 사주 관리 */}
           <View className="gap-3">
             <Text className="ml-1 text-lg font-bold text-gray-900">🗂️ 사주 관리</Text>
-            <View className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+            <View className="overflow-hidden rounded-2xl border border-gray-100 bg-white">
               <TouchableOpacity
                 className="flex-row items-center justify-between bg-white p-4 active:bg-gray-50"
                 onPress={() => router.push('/settings/saved')}>
@@ -527,7 +527,7 @@ export default function SettingsScreen() {
           {/* Section: 즐길거리 */}
           <View className="gap-3">
             <Text className="ml-1 text-lg font-bold text-gray-900">✨ 즐길거리</Text>
-            <View className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+            <View className="overflow-hidden rounded-2xl border border-gray-100 bg-white">
               <TouchableOpacity
                 className="flex-row items-center justify-between bg-white p-4 active:bg-gray-50"
                 onPress={() => router.push('/encyclopedia')}>
@@ -569,7 +569,7 @@ export default function SettingsScreen() {
           {/* Section: 앱 설정 */}
           <View className="gap-3">
             <Text className="ml-1 text-lg font-bold text-gray-900">⚙️ 앱 설정</Text>
-            <View className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+            <View className="overflow-hidden rounded-2xl border border-gray-100 bg-white">
               <TouchableOpacity
                 className="flex-row items-center justify-between bg-white p-4 active:bg-gray-50"
                 onPress={() => Alert.alert('알림 설정', '푸시 알림 설정 페이지로 이동합니다.')}>
@@ -599,7 +599,7 @@ export default function SettingsScreen() {
           {/* Section: 고객지원 */}
           <View className="gap-3">
             <Text className="ml-1 text-lg font-bold text-gray-900">📢 고객지원</Text>
-            <View className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+            <View className="overflow-hidden rounded-2xl border border-gray-100 bg-white">
               <TouchableOpacity
                 className="flex-row items-center justify-between bg-white p-4 active:bg-gray-50"
                 onPress={() => Alert.alert('공지사항', '새로운 소식이 없습니다.')}>
