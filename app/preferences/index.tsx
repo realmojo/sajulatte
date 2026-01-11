@@ -13,8 +13,11 @@ import {
 import { useState } from 'react';
 import Constants from 'expo-constants';
 import { supabase } from '@/lib/supabase';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { WebSEO } from '@/components/ui/WebSEO';
 
 export default function PreferencesScreen() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const [pushEnabled, setPushEnabled] = useState(true);
   const appVersion = Constants.expoConfig?.version || '1.0.0';
@@ -90,15 +93,19 @@ export default function PreferencesScreen() {
   );
 
   return (
-    <View className="flex-1 bg-gray-50">
+    <View className="flex-1 bg-gray-50" style={{ paddingTop: insets.top }}>
+      <WebSEO
+        title="디지털 부적 - 사주라떼"
+        description="나만의 디지털 부적으로 행운을 높여보세요."
+      />
       <Stack.Screen options={{ headerShown: false }} />
 
       {/* Header */}
-      <View className="flex-row items-center justify-between bg-white px-4 pb-4 pt-14 shadow-sm">
-        <TouchableOpacity onPress={() => router.back()} className="-ml-2 p-2">
+      <View className="flex-row items-center justify-between border-b border-gray-100 bg-white px-4 py-3">
+        <TouchableOpacity onPress={() => router.back()} className="p-2">
           <ChevronLeft size={24} color="#000" />
         </TouchableOpacity>
-        <Text className="text-lg font-bold">환경설정</Text>
+        <Text className="text-lg font-bold text-gray-900">환경설정</Text>
         <View className="w-10" />
       </View>
 

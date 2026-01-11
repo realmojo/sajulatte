@@ -1,5 +1,17 @@
 import * as React from 'react';
-import { Circle, CircleHelp, CircleX, Coffee } from 'lucide-react-native';
+import {
+  Circle,
+  CircleHelp,
+  CircleX,
+  Coffee,
+  ChevronLeft,
+  ChevronRight,
+  Calendar as CalendarIcon,
+  X,
+  Share2,
+  Download,
+  Info,
+} from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from 'nativewind';
 import Svg, {
@@ -16,7 +28,7 @@ import Svg, {
   Text as SvgText,
 } from 'react-native-svg';
 import { CalendarDays } from 'lucide-react-native';
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import {
   Modal,
   ScrollView,
@@ -54,6 +66,7 @@ export const SajuResultView = ({
 }: SajuResultProps) => {
   const { colorScheme } = useColorScheme();
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   // Calculate Saju
   const [saju, setSaju] = React.useState<any>(null);
 
@@ -510,17 +523,15 @@ export const SajuResultView = ({
                   return (
                     <View key={i} className="flex-1 items-center gap-2">
                       <View className="w-full flex-1 items-center justify-end">
-                        {/* SVG Line would go here ideally, but for now using relative positioning for dots */}
-                        {/* Simplified Bar/Point visualization */}
-                        <View
-                          className="w-full rounded-t-sm bg-gray-100"
-                          style={{ height: '100%' }}>
-                          {/* Line connector simulation could be done with SVG overlay,
+                        {/* Line connector simulation could be done with SVG overlay,
                           but here we just show the structure.
                           To match the image perfectly we need SVG.
                           Let's draw the SVG overlay on top of this container.
                        */}
-                        </View>
+                        <View
+                          className="w-full rounded-t-sm bg-gray-100"
+                          style={{ height: '100%' }}
+                        />
                       </View>
                       <Text className="text-center text-[10px] text-gray-500">{label}</Text>
                     </View>
@@ -791,89 +802,6 @@ export const SajuResultView = ({
               </Svg>
             </View>
           </View>
-
-          {/* Basic Interpretation */}
-          {/* <View className="gap-2">
-          <Text className="text-lg font-semibold text-foreground">기본 운세 분석</Text>
-          <View className="gap-4 rounded-xl border border-border bg-card p-5">
-            {(() => {
-              // Extract Sipsin and Shinsal lists for simple analysis
-              const sipsinList = [
-                saju.year.gan.sipsin,
-                saju.year.ji.sipsin,
-                saju.month.gan.sipsin,
-                saju.month.ji.sipsin,
-                saju.day.gan.sipsin,
-                saju.day.ji.sipsin,
-                saju.hour.gan.sipsin,
-                saju.hour.ji.sipsin,
-              ].filter(Boolean) as string[];
-
-              // Helper to flatten shinsal (which might be array or string)
-              const extractShinsal = (pillar: any) => {
-                const s = pillar.ji.shinsal;
-                return Array.isArray(s) ? s : s ? [s] : [];
-              };
-
-              const shinsalList = [
-                ...extractShinsal(saju.year),
-                ...extractShinsal(saju.month),
-                ...extractShinsal(saju.day),
-                ...extractShinsal(saju.hour),
-              ];
-
-              const interpretation = interpretSaju(
-                saju.meta.ilgan,
-                saju.distributions,
-                sipsinList,
-                shinsalList,
-                gender
-              );
-
-              return (
-                <>
-                  <View>
-                    <Text className="mb-1 text-sm font-bold text-blue-600">🔔 나의 성향</Text>
-                    <Text className="text-sm leading-6 text-foreground">
-                      {interpretation.summary}
-                    </Text>
-                  </View>
-                  <View className="h-[1px] bg-border" />
-                  <View>
-                    <Text className="mb-1 text-sm font-bold text-yellow-600">💰 금전운</Text>
-                    <Text className="text-sm leading-6 text-foreground">
-                      {interpretation.money}
-                    </Text>
-                  </View>
-                  <View className="h-[1px] bg-border" />
-                  <View>
-                    <Text className="mb-1 text-sm font-bold text-pink-500">💕 연애 스타일</Text>
-                    <Text className="text-sm leading-6 text-foreground">{interpretation.love}</Text>
-                  </View>
-                  <View className="h-[1px] bg-border" />
-                  <View>
-                    <Text className="mb-1 text-sm font-bold text-purple-600">💍 결혼/배우자운</Text>
-                    <Text className="text-sm leading-6 text-foreground">
-                      {interpretation.marriage}
-                    </Text>
-                  </View>
-                  <View className="h-[1px] bg-border" />
-                  <View>
-                    <Text className="mb-1 text-sm font-bold text-green-600">💼 직업운</Text>
-                    <Text className="text-sm leading-6 text-foreground">{interpretation.work}</Text>
-                  </View>
-                  <View className="h-[1px] bg-border" />
-                  <View>
-                    <Text className="mb-1 text-sm font-bold text-teal-600">🌿 건강운</Text>
-                    <Text className="text-sm leading-6 text-foreground">
-                      {interpretation.health}
-                    </Text>
-                  </View>
-                </>
-              );
-            })()}
-          </View>
-        </View> */}
 
           {/* Detailed Interpretations */}
           <View className="gap-2">
@@ -1207,6 +1135,23 @@ export const SajuResultView = ({
               </View>
             ))}
           </ScrollView>
+        </View>
+
+        <View className="pb-10">
+          <TouchableOpacity
+            onPress={() => router.push('/pillarscalendar')}
+            className="flex-row items-center justify-between rounded-2xl border border-gray-100 bg-white p-5 shadow-sm active:bg-gray-50">
+            <View className="gap-1">
+              <View className="flex-row items-center gap-2">
+                <Text className="text-lg font-bold text-gray-900">만세력 달력</Text>
+                <View className="rounded-full bg-amber-100 px-2 py-0.5">
+                  <Text className="text-xs font-bold text-amber-700">NEW</Text>
+                </View>
+              </View>
+              <Text className="text-sm text-gray-500">나의 일진과 하루 운세를 확인해보세요</Text>
+            </View>
+            <CalendarIcon size={24} className="text-gray-400" color="#9ca3af" />
+          </TouchableOpacity>
         </View>
 
         <Modal

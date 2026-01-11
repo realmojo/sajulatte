@@ -141,7 +141,9 @@ export interface DailyFortune {
 export const getDailyFortune = (
   userIlgan: string,
   userIlji: string,
-  targetDate: Date = new Date()
+  targetDate: Date = new Date(),
+  knownGan?: string,
+  knownJi?: string
 ): DailyFortune => {
   // 1. Get Today's Gan/Ji
   const solar = Solar.fromYmd(
@@ -150,15 +152,22 @@ export const getDailyFortune = (
     targetDate.getDate()
   );
   const lunar = solar.getLunar();
-  const dayGan = lunar.getDayGan(); // Chinese character e.g. '甲'
-  const dayJi = lunar.getDayJi(); // Chinese character e.g. '子'
+  let dayGan = lunar.getDayGan(); // Chinese character e.g. '甲'
+  let dayJi = lunar.getDayJi(); // Chinese character e.g. '子'
+
+  if (knownGan) dayGan = knownGan;
+  if (knownJi) dayJi = knownJi;
 
   // Translate to our format if needed, but lunar-javascript usually returns Hanja
   // Check if matches our STEMS list
   const todayGan = STEMS_EN.includes(dayGan)
     ? dayGan
     : STEMS_EN[STEMS_KO.indexOf(dayGan)] || dayGan;
-  // If library returns Korean, we map to Hanja. If Hanja, use as is.
+
+  // Check if matches our BRANCHES list
+  const todayJi = BRANCHES_EN.includes(dayJi)
+    ? dayJi
+    : BRANCHES_EN[BRANCHES_KO.indexOf(dayJi)] || dayJi;
   // Actually library returns Hanja usually. Let's assume Hanja.
 
   // 2. Calculate Sipsin
@@ -303,7 +312,7 @@ export const getDailyFortune = (
   return {
     date: `${targetDate.getFullYear()}-${targetDate.getMonth() + 1}-${targetDate.getDate()}`,
     gan: todayGan,
-    ji: dayJi,
+    ji: todayJi,
     sipsin,
     score,
     summary,

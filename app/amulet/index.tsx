@@ -61,7 +61,64 @@ const AMULET_LIST: { type: AmuletType; title: string; desc: string }[] = [
     title: '인화단결 부적',
     desc: '가정의 불화를 잠재우고, 사회생활에서 원만한 대인관계를 맺게 해주는 화합의 부적입니다. 다툼과 갈등을 해소하고, 서로 이해하고 배려하는 마음을 키워줍니다. 미움이 사랑으로, 오해가 이해로 바뀌는 기적을 선물합니다. 집안의 거실이나, 여러 사람이 모이는 장소에 두어 웃음이 끊이지 않는 화목한 분위기를 만드세요.',
   },
+  {
+    type: 'reunion',
+    title: '재회성취 부적',
+    desc: '헤어진 연인과 다시 만나고 싶거나, 소원해진 인간관계를 회복시켜주는 부적입니다. 간절한 그리움이 닿아 끊어진 인연의 끈을 다시 이어줍니다. 오해를 풀고 서로의 소중함을 깨닫게 하여, 예전보다 더 깊고 단단한 관계로 발전시킵니다. 떠나간 마음을 되돌리고 싶을 때 간직하세요.',
+  },
+  {
+    type: 'popularity',
+    title: '인기상승 부적',
+    desc: '사람들 사이에서 인기와 평판을 높여주는 부적입니다. 나의 매력이 자연스럽게 발산되어 주변 사람들의 호감을 사고, 모임의 중심이 되도록 돕습니다. 연예인, 인플루언서, 영업직 등 대중의 관심이 필요한 분들에게 강력한 도화살의 기운을 불어넣어 줍니다.',
+  },
+  {
+    type: 'sale',
+    title: '부동산 매매 부적',
+    desc: '잘 팔리지 않는 땅이나 집을 빠르게 매매하도록 돕는 부적입니다. 좋은 매수자를 만나게 하고, 원하는 가격에 거래가 성사되도록 기운을 터줍니다. 이사 날짜를 잡거나 새로운 투자를 할 때도 유리한 방향으로 이끌어줍니다. 매물 근처에 두면 더욱 효과적입니다.',
+  },
+  {
+    type: 'legal',
+    title: '관재소멸 부적',
+    desc: '억울한 누명을 벗거나 소송에서 승리하도록 돕는 부적입니다. 복잡하게 얽힌 관재구설을 명쾌하게 해결하고, 법적인 문제로부터 나를 보호해줍니다. 시비나 다툼을 잠재우고, 정당한 권리를 되찾아 평온한 일상으로 복귀하게 합니다.',
+  },
+  {
+    type: 'fertility',
+    title: '순산기원 부적',
+    desc: '건강하고 예쁜 아기를 기다리는 부부에게 새 생명의 기운을 전하는 부적입니다. 난임을 극복하고 순조로운 임신과 출산을 돕습니다. 산모와 태아를 보호하며, 집안에 아이의 웃음소리가 가득하도록 자손 번창의 복을 내려줍니다.',
+  },
+  {
+    type: 'pet',
+    title: '애견건강 부적',
+    desc: '가족과 같은 반려동물의 건강과 안전을 지켜주는 수호 부적입니다. 질병과 사고를 막아주고, 아픈 곳이 있다면 빠른 회복을 돕습니다. 동물과 교감을 깊게 하고, 오랫동안 곁에서 함께 행복할 수 있도록 생명력을 불어넣어 줍니다.',
+  },
+  {
+    type: 'sobriety',
+    title: '금주금연 부적',
+    desc: '술이나 담배 등 끊기 힘든 나쁜 습관을 의지로 이겨내게 돕는 부적입니다. 유혹을 뿌리칠 수 있는 강한 정신력을 심어주고, 건강한 몸과 마음을 되찾게 합니다. 작심삼일로 끝나지 않고 성공적인 금주/금연을 달성하도록 이끌어줍니다.',
+  },
+  {
+    type: 'sleep',
+    title: '숙면안정 부적',
+    desc: '불면증에 시달리거나 악몽을 자주 꾸는 분들에게 꿀잠을 선물하는 부적입니다. 침실의 나쁜 기운을 정화하고, 편안하고 깊은 수면을 취하게 돕습니다. 자고 일어나면 머리가 맑고 개운해지며, 활기찬 아침을 맞이하게 해줍니다.',
+  },
+  {
+    type: 'diet',
+    title: '미용성형 부적',
+    desc: '다이어트 의지를 불태우고 아름다움을 가꾸도록 돕는 부적입니다. 식욕을 조절하고 운동 효과를 높여 건강하게 체중을 감량하게 합니다. 내면의 자신감을 채워주어 외모뿐만 아니라 분위기까지 아름답게 변화시켜줍니다.',
+  },
+  {
+    type: 'debt',
+    title: '채무청산 부적',
+    desc: '감당하기 힘든 빚을 청산하고 경제적인 자유를 찾도록 돕는 부적입니다. 새는 돈을 막고, 빚을 갚을 수 있는 능력을 키워줍니다. 흐트러진 재정 상태를 바로잡고, 다시 일어설 수 있는 희망과 기회를 가져다줍니다.',
+  },
 ];
+
+const CATEGORIES: { [key: string]: AmuletType[] } = {
+  전체: [],
+  '재물·성공': ['wealth', 'business', 'jackpot', 'promotion', 'success', 'sale', 'debt'],
+  '사랑·인연': ['love', 'harmony', 'reunion', 'popularity', 'fertility'],
+  '건강·안전': ['health', 'safety', 'peace', 'pet', 'sobriety', 'sleep', 'diet', 'legal'],
+};
 
 export default function AmuletScreen() {
   const insets = useSafeAreaInsets();
@@ -72,6 +129,12 @@ export default function AmuletScreen() {
     desc: string;
   } | null>(null);
   const viewShotRef = useRef<ViewShot>(null);
+  const [selectedCategory, setSelectedCategory] = useState('전체');
+
+  const filteredAmulets = AMULET_LIST.filter((item) => {
+    if (selectedCategory === '전체') return true;
+    return CATEGORIES[selectedCategory]?.includes(item.type);
+  });
 
   const handleSave = async () => {
     try {
@@ -150,9 +213,34 @@ export default function AmuletScreen() {
           </View>
         </View>
 
+        {/* Category Filter */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          className="mb-6 flex-row"
+          contentContainerClassName="gap-2 px-1">
+          {Object.keys(CATEGORIES).map((cat) => (
+            <TouchableOpacity
+              key={cat}
+              onPress={() => setSelectedCategory(cat)}
+              className={`rounded-full border px-4 py-2 ${
+                selectedCategory === cat
+                  ? 'border-gray-900 bg-gray-900'
+                  : 'border-gray-200 bg-white'
+              }`}>
+              <Text
+                className={`text-sm font-bold ${
+                  selectedCategory === cat ? 'text-white' : 'text-gray-500'
+                }`}>
+                {cat}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+
         {/* Grid */}
         <View className="flex-row flex-wrap justify-between gap-y-6">
-          {AMULET_LIST.map((item, index) => (
+          {filteredAmulets.map((item, index) => (
             <TouchableOpacity
               key={index}
               className="w-[48%] items-center"

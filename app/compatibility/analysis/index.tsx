@@ -97,14 +97,16 @@ export default function CompatibilityAnalysisScreen() {
 
       // 3. Calculate Saju
       // My Saju
-      const mySaju = getMyEightSaju(
-        myProfile.birth_year,
-        myProfile.birth_month,
-        myProfile.birth_day,
-        myProfile.birth_hour ?? 0,
-        myProfile.birth_minute ?? 0,
-        myProfile.gender === 'male' ? 'm' : 'f'
-      );
+      const mySaju = await getMyEightSaju({
+        year: myProfile.birth_year,
+        month: myProfile.birth_month,
+        day: myProfile.birth_day,
+        hour: myProfile.birth_hour ?? 0,
+        minute: myProfile.birth_minute ?? 0,
+        gender: myProfile.gender,
+        calendarType: myProfile.calendar_type,
+        isLeapMonth: myProfile.is_leap || myProfile.isLeapMonth || false,
+      });
 
       // Partner Saju
       // (Assume logic for calculating Saju from provided fields)
@@ -119,14 +121,16 @@ export default function CompatibilityAnalysisScreen() {
       // "meSaju" uses `getMyEightSaju`.
       // "youSaju" uses `getMyEightSaju`.
 
-      const youSaju = getMyEightSaju(
-        pYear,
-        pMonth,
-        pDay,
-        pHour ?? 0,
-        0, // minute default 0
-        pGender === 'male' ? 'm' : 'f'
-      );
+      const youSaju = await getMyEightSaju({
+        year: pYear,
+        month: pMonth,
+        day: pDay,
+        hour: pHour ?? 0,
+        minute: 0,
+        gender: pGender,
+        calendarType: pCalendar,
+        isLeapMonth: params.isLeapMonth === 'true',
+      });
 
       // 4. Calculate Compatibility
       const compResult = calculateRealCompatibility(mySaju, youSaju);
@@ -166,9 +170,9 @@ export default function CompatibilityAnalysisScreen() {
 
   return (
     <>
-      <WebSEO title={`나와 ${partnerName}님의 궁합 분석 - 사주라떼`} />
-      <Stack.Screen options={{ headerShown: false, title: '궁합 분석 결과' }} />
       <View className="flex-1 bg-white" style={{ paddingTop: insets.top }}>
+        <WebSEO title={`나와 ${partnerName}님의 궁합 분석 - 사주라떼`} />
+        <Stack.Screen options={{ headerShown: false, title: '궁합 분석 결과' }} />
         {/* Header */}
         <View className="flex-row items-center justify-between px-4 py-3">
           <TouchableOpacity onPress={() => router.back()} className="p-2">
@@ -262,9 +266,21 @@ export default function CompatibilityAnalysisScreen() {
 
               {/* Five Elements Graph */}
               <View className="mb-8">
-                <View className="mb-4 flex-row items-center gap-2">
-                  <TrendingUp size={20} className="text-gray-900" color="black" />
-                  <Text className="text-lg font-bold text-gray-900">오행 에너지 비교</Text>
+                <View className="mb-4 flex-row items-center justify-between gap-2">
+                  <View className="flex-row items-center gap-2">
+                    <TrendingUp size={20} className="text-gray-900" color="black" />
+                    <Text className="text-lg font-bold text-gray-900">오행 에너지 비교</Text>
+                  </View>
+                  <View className="mt-2 flex-row justify-end gap-4">
+                    <View className="flex-row items-center gap-1">
+                      <View className="h-2 w-2 rounded-full bg-gray-600" />
+                      <Text className="text-xs text-gray-500">나</Text>
+                    </View>
+                    <View className="flex-row items-center gap-1">
+                      <View className="h-2 w-2 rounded-full bg-gray-300" />
+                      <Text className="text-xs text-gray-500">상대방</Text>
+                    </View>
+                  </View>
                 </View>
 
                 <View className="gap-3">
@@ -297,16 +313,6 @@ export default function CompatibilityAnalysisScreen() {
                       </View>
                     );
                   })}
-                  <View className="mt-2 flex-row justify-end gap-4">
-                    <View className="flex-row items-center gap-1">
-                      <View className="h-2 w-2 rounded-full bg-gray-600" />
-                      <Text className="text-xs text-gray-500">나</Text>
-                    </View>
-                    <View className="flex-row items-center gap-1">
-                      <View className="h-2 w-2 rounded-full bg-gray-300" />
-                      <Text className="text-xs text-gray-500">상대방</Text>
-                    </View>
-                  </View>
                 </View>
 
                 {/* Element Analysis Description (Added) */}

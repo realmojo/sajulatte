@@ -22,7 +22,17 @@ export type AmuletType =
   | 'peace'
   | 'promotion'
   | 'jackpot'
-  | 'harmony';
+  | 'harmony'
+  | 'reunion'
+  | 'popularity'
+  | 'sale'
+  | 'legal'
+  | 'fertility'
+  | 'pet'
+  | 'sobriety'
+  | 'sleep'
+  | 'diet'
+  | 'debt';
 
 interface AmuletProps {
   type: AmuletType;
@@ -46,6 +56,16 @@ const GLYPHS: Record<AmuletType, string> = {
   jackpot: 'M100 130 L70 80 L130 80 Z M100 130 L130 180 L70 180 Z M100 40 V80 M100 180 V220', // Star/Burst
   harmony:
     'M60 130 A40 40 0 1 1 140 130 A40 40 0 1 1 60 130 M70 130 H130 M100 100 V160 M60 60 L80 80 M140 60 L120 80 M60 200 L80 180 M140 200 L120 180', // Circle/Unity
+  reunion: 'M80 60 Q120 60 100 100 T80 140 M120 140 L80 180',
+  popularity: 'M100 40 L70 200 M130 200 L100 40 M60 120 H140',
+  sale: 'M70 70 H130 V130 H70 Z M70 130 L60 220 M130 130 L140 220',
+  legal: 'M100 40 V220 M70 80 L130 180 M130 80 L70 180',
+  fertility: 'M100 50 Q150 50 150 100 T100 150 T50 200',
+  pet: 'M80 80 Q60 60 80 40 Q100 60 120 40 Q140 60 120 80 M100 100 V200',
+  sobriety: 'M60 60 L140 220 M140 60 L60 220 M100 40 V220',
+  sleep: 'M70 100 Q100 150 130 100 M70 180 Q100 230 130 180 M100 40 V80',
+  diet: 'M90 40 Q60 100 90 160 Q120 100 90 40 M70 180 H110',
+  debt: 'M70 100 H130 M70 140 H130 M70 180 H130 M100 80 V200',
 };
 
 // Traditional Hanja for Titles (Simulated/Mapped)
@@ -60,6 +80,16 @@ const HANJA_TITLE: Record<AmuletType, string> = {
   promotion: '昇',
   jackpot: '金',
   harmony: '和',
+  reunion: '再',
+  popularity: '名',
+  sale: '売',
+  legal: '官',
+  fertility: '産',
+  pet: '獸',
+  sobriety: '禁',
+  sleep: '夢',
+  diet: '美',
+  debt: '淸',
 };
 
 const AMULET_CONFIG: Record<AmuletType, { label: string; sub: string }> = {
@@ -73,6 +103,16 @@ const AMULET_CONFIG: Record<AmuletType, { label: string; sub: string }> = {
   promotion: { label: '승승장구', sub: '관운형통 입신양명' },
   jackpot: { label: '일확천금', sub: '횡재도래 복권당첨' },
   harmony: { label: '인화단결', sub: '가정화목 대인원만' },
+  reunion: { label: '재회성취', sub: '인연회복 이별방지' },
+  popularity: { label: '인기상승', sub: '명예고취 만인추앙' },
+  sale: { label: '부동산운', sub: '매매성사 급매해결' },
+  legal: { label: '관재소멸', sub: '시비구설 승소기원' },
+  fertility: { label: '순산기원', sub: '자손번창 잉태기원' },
+  pet: { label: '애견건강', sub: '무병장수 사고방지' },
+  sobriety: { label: '금주금연', sub: '습관개선 의지강화' },
+  sleep: { label: '숙면안정', sub: '악몽퇴치 불면해소' },
+  diet: { label: '미용성형', sub: '다이어트 외모개선' },
+  debt: { label: '채무청산', sub: '빚탈출기 자산증식' },
 };
 
 export const DigitalAmulet = ({ type, width = 200, height = 300 }: AmuletProps) => {
@@ -146,6 +186,19 @@ export const DigitalAmulet = ({ type, width = 200, height = 300 }: AmuletProps) 
             {hanja}
           </SvgText>
         </G>
+
+        {/* 3.5. Background Large Hanja Watermark (Slightly visible behind glyph) */}
+        <SvgText
+          x="100"
+          y="190"
+          fontSize="120"
+          fill={INK_COLOR}
+          opacity="0.07"
+          textAnchor="middle"
+          fontWeight="bold"
+          fontFamily="serif">
+          {hanja}
+        </SvgText>
 
         {/* 4. Main Glyph (The "Charm" Drawing) - Simulated Brush Strokes */}
         {/* We use strokeLinecap="round" and strokeLinejoin="round" for a smoother ink feel */}

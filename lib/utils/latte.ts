@@ -237,7 +237,7 @@ const convertToKorean = (hanja: string) => {
 /**
  * 한 글자 한자(천간 또는 지지)를 한글로 변환
  */
-const convertCharToKorean = (char: string) => {
+export const convertCharToKorean = (char: string) => {
   const stemIdx = STEMS_EN.indexOf(char);
   if (stemIdx !== -1) return STEMS[stemIdx];
 

@@ -1,4 +1,15 @@
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  Modal,
+  TextInput,
+  TouchableWithoutFeedback,
+  Keyboard,
+  FlatList,
+} from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react-native';
@@ -21,14 +32,37 @@ export default function PillarsCalendarScreen() {
   const [calendarData, setCalendarData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [userIlgan, setUserIlgan] = useState<string | undefined>(undefined);
+  const [userIlji, setUserIlji] = useState<string | undefined>(undefined);
+  const [userIlganColor, setUserIlganColor] = useState<string | undefined>(undefined);
+
+  // Date Picker Modal State
+  const [isDatePickerVisible, setDatePickerVisible] = useState(false);
+  const [pickerYear, setPickerYear] = useState(2024);
+  const [pickerMonth, setPickerMonth] = useState(1);
+
+  // Day Analysis Modal State Removed
+
+  const YEARS = Array.from({ length: 1101 }, (_, i) => 1900 + i);
+  const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
+  const ITEM_HEIGHT = 50;
 
   useEffect(() => {
     // Fetch User Ilgan
     const fetchUserData = async () => {
       try {
         const result = await getMyEightSaju();
-        if (result && result.meta && result.meta.ilgan) {
-          setUserIlgan(result.meta.ilgan);
+        console.log(111, result);
+        if (result && result.meta) {
+          if (result.meta.ilgan) {
+            setUserIlgan(result.meta.ilgan);
+            // Ilgan is day's gan.
+            if (result.day && result.day.gan && result.day.gan.color) {
+              setUserIlganColor(result.day.gan.color);
+            }
+          }
+          if (result.meta.sajuJiHjs && result.meta.sajuJiHjs.dayJi) {
+            setUserIlji(result.meta.sajuJiHjs.dayJi);
+          }
         }
       } catch (e) {
         console.error('Failed to fetch user ilgan:', e);
@@ -73,6 +107,34 @@ export default function PillarsCalendarScreen() {
     setCurrentDate({ year: now.getFullYear(), month: now.getMonth() + 1 });
   };
 
+  const handleOpenDatePicker = () => {
+    setPickerYear(currentDate.year);
+    setPickerMonth(currentDate.month);
+    setDatePickerVisible(true);
+  };
+
+  const handleConfirmDate = () => {
+    setCurrentDate({ year: pickerYear, month: pickerMonth });
+    setDatePickerVisible(false);
+  };
+
+  const handleDayPress = (day: any) => {
+    if (!userIlgan || !userIlji) {
+      return;
+    }
+
+    router.push({
+      pathname: '/pillarscalendar/analysis',
+      params: {
+        year: currentDate.year,
+        month: currentDate.month,
+        day: day.day,
+        gan: day.gan.hanja,
+        ji: day.ji.hanja,
+      },
+    });
+  };
+
   // Grid Generation logic with padding
   const gridCells = useMemo(() => {
     if (!calendarData) return [];
@@ -113,11 +175,13 @@ export default function PillarsCalendarScreen() {
             className="rounded-full p-2 active:bg-gray-100">
             <ChevronLeft size={20} color="#4b5563" />
           </TouchableOpacity>
-          <View className="items-center">
+          <TouchableOpacity
+            onPress={handleOpenDatePicker}
+            className="items-center active:opacity-70">
             <Text className="text-lg font-bold text-gray-900">
               {currentDate.year}년 {currentDate.month}월
             </Text>
-          </View>
+          </TouchableOpacity>
           <TouchableOpacity
             onPress={handleNextMonth}
             className="rounded-full p-2 active:bg-gray-100">
@@ -129,6 +193,17 @@ export default function PillarsCalendarScreen() {
           <Text className="text-xs font-bold text-gray-600">오늘</Text>
         </TouchableOpacity>
       </View>
+
+      {userIlji && (
+        <View className="items-center justify-center bg-gray-50 py-2">
+          <Text className="text-sm font-medium text-gray-600">
+            나의 일간:{' '}
+            <Text className="font-bold" style={{ color: userIlganColor }}>
+              {userIlgan}
+            </Text>
+          </Text>
+        </View>
+      )}
 
       {/* Weekday Header */}
       <View className="flex-row border-b border-gray-100 bg-gray-50/50 py-2">
@@ -162,6 +237,7 @@ export default function PillarsCalendarScreen() {
               }
 
               const day = cell.data;
+              console.log(day);
               const isSun = day.weekDay === 0;
               const isSat = day.weekDay === 6;
               // Check if today
@@ -171,9 +247,11 @@ export default function PillarsCalendarScreen() {
                 today.getDate() === day.day;
 
               return (
-                <View
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() => handleDayPress(day)}
                   key={cell.key}
-                  className={`relative h-28 border-b border-r border-gray-100 p-1 ${isToday ? 'bg-amber-50' : day.isMyIlgan ? 'bg-amber-100/30' : ''}`}
+                  className={`relative h-28 border-b border-r border-gray-100 p-1 ${isToday ? 'bg-green-100' : day.isMyIlgan ? 'bg-amber-100/30' : ''}`}
                   style={{ width: '14.28%' }}>
                   {/* Date Number */}
                   <View className="flex-row items-start justify-between">
@@ -182,8 +260,12 @@ export default function PillarsCalendarScreen() {
                       {day.day}
                     </Text>
                     {day.isMyIlgan && (
-                      <View className="mr-1 mt-1 rounded-md bg-amber-100 px-1.5 py-0.5">
-                        <Text className="text-[10px] font-bold text-amber-700">나의 일진</Text>
+                      <View className="mt-1 rounded-md bg-amber-100 px-1.5">
+                        <Text
+                          className="text-[10px] font-bold text-amber-700"
+                          style={{ color: userIlganColor }}>
+                          {userIlgan}
+                        </Text>
                       </View>
                     )}
                   </View>
@@ -213,12 +295,108 @@ export default function PillarsCalendarScreen() {
                       {day.lunarText}
                     </Text>
                   </View>
-                </View>
+                </TouchableOpacity>
               );
             })}
           </View>
         </ScrollView>
       )}
+
+      {/* Date Picker Modal */}
+      <Modal
+        visible={isDatePickerVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setDatePickerVisible(false)}>
+        <TouchableWithoutFeedback onPress={() => setDatePickerVisible(false)}>
+          <View className="flex-1 items-center justify-center bg-black/50 p-6">
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+              <View className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
+                <Text className="mb-4 text-center text-lg font-bold text-gray-900">날짜 선택</Text>
+
+                <View className="h-64 flex-row gap-4">
+                  {/* Year List */}
+                  <View className="flex-1 overflow-hidden rounded-xl border border-gray-100 bg-gray-50">
+                    <Text className="bg-gray-100 py-2 text-center text-sm font-medium text-gray-500">
+                      년도
+                    </Text>
+                    <FlatList
+                      data={YEARS}
+                      keyExtractor={(item) => item.toString()}
+                      getItemLayout={(data, index) => ({
+                        length: ITEM_HEIGHT,
+                        offset: ITEM_HEIGHT * index,
+                        index,
+                      })}
+                      initialScrollIndex={Math.max(0, pickerYear - 1900 - 2)} // Center roughly
+                      showsVerticalScrollIndicator={false}
+                      renderItem={({ item }) => (
+                        <TouchableOpacity
+                          onPress={() => setPickerYear(item)}
+                          className={`h-[50px] items-center justify-center ${
+                            pickerYear === item ? 'bg-amber-100' : ''
+                          }`}>
+                          <Text
+                            className={`text-lg ${
+                              pickerYear === item ? 'font-bold text-amber-900' : 'text-gray-600'
+                            }`}>
+                            {item}년
+                          </Text>
+                        </TouchableOpacity>
+                      )}
+                    />
+                  </View>
+
+                  {/* Month List */}
+                  <View className="flex-1 overflow-hidden rounded-xl border border-gray-100 bg-gray-50">
+                    <Text className="bg-gray-100 py-2 text-center text-sm font-medium text-gray-500">
+                      월
+                    </Text>
+                    <FlatList
+                      data={MONTHS}
+                      keyExtractor={(item) => item.toString()}
+                      getItemLayout={(data, index) => ({
+                        length: ITEM_HEIGHT,
+                        offset: ITEM_HEIGHT * index,
+                        index,
+                      })}
+                      initialScrollIndex={Math.max(0, pickerMonth - 1 - 2)}
+                      showsVerticalScrollIndicator={false}
+                      renderItem={({ item }) => (
+                        <TouchableOpacity
+                          onPress={() => setPickerMonth(item)}
+                          className={`h-[50px] items-center justify-center ${
+                            pickerMonth === item ? 'bg-amber-100' : ''
+                          }`}>
+                          <Text
+                            className={`text-lg ${
+                              pickerMonth === item ? 'font-bold text-amber-900' : 'text-gray-600'
+                            }`}>
+                            {item}월
+                          </Text>
+                        </TouchableOpacity>
+                      )}
+                    />
+                  </View>
+                </View>
+
+                <View className="mt-6 flex-row gap-3">
+                  <TouchableOpacity
+                    className="flex-1 items-center justify-center rounded-xl bg-gray-100 py-3.5"
+                    onPress={() => setDatePickerVisible(false)}>
+                    <Text className="font-semibold text-gray-600">취소</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    className="flex-1 items-center justify-center rounded-xl bg-amber-500 py-3.5"
+                    onPress={handleConfirmDate}>
+                    <Text className="font-semibold text-white">이동</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
     </View>
   );
 }
