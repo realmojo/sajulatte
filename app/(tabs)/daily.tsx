@@ -18,12 +18,24 @@ import {
 import { useColorScheme } from 'nativewind';
 
 import { WebSEO } from '@/components/ui/WebSEO';
+import { STORY_DATA } from '@/lib/data/storyData';
 
 export default function DailyScreen() {
   const insets = useSafeAreaInsets();
   const { colorScheme } = useColorScheme();
   const router = useRouter();
   const iconColor = colorScheme === 'dark' ? '#fff' : '#000';
+
+  const storiesByCategory = React.useMemo(() => {
+    const grouped: Record<string, (typeof STORY_DATA)[string][]> = {};
+    Object.values(STORY_DATA).forEach((story) => {
+      if (!grouped[story.category]) grouped[story.category] = [];
+      grouped[story.category].push(story);
+    });
+    return grouped;
+  }, []);
+
+  const categoryOrder = ['사주 기초', '생활 풍수', '연애 사주', '절기 지혜', '12지신'];
 
   return (
     <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
@@ -43,7 +55,7 @@ export default function DailyScreen() {
 
       <ScrollView className="flex-1" contentContainerClassName="p-4 gap-8">
         {/* Banner Section (Optional) */}
-        <View className="h-40 w-full items-center justify-center rounded-2xl bg-indigo-500 shadow-sm">
+        <View className="h-40 w-full items-center justify-center rounded-2xl bg-indigo-500">
           <View className="items-center gap-2">
             <Sparkles size={40} color="white" />
             <Text className="text-xl font-bold text-white">오늘의 운세를 확인하세요</Text>
@@ -117,14 +129,48 @@ export default function DailyScreen() {
                 key={index}
                 onPress={() => router.push(`/fortune/${item.id}`)}
                 className="w-[22%] items-center gap-2 active:opacity-70">
-                <View
-                  className={`h-14 w-14 items-center justify-center rounded-2xl ${item.bg} shadow-sm`}>
+                <View className={`h-14 w-14 items-center justify-center rounded-2xl ${item.bg}`}>
                   <item.icon size={24} className={item.color} strokeWidth={2.5} />
                 </View>
                 <Text className="text-xs font-medium text-foreground">{item.label}</Text>
               </TouchableOpacity>
             ))}
           </View>
+        </View>
+
+        {/* Fortune Stories (Card News) - Netflix Style Rows */}
+        <View className="pb-10">
+          {categoryOrder.map((cat) => (
+            <View key={cat} className="mb-8 gap-4">
+              <View className="flex-row items-center justify-between px-1">
+                <Text className="text-lg font-bold text-foreground">{cat}</Text>
+              </View>
+
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerClassName="gap-3 px-1">
+                {storiesByCategory[cat]?.map((item) => (
+                  <TouchableOpacity
+                    key={item.id}
+                    onPress={() => router.push(`/story/${item.id}`)}
+                    className="mr-2 w-72 gap-3 rounded-2xl border border-gray-100 bg-white p-5 active:opacity-90">
+                    <View className={`self-start rounded-full px-3 py-1 ${item.color}`}>
+                      <Text className={`text-xs font-bold ${item.textColor}`}>{item.category}</Text>
+                    </View>
+                    <View className="gap-1.5">
+                      <Text className="text-lg font-bold leading-snug text-gray-900">
+                        {item.title}
+                      </Text>
+                      <Text className="text-sm leading-5 text-gray-500" numberOfLines={2}>
+                        {item.desc}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+          ))}
         </View>
       </ScrollView>
     </View>

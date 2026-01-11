@@ -366,7 +366,7 @@ export const SajuResultView = ({
             </View>
 
             {/* Row 2: 십성 (Sipsin for Gan) */}
-            <View className="flex-row border-b border-gray-200 py-2">
+            <View className="flex-row border-b border-gray-200">
               <View className="w-12 items-center justify-center bg-gray-50">
                 <Text className="text-xs font-medium text-gray-500">십성</Text>
               </View>
@@ -411,7 +411,7 @@ export const SajuResultView = ({
             </View>
 
             {/* Row 4: 십성 (Sipsin for Ji) */}
-            <View className="flex-row border-b border-gray-200 py-2">
+            <View className="flex-row border-b border-gray-200">
               <View className="w-12 items-center justify-center bg-gray-50">
                 <Text className="text-xs font-medium text-gray-500">십성</Text>
               </View>
@@ -427,7 +427,7 @@ export const SajuResultView = ({
             </View>
 
             {/* Row 5: 지장간 (Jijangan) */}
-            <View className="flex-row border-b border-gray-200 py-2">
+            <View className="flex-row border-b border-gray-200">
               <View className="w-12 items-center justify-center bg-gray-50">
                 <Text className="text-xs font-medium text-gray-500">지장간</Text>
               </View>
@@ -443,7 +443,7 @@ export const SajuResultView = ({
             </View>
 
             {/* Row 6: 12운성 (12Wunsung) */}
-            <View className="flex-row border-b border-gray-200 py-2">
+            <View className="flex-row border-b border-gray-200">
               <View className="w-12 items-center justify-center bg-gray-50">
                 <Text className="text-xs font-medium text-gray-500">12운성</Text>
               </View>
@@ -459,7 +459,7 @@ export const SajuResultView = ({
             </View>
 
             {/* Row 7: 12신살 (12Shinsal) */}
-            <View className="flex-row py-2">
+            <View className="flex-row">
               <View className="w-12 items-center justify-center bg-gray-50">
                 <Text className="text-xs font-medium text-gray-500">12신살</Text>
               </View>
@@ -1140,7 +1140,7 @@ export const SajuResultView = ({
         <View className="pb-10">
           <TouchableOpacity
             onPress={() => router.push('/pillarscalendar')}
-            className="flex-row items-center justify-between rounded-2xl border border-gray-100 bg-white p-5 shadow-sm active:bg-gray-50">
+            className="flex-row items-center justify-between rounded-2xl border border-gray-300 bg-white p-5 active:bg-gray-50">
             <View className="gap-1">
               <View className="flex-row items-center gap-2">
                 <Text className="text-lg font-bold text-gray-900">만세력 달력</Text>
