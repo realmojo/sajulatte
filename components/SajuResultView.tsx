@@ -39,7 +39,14 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Text } from '@/components/ui/text';
-import { getMonthList, getMyEightSaju, getYearList } from '@/lib/utils/latte';
+import {
+  getMonthList,
+  getMyEightSaju,
+  getYearList,
+  calc12ShinSal,
+  getSpecialShinSals,
+  getCurrentYearJi,
+} from '@/lib/utils/latte';
 
 interface SajuResultProps {
   name: string;
@@ -480,6 +487,69 @@ export const SajuResultView = ({
                 </View>
               ))}
             </View>
+          </View>
+        </View>
+
+        {/* Detailed 12-Shin-sal & Special Shin-sal Table */}
+        <View className="gap-3 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+          <Text className="text-lg font-bold text-gray-900">신살 상세 분석</Text>
+          <View className="flex-row justify-between gap-2">
+            {[
+              { label: '시주', data: saju.hour },
+              { label: '일주', data: saju.day },
+              { label: '월주', data: saju.month },
+              { label: '년주', data: saju.year },
+            ].map((pillar, idx) => {
+              // 1. Calculate 12-Shin-sal
+              // Standard 1: Year Ji Base
+              const shinSalYear = calc12ShinSal(saju.year.ji.hanja, pillar.data.ji.hanja);
+              // Standard 2: Day Ji Base
+              const shinSalDay = calc12ShinSal(saju.day.ji.hanja, pillar.data.ji.hanja);
+              // Standard 3: Current Year Base (Seun)
+              const currentYearJi = getCurrentYearJi();
+              const shinSalSeun = calc12ShinSal(currentYearJi, pillar.data.ji.hanja);
+
+              // 2. Special Shin-sals
+              const specialShinSals = getSpecialShinSals(
+                pillar.data.gan.hanja,
+                pillar.data.ji.hanja,
+                saju.day.gan.hanja
+              );
+
+              return (
+                <View key={idx} className="flex-1 items-center gap-2">
+                  {/* Header */}
+                  <View className="mb-1 rounded-full bg-gray-100 px-2.5 py-1">
+                    <Text className="text-xs font-bold text-gray-500">{pillar.label}</Text>
+                  </View>
+
+                  {/* 12 Shin-sal Rows */}
+                  <View className="w-full items-center gap-1">
+                    <Text className="text-xs font-medium text-gray-800">{shinSalYear}</Text>
+                    <Text className="text-xs font-medium text-gray-600">{shinSalDay}</Text>
+                    <Text className="text-xs font-medium text-blue-600">{shinSalSeun}</Text>
+                  </View>
+
+                  {/* Divider */}
+                  <View className="my-1 h-[1px] w-full bg-gray-100" />
+
+                  {/* Special Shin-sals */}
+                  <View className="min-h-[60px] w-full items-center gap-1">
+                    {specialShinSals.length > 0 ? (
+                      specialShinSals.map((sal, sIdx) => (
+                        <Text
+                          key={sIdx}
+                          className="text-center text-[11px] font-bold text-indigo-600">
+                          {sal}
+                        </Text>
+                      ))
+                    ) : (
+                      <Text className="text-[11px] text-gray-300">-</Text>
+                    )}
+                  </View>
+                </View>
+              );
+            })}
           </View>
         </View>
 

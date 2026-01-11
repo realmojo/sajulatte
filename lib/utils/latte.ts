@@ -53,6 +53,15 @@ const GAN_INFO = {
   癸: { elem: 'WATER', sang: -1 },
 };
 
+/**
+ * 현재 연도의 지지(Year Branch)를 반환하는 함수 (입춘 기준)
+ */
+export const getCurrentYearJi = () => {
+  const solar = Solar.fromDate(new Date());
+  const lunar = solar.getLunar();
+  return lunar.getEightChar().getYear()[1]; // 지지 한자 반환
+};
+
 const JI_INFO = {
   寅: { elem: 'WOOD', sang: 1 },
   卯: { elem: 'WOOD', sang: -1 },
@@ -465,12 +474,77 @@ const GAN_ELEMENT_GROUP = {
   癸: '申', // 수(신자진)
 };
 
+// 백호살 리스트
+const BAEKHO_LIST = ['甲辰', '乙未', '丙戌', '丁丑', '戊辰', '壬戌', '癸丑'];
+
+// 괴강살 리스트 (무술, 경진, 경술, 임진 - 임술, 무진 포함 여부는 파벌 따름, 여기선 4대 괴강 위주)
+const GOEGANG_LIST = ['戊戌', '庚辰', '庚戌', '壬辰'];
+
+// 천을귀인 맵 (일간 -> 지지 리스트)
+const CHEONEUL_MAP = {
+  甲: ['丑', '未'],
+  戊: ['丑', '未'],
+  庚: ['丑', '未'],
+  乙: ['子', '申'],
+  己: ['子', '申'],
+  丙: ['亥', '酉'],
+  丁: ['亥', '酉'],
+  辛: ['午', '寅'],
+  壬: ['巳', '卯'],
+  癸: ['巳', '卯'],
+};
+
+// 비인살 맵 (일간 -> 지지) - 양인의 충
+const BIIN_MAP = {
+  甲: '酉',
+  丙: '子',
+  戊: '子',
+  庚: '卯',
+  壬: '午',
+  // 음간의 경우 관대지의 충 (혹은 양인과 동일하게 보는 견해 있음, 여기서는 양간 위주만 적용하거나 생략)
+  乙: '',
+  丁: '',
+  己: '',
+  辛: '',
+  癸: '',
+};
+
+// 현침살 글자 (천간/지지)
+const HYEONCHIM_CHARS = ['甲', '申', '卯', '午', '辛'];
+
 /**
- * 12신살 계산 함수
+ * 특수 신살 계산 함수
+ */
+export const getSpecialShinSals = (gan: string, ji: string, dayGan: string): string[] => {
+  const list: string[] = [];
+  const pillar = gan + ji;
+
+  // 1. 백호살 (간지 기준)
+  if (BAEKHO_LIST.includes(pillar)) list.push('백호살');
+
+  // 2. 괴강살 (간지 기준)
+  if (GOEGANG_LIST.includes(pillar)) list.push('괴강살');
+
+  // 3. 천을귀인 (일간 기준)
+  const cheoneuls = CHEONEUL_MAP[dayGan as keyof typeof CHEONEUL_MAP] || [];
+  if (cheoneuls.includes(ji)) list.push('천을귀인');
+
+  // 4. 현침살 (글자 기준) - 보통 주중에 해당 글자가 있으면 성립.
+  // 기둥별 표시를 위해 해당 기둥에 글자가 있으면 표시.
+  if (HYEONCHIM_CHARS.includes(gan) || HYEONCHIM_CHARS.includes(ji)) list.push('현침살');
+
+  // 5. 비인살 (일간 기준)
+  if (BIIN_MAP[dayGan as keyof typeof BIIN_MAP] === ji) list.push('비인살');
+
+  return list;
+};
+
+/**
+ * 12신살 계산 함수 (Exported)
  * @param {string} standardJi - 기준 지지 (예: 년지 '戌')
  * @param {string} targetJi - 대조할 지지 (예: 대운 지지 '亥')
  */
-const get12ShinSal = (standardJi: string, targetJi: string) => {
+export const calc12ShinSal = (standardJi: string, targetJi: string) => {
   const startJi = SAM_HAP_MAP[standardJi as keyof typeof SAM_HAP_MAP]; // 삼합의 시작점(지살) 추출
   if (!startJi) return '';
 
@@ -482,6 +556,11 @@ const get12ShinSal = (standardJi: string, targetJi: string) => {
 
   return SHIN_SAL_LIST[diff];
 };
+
+/**
+ * 12신살 계산 함수 (Internal use)
+ */
+const get12ShinSal = calc12ShinSal;
 
 /**
  * [핵심] 대운 리스트 10단계 생성 함수
