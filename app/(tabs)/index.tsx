@@ -196,7 +196,7 @@ export default function Screen() {
           }}>
           <View className="overflow-hidden rounded-full border-4 border-amber-100 shadow-xl">
             <Image
-              source={require('../../assets/images/logo.png')}
+              source={require('../../assets/images/icon.png')}
               style={{ width: 120, height: 120 }}
               resizeMode="cover"
             />
