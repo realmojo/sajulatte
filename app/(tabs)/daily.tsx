@@ -20,6 +20,65 @@ import { useColorScheme } from 'nativewind';
 import { WebSEO } from '@/components/ui/WebSEO';
 import { STORY_DATA } from '@/lib/data/storyData';
 
+const categories = [
+  {
+    id: 'today',
+    label: '종합',
+    icon: Star,
+    color: 'text-amber-500',
+    bg: 'bg-amber-100',
+  },
+  {
+    id: 'love',
+    label: '연애운',
+    icon: Heart,
+    color: 'text-rose-500',
+    bg: 'bg-rose-100',
+  },
+  {
+    id: 'money',
+    label: '금전운',
+    icon: Coins,
+    color: 'text-yellow-600',
+    bg: 'bg-yellow-100',
+  },
+  {
+    id: 'marriage',
+    label: '결혼운',
+    icon: HeartHandshake,
+    color: 'text-pink-500',
+    bg: 'bg-pink-100',
+  },
+  {
+    id: 'job',
+    label: '직업운',
+    icon: Briefcase,
+    color: 'text-blue-500',
+    bg: 'bg-blue-100',
+  },
+  {
+    id: 'health',
+    label: '건강운',
+    icon: Activity,
+    color: 'text-green-500',
+    bg: 'bg-green-100',
+  },
+  {
+    id: 'human',
+    label: '대인운',
+    icon: User,
+    color: 'text-purple-500',
+    bg: 'bg-purple-100',
+  },
+  {
+    id: 'newyear',
+    label: '신년운세',
+    icon: Sparkles,
+    color: 'text-cyan-500',
+    bg: 'bg-cyan-100',
+  },
+];
+
 export default function DailyScreen() {
   const insets = useSafeAreaInsets();
   const { colorScheme } = useColorScheme();
@@ -67,64 +126,7 @@ export default function DailyScreen() {
         <View className="gap-4">
           <Text className="px-1 text-lg font-bold text-foreground">전체 카테고리</Text>
           <View className="flex-row flex-wrap justify-between gap-y-6">
-            {[
-              {
-                id: 'today',
-                label: '종합',
-                icon: Star,
-                color: 'text-amber-500',
-                bg: 'bg-amber-100',
-              },
-              {
-                id: 'love',
-                label: '연애운',
-                icon: Heart,
-                color: 'text-rose-500',
-                bg: 'bg-rose-100',
-              },
-              {
-                id: 'money',
-                label: '금전운',
-                icon: Coins,
-                color: 'text-yellow-600',
-                bg: 'bg-yellow-100',
-              },
-              {
-                id: 'marriage',
-                label: '결혼운',
-                icon: HeartHandshake,
-                color: 'text-pink-500',
-                bg: 'bg-pink-100',
-              },
-              {
-                id: 'job',
-                label: '직업운',
-                icon: Briefcase,
-                color: 'text-blue-500',
-                bg: 'bg-blue-100',
-              },
-              {
-                id: 'health',
-                label: '건강운',
-                icon: Activity,
-                color: 'text-green-500',
-                bg: 'bg-green-100',
-              },
-              {
-                id: 'human',
-                label: '대인운',
-                icon: User,
-                color: 'text-purple-500',
-                bg: 'bg-purple-100',
-              },
-              {
-                id: 'newyear',
-                label: '신년운세',
-                icon: Sparkles,
-                color: 'text-cyan-500',
-                bg: 'bg-cyan-100',
-              },
-            ].map((item, index) => (
+            {categories.map((item, index) => (
               <TouchableOpacity
                 key={index}
                 onPress={() => router.push(`/fortune/${item.id}`)}

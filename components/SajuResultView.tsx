@@ -83,6 +83,7 @@ export const SajuResultView = ({
           calendarType,
           isLeapMonth,
         });
+        console.log(data);
         setSaju(data);
       } catch (e) {
         console.error(e);
@@ -221,6 +222,12 @@ export const SajuResultView = ({
                       <View className="rounded-full bg-gray-100 px-2 py-0.5">
                         <Text className="text-[10px] text-gray-500">
                           {gender === 'male' ? '남성' : '여성'}
+                        </Text>
+                      </View>
+                      <View className="rounded-full border border-amber-100 bg-amber-50 px-2 py-0.5">
+                        <Text className="text-[10px] font-bold text-amber-700">
+                          {saju.day.gan.hanja}
+                          {saju.day.ji.hanja}({saju.day.korean})일주
                         </Text>
                       </View>
                     </View>

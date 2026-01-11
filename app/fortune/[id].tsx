@@ -151,9 +151,19 @@ export default function FortuneDetailScreen() {
 
     return (
       <View className="mb-6 rounded-2xl border border-gray-100 bg-gray-50 p-5 shadow-sm">
-        <Text className={`mb-2 text-base font-bold ${config.color}`}>
-          {config.emoji} {config.title}
-        </Text>
+        <View className="mb-2 flex-row items-baseline justify-between">
+          <Text className={`text-base font-bold ${config.color}`}>
+            {config.emoji} {config.title}
+          </Text>
+          <Text className="text-xs text-gray-400">
+            {new Date().toLocaleDateString('ko-KR', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}{' '}
+            기준
+          </Text>
+        </View>
         <Text className="text-sm leading-6 text-gray-800">{content}</Text>
       </View>
     );
