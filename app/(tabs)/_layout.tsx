@@ -65,14 +65,14 @@ export default function TabLayout() {
             title: tab.title,
             headerLeft: () => (
               <View className="pl-4">
-                <tab.icon size={24} color={theme.colors.text} />
+                <tab.icon size={20} color={theme.colors.text} />
               </View>
             ),
             headerTitleContainerStyle: {
               paddingLeft: 4,
             },
             tabBarIcon: ({ focused, color }) => (
-              <View className={focused ? 'rounded-full bg-amber-100 px-4 py-1' : ''}>
+              <View>
                 <tab.icon color={focused ? '#d97706' : color} size={20} />
               </View>
             ),

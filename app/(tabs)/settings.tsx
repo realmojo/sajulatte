@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { WebView } from 'react-native-webview'; // Import WebView
 import * as Linking from 'expo-linking';
+import * as Clipboard from 'expo-clipboard';
 
 import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -32,6 +33,7 @@ import {
   MessageSquare,
   Users, // Added Users icon
   Ellipsis,
+  Check,
 } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -317,24 +319,22 @@ export default function SettingsScreen() {
   };
 
   return (
-    <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
-      <Stack.Screen options={{ headerShown: false }} />
-
-      {/* Header */}
-      <View className="flex-row items-center justify-between px-4 py-3">
-        <View className="flex-row items-center gap-2">
-          <Ellipsis size={24} className="text-foreground" color={iconColor} />
-          <Text className="text-xl font-bold text-foreground">설정</Text>
-        </View>
-        <View className="flex-row items-center gap-4">
-          <TouchableOpacity>
-            <Bell size={24} color={iconColor} />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => router.push('/preferences')}>
-            <Settings size={24} color={iconColor} />
-          </TouchableOpacity>
-        </View>
-      </View>
+    <View className="flex-1 bg-background">
+      <Stack.Screen
+        options={{
+          headerShown: true,
+          headerRight: () => (
+            <View className="flex-row items-center gap-4 pr-4">
+              <TouchableOpacity>
+                <Bell size={24} color={iconColor} />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => router.push('/preferences')}>
+                <Settings size={24} color={iconColor} />
+              </TouchableOpacity>
+            </View>
+          ),
+        }}
+      />
       {/* Profile Edit Modal Component */}
       <ProfileEditModal
         visible={showProfileEdit}
@@ -602,7 +602,7 @@ export default function SettingsScreen() {
             <View className="overflow-hidden rounded-2xl border border-gray-100 bg-white">
               <TouchableOpacity
                 className="flex-row items-center justify-between bg-white p-4 active:bg-gray-50"
-                onPress={() => Alert.alert('공지사항', '새로운 소식이 없습니다.')}>
+                onPress={() => router.push('/notice')}>
                 <View className="flex-row items-center gap-3">
                   <View className="h-10 w-10 items-center justify-center rounded-full bg-purple-50">
                     <Volume2 size={20} color="#9333ea" />
@@ -626,7 +626,10 @@ export default function SettingsScreen() {
               <View className="mx-4 h-[1px] bg-gray-100" />
               <TouchableOpacity
                 className="flex-row items-center justify-between bg-white p-4 active:bg-gray-50"
-                onPress={() => Alert.alert('공유하기', '친구에게 앱 추천 링크를 복사했습니다.')}>
+                onPress={async () => {
+                  await Clipboard.setStringAsync('https://sajulatte.com');
+                  Alert.alert('복사 완료', '앱 추천 링크가 클립보드에 복사되었습니다.');
+                }}>
                 <View className="flex-row items-center gap-3">
                   <View className="h-10 w-10 items-center justify-center rounded-full bg-indigo-50">
                     <Share2 size={20} color="#4f46e5" />

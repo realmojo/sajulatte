@@ -214,16 +214,6 @@ export default function Screen() {
           title={`${savedProfile.name}님의 사주 풀이 - 사주라떼`}
           description={`${savedProfile.name}님의 타고난 성향, 오행 분석, 대운 흐름 등 상세한 사주 분석 결과를 무료로 확인하세요.`}
         />
-        <Stack.Screen
-          options={{
-            title: '만세력',
-            headerRight: () => (
-              <TouchableOpacity onPress={handleReset} className="mr-4">
-                <RefreshCcw size={20} color="#000" />
-              </TouchableOpacity>
-            ),
-          }}
-        />
         <SajuResultView
           name={savedProfile.name}
           year={savedProfile.birth_year}
@@ -245,7 +235,7 @@ export default function Screen() {
         title="사주라떼 - 무료 사주 만세력"
         description="생년월일만 입력하면 정통 명리학 기반의 정확한 사주 풀이와 만세력을 무료로 확인할 수 있습니다. 오늘의 운세와 궁합도 확인해보세요."
       />
-      <Stack.Screen options={{ title: '만세력', headerTransparent: false }} />
+      {/* <Stack.Screen options={{ title: '만세력' }} /> */}
       <ScrollView
         contentContainerClassName="flex-grow justify-center p-6 gap-8"
         className="flex-1 bg-background">

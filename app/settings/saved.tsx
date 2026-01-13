@@ -373,16 +373,6 @@ export default function SavedScreen() {
           title="저장된 사주 - 사주라떼"
           description="저장된 사주 명식 목록을 확인하고 관리하세요."
         />
-        <Stack.Screen options={{ headerShown: false }} />
-
-        {/* Header */}
-        <View className="flex-row items-center justify-between border-b border-gray-100 bg-white px-4 py-3">
-          <TouchableOpacity onPress={() => router.back()} className="-ml-2 w-10 p-2">
-            <ChevronLeft size={24} color="#000" />
-          </TouchableOpacity>
-          <Text className="text-lg font-bold text-gray-900">저장된 사주</Text>
-          <View className="w-10" />
-        </View>
 
         <View className="flex-1 px-4 pt-4">
           {isLoading ? (

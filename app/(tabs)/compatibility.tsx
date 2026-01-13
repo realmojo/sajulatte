@@ -187,24 +187,12 @@ export default function CompatibilityScreen() {
   };
 
   return (
-    <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
+    <View className="flex-1 bg-background">
       <WebSEO
         title="무료 궁합 보기 - 사주라떼"
         description="연인, 친구, 동료와의 궁합을 오행 분석을 통해 무료로 확인해보세요."
       />
-      <Stack.Screen options={{ headerShown: false }} />
-
-      {/* Header */}
-      <View className="flex-row items-center justify-between px-4 py-3">
-        <View className="flex-row items-center gap-2">
-          <HeartHandshake
-            size={24}
-            className="text-foreground"
-            color={colorScheme === 'dark' ? '#fff' : '#000'}
-          />
-          <Text className="text-xl font-bold text-foreground">궁합</Text>
-        </View>
-      </View>
+      {/* Header Removed (Using Native Tabs Header) */}
 
       <ScrollView contentContainerClassName="pb-20">
         <View className="px-6 py-8">

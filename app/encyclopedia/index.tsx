@@ -46,16 +46,6 @@ export default function EncyclopediaScreen() {
         title="디지털 부적 - 사주라떼"
         description="나만의 디지털 부적으로 행운을 높여보세요."
       />
-      <Stack.Screen options={{ headerShown: false }} />
-
-      {/* Header */}
-      <View className="flex-row items-center justify-between border-b border-gray-100 bg-white px-4 py-3">
-        <TouchableOpacity onPress={() => router.back()} className="-ml-2 w-10 p-2">
-          <ChevronLeft size={24} color="#000" />
-        </TouchableOpacity>
-        <Text className="text-lg font-bold text-gray-900">사주 용어 백과</Text>
-        <View className="w-10" />
-      </View>
 
       <ScrollView className="flex-1" contentContainerClassName="p-4 pb-10">
         {/* Intro Card */}

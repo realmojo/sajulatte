@@ -171,17 +171,7 @@ export default function FortuneDetailScreen() {
 
   return (
     <View className="flex-1 bg-white">
-      <Stack.Screen options={{ headerShown: false }} />
-
-      {/* Header */}
-      <View
-        className="flex-row items-center border-b border-gray-100 bg-white px-4 pb-4"
-        style={{ paddingTop: insets.top + 10 }}>
-        <TouchableOpacity onPress={() => router.back()} className="mr-4 p-1">
-          <ChevronLeft size={28} color="#000" />
-        </TouchableOpacity>
-        <Text className="text-xl font-bold">{title}</Text>
-      </View>
+      <Stack.Screen options={{ title: '운세' }} />
 
       <ScrollView className="flex-1 p-6" showsVerticalScrollIndicator={false}>
         {loading ? (

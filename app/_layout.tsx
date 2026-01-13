@@ -72,7 +72,15 @@ export default function RootLayout() {
           <Stack>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen
-              name="saved/index"
+              name="fortune/[id]"
+              options={{ title: '운세', headerBackTitle: '뒤로' }}
+            />
+            <Stack.Screen
+              name="amulet/index"
+              options={{ title: '디지털 부적', headerBackTitle: '뒤로' }}
+            />
+            <Stack.Screen
+              name="settings/saved"
               options={{ title: '저장된 사주', headerBackTitle: '뒤로' }}
             />
             <Stack.Screen
@@ -82,6 +90,10 @@ export default function RootLayout() {
             <Stack.Screen
               name="preferences/index"
               options={{ title: '환경 설정', headerBackTitle: '뒤로' }}
+            />
+            <Stack.Screen
+              name="notice/index"
+              options={{ title: '공지사항', headerBackTitle: '뒤로' }}
             />
           </Stack>
         </View>

@@ -96,7 +96,7 @@ export default function StoryDetailScreen() {
       </View>
 
       <ScrollView className="flex-1" contentContainerClassName="pb-20">
-        <View className="px-6 py-8">
+        <View className="px-6 py-4">
           {/* Category Badge */}
           <View className={`mb-4 self-start rounded-full px-3 py-1 ${story.color_class}`}>
             <Text className={`text-xs font-bold ${story.text_color_class}`}>{story.category}</Text>
