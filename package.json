@@ -8,6 +8,7 @@
     "android:device": "expo run:android",
     "ios": "expo start -c --ios",
     "web": "expo start -c --web",
+    "sitemap": "node scripts/generate-sitemap.js",
     "build:web": "expo export -p web",
     "serve:web": "npx serve dist",
     "clean": "rm -rf .expo node_modules"
