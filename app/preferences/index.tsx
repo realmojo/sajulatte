@@ -110,7 +110,7 @@ export default function PreferencesScreen() {
 
       <ScrollView className="flex-1 p-4" showsVerticalScrollIndicator={false}>
         {/* 알림 설정 */}
-        <MenuSection title="알림">
+        {/* <MenuSection title="알림">
           <MenuItem
             icon={Bell}
             label="푸시 알림"
@@ -124,7 +124,7 @@ export default function PreferencesScreen() {
               />
             }
           />
-        </MenuSection>
+        </MenuSection> */}
 
         {/* 서비스 정보 */}
         <MenuSection title="서비스 정보">
