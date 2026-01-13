@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
+import { WebSEO } from '@/components/ui/WebSEO';
 import { Stack, useRouter } from 'expo-router';
 import * as React from 'react';
 import {
@@ -18,25 +19,6 @@ import { useFocusEffect } from '@react-navigation/native';
 import { SajuResultView } from '@/components/SajuResultView';
 import { RefreshCcw } from 'lucide-react-native';
 import { updateRemoteProfile } from '@/lib/services/authService';
-
-// Web SEO Helper Component
-const WebSEO = ({ title, description }: { title: string; description: string }) => {
-  if (Platform.OS !== 'web') return null;
-
-  React.useEffect(() => {
-    document.title = title;
-
-    let metaDesc = document.querySelector('meta[name="description"]');
-    if (!metaDesc) {
-      metaDesc = document.createElement('meta');
-      metaDesc.setAttribute('name', 'description');
-      document.head.appendChild(metaDesc);
-    }
-    metaDesc.setAttribute('content', description);
-  }, [title, description]);
-
-  return null;
-};
 
 export default function Screen() {
   const insets = useSafeAreaInsets();
@@ -234,6 +216,12 @@ export default function Screen() {
       <WebSEO
         title="사주라떼 - 무료 사주 만세력"
         description="생년월일만 입력하면 정통 명리학 기반의 정확한 사주 풀이와 만세력을 무료로 확인할 수 있습니다. 오늘의 운세와 궁합도 확인해보세요."
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'WebSite',
+          name: '사주라떼',
+          url: 'https://sajulatte.app',
+        }}
       />
       {/* <Stack.Screen options={{ title: '만세력' }} /> */}
       <ScrollView
