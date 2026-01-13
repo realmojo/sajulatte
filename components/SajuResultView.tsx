@@ -42,6 +42,34 @@ import {
 } from '@/lib/utils/latte';
 import { ENCYCLOPEDIA_DATA } from '@/lib/utils/encyclopedia';
 
+const GAN_FULL_NAMES: Record<string, string> = {
+  甲: '갑목',
+  乙: '을목',
+  丙: '병화',
+  丁: '정화',
+  戊: '무토',
+  己: '기토',
+  庚: '경금',
+  辛: '신금',
+  壬: '임수',
+  癸: '계수',
+};
+
+const JI_FULL_NAMES: Record<string, string> = {
+  子: '자수',
+  丑: '축토',
+  寅: '인목',
+  卯: '묘목',
+  辰: '진토',
+  巳: '사화',
+  午: '오화',
+  未: '미토',
+  申: '신금',
+  酉: '유금',
+  戌: '술토',
+  亥: '해수',
+};
+
 interface SajuResultProps {
   name: string;
   year: number; // YYYY
@@ -220,7 +248,7 @@ export const SajuResultView = ({
   return (
     <ScrollView contentContainerClassName="px-6 gap-10" className="flex-1 bg-background">
       <View className="pt-2">
-        <View className="relative overflow-hidden rounded-3xl border border-gray-300 bg-white">
+        <View className="relative overflow-hidden rounded-3xl border border-gray-100 bg-white">
           {/* Top Accent Bar */}
           <View className="h-3 w-full opacity-80" style={{ backgroundColor: saju.day.gan.color }} />
 
@@ -268,7 +296,7 @@ export const SajuResultView = ({
               {/* Right Symbol (Ilgan) */}
               <View className="ml-2 shrink-0 items-center justify-center rounded-2xl border border-gray-100 bg-gray-50/50 p-3">
                 <Text className="mb-1 text-[10px] font-medium text-gray-400">본원(나)</Text>
-                <View className="mb-1 h-12 w-12 items-center justify-center rounded-full bg-white shadow-sm">
+                <View className="mb-1 h-12 w-12 items-center justify-center rounded-full border border-gray-200">
                   <Text className="text-2xl font-black" style={{ color: saju.day.gan.color }}>
                     {saju.day.gan.hanja}
                   </Text>
@@ -357,7 +385,7 @@ export const SajuResultView = ({
             <CircleHelp size={16} color="#A3A3A3" />
           </TouchableOpacity> */}
         </View>
-        <View className="overflow-hidden rounded-xl border border-gray-300 bg-white">
+        <View className="overflow-hidden rounded-xl border border-gray-100 bg-white">
           {/* Header Row */}
           <View className="flex-row border-b border-gray-200 bg-gray-50">
             <View className="w-12 items-center justify-center p-2" />
@@ -381,7 +409,9 @@ export const SajuResultView = ({
               <View key={i} className="flex-1 items-center justify-center border-l border-gray-200">
                 <TouchableOpacity
                   className="h-full w-full items-center justify-center gap-1"
-                  onPress={() => handleShinSalClick(pillar.gan.hanja)}>
+                  onPress={() =>
+                    handleShinSalClick(GAN_FULL_NAMES[pillar.gan.hanja] || pillar.gan.hanja)
+                  }>
                   <Text
                     className="text-4xl font-bold"
                     style={{
@@ -430,7 +460,9 @@ export const SajuResultView = ({
               <View key={i} className="flex-1 items-center justify-center border-l border-gray-200">
                 <TouchableOpacity
                   className="h-full w-full items-center justify-center gap-1"
-                  onPress={() => handleShinSalClick(pillar.ji.hanja)}>
+                  onPress={() =>
+                    handleShinSalClick(JI_FULL_NAMES[pillar.ji.hanja] || pillar.ji.hanja)
+                  }>
                   <Text
                     className="text-4xl font-bold"
                     style={{
@@ -531,7 +563,7 @@ export const SajuResultView = ({
             <ChevronRight size={16} color="#6B7280" />
           </TouchableOpacity>
         </View>
-        <View className="gap-3 rounded-2xl border border-gray-300 bg-white p-5">
+        <View className="gap-3 rounded-2xl border border-gray-100 bg-white p-5">
           <View className="flex-row justify-between gap-2">
             {(() => {
               const dayGongmang = getGongmang(saju.day.gan.hanja, saju.day.ji.hanja);
@@ -795,7 +827,7 @@ export const SajuResultView = ({
               <Text className="text-[10px] font-medium text-gray-600">생(生) : 상생</Text>
             </View>
             <View className="flex-row items-center gap-2">
-              <View className="h-[0px] w-6 border-b border-dashed border-gray-300" />
+              <View className="h-[0px] w-6 border-b border-dashed border-gray-100" />
               <Text className="text-[10px] font-medium text-gray-600">극(剋) : 상극</Text>
             </View>
 
@@ -1303,7 +1335,7 @@ export const SajuResultView = ({
       <View className="pb-10">
         <TouchableOpacity
           onPress={() => router.push('/pillarscalendar')}
-          className="flex-row items-center justify-between rounded-2xl border border-gray-300 bg-white p-5 active:bg-gray-50">
+          className="flex-row items-center justify-between rounded-2xl border border-gray-100 bg-white p-5 active:bg-gray-50">
           <View className="gap-1">
             <View className="flex-row items-center gap-2">
               <Text className="text-lg font-bold text-gray-900">만세력 달력</Text>

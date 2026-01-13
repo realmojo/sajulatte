@@ -281,7 +281,7 @@ export default function DailyScreen() {
               ].map((item, index) => (
                 <View
                   key={index}
-                  className="flex-1 items-center gap-2 rounded-2xl border border-gray-300 bg-white p-3 py-4">
+                  className="flex-1 items-center gap-2 rounded-2xl border border-gray-100 bg-white p-3 py-4">
                   <View className={`h-10 w-10 items-center justify-center rounded-full ${item.bg}`}>
                     <item.icon size={20} className={item.color} />
                   </View>
@@ -329,7 +329,7 @@ export default function DailyScreen() {
                   <TouchableOpacity
                     key={item.id}
                     onPress={() => router.push(`/story/${item.id}`)}
-                    className="mr-2 w-72 gap-3 rounded-2xl border border-gray-300 bg-white p-5 active:opacity-90">
+                    className="mr-2 w-72 gap-3 rounded-2xl border border-gray-100 bg-white p-5 active:opacity-90">
                     <View className={`self-start rounded-full px-3 py-1 ${item.color}`}>
                       <Text className={`text-xs font-bold ${item.textColor}`}>{item.category}</Text>
                     </View>

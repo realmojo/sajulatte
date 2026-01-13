@@ -42,7 +42,7 @@ export default function NoticeScreen() {
           <TouchableOpacity
             activeOpacity={0.7}
             className={`w-full flex-row items-center justify-between rounded-xl border p-5 active:bg-gray-50 ${
-              item.isImportant ? 'border-indigo-300 bg-indigo-50/30' : 'border-gray-300 bg-white'
+              item.isImportant ? 'border-indigo-300 bg-indigo-50/30' : 'border-gray-100 bg-white'
             }`}
             onPress={() => {
               // Future: Navigate to detail
