@@ -1,7 +1,6 @@
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
-import { Stack, useRouter } from 'expo-router';
+import { View, Text, ScrollView } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft } from 'lucide-react-native';
 import { WebSEO } from '@/components/ui/WebSEO';
 
 export default function PrivacyScreen() {
@@ -14,17 +13,6 @@ export default function PrivacyScreen() {
         title="개인정보처리방침 - 사주라떼"
         description="사주라떼 개인정보처리방침을 확인하세요."
       />
-      <Stack.Screen options={{ headerShown: false }} />
-
-      {/* Header */}
-      <View
-        className="flex-row items-center border-b border-gray-100 bg-white px-4 pb-4"
-        style={{ paddingTop: insets.top + 10 }}>
-        <TouchableOpacity onPress={() => router.back()} className="mr-4 p-1">
-          <ChevronLeft size={28} color="#000" />
-        </TouchableOpacity>
-        <Text className="text-xl font-bold">개인정보처리방침</Text>
-      </View>
 
       <ScrollView className="flex-1 p-6" contentContainerClassName="pb-10">
         <View className="mb-8">

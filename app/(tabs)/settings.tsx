@@ -509,7 +509,7 @@ export default function SettingsScreen() {
           {/* Section: 사주 관리 */}
           <View className="gap-3">
             <Text className="ml-1 text-lg font-bold text-gray-900">🗂️ 사주 관리</Text>
-            <View className="overflow-hidden rounded-2xl border border-gray-100 bg-white">
+            <View className="overflow-hidden rounded-2xl border border-gray-300 bg-white">
               <TouchableOpacity
                 className="flex-row items-center justify-between bg-white p-4 active:bg-gray-50"
                 onPress={() => router.push('/settings/saved')}>
@@ -527,7 +527,7 @@ export default function SettingsScreen() {
           {/* Section: 즐길거리 */}
           <View className="gap-3">
             <Text className="ml-1 text-lg font-bold text-gray-900">✨ 즐길거리</Text>
-            <View className="overflow-hidden rounded-2xl border border-gray-100 bg-white">
+            <View className="overflow-hidden rounded-2xl border border-gray-300 bg-white">
               <TouchableOpacity
                 className="flex-row items-center justify-between bg-white p-4 active:bg-gray-50"
                 onPress={() => router.push('/encyclopedia')}>
@@ -569,8 +569,8 @@ export default function SettingsScreen() {
           {/* Section: 앱 설정 */}
           <View className="gap-3">
             <Text className="ml-1 text-lg font-bold text-gray-900">⚙️ 앱 설정</Text>
-            <View className="overflow-hidden rounded-2xl border border-gray-100 bg-white">
-              <TouchableOpacity
+            <View className="overflow-hidden rounded-2xl border border-gray-300 bg-white">
+              {/* <TouchableOpacity
                 className="flex-row items-center justify-between bg-white p-4 active:bg-gray-50"
                 onPress={() => Alert.alert('알림 설정', '푸시 알림 설정 페이지로 이동합니다.')}>
                 <View className="flex-row items-center gap-3">
@@ -580,7 +580,7 @@ export default function SettingsScreen() {
                   <Text className="text-base font-medium text-gray-800">알림 설정</Text>
                 </View>
                 <ChevronRight size={20} color="#9ca3af" />
-              </TouchableOpacity>
+              </TouchableOpacity> */}
               <View className="mx-4 h-[1px] bg-gray-100" />
               <TouchableOpacity
                 className="flex-row items-center justify-between bg-white p-4 active:bg-gray-50"
@@ -599,7 +599,7 @@ export default function SettingsScreen() {
           {/* Section: 고객지원 */}
           <View className="gap-3">
             <Text className="ml-1 text-lg font-bold text-gray-900">📢 고객지원</Text>
-            <View className="overflow-hidden rounded-2xl border border-gray-100 bg-white">
+            <View className="overflow-hidden rounded-2xl border border-gray-300 bg-white">
               <TouchableOpacity
                 className="flex-row items-center justify-between bg-white p-4 active:bg-gray-50"
                 onPress={() => router.push('/notice')}>

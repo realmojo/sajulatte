@@ -1,28 +1,10 @@
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
-import { Stack, useRouter } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft } from 'lucide-react-native';
+import { View, Text, ScrollView } from 'react-native';
 import { WebSEO } from '@/components/ui/WebSEO';
 
 export default function TermsScreen() {
-  const insets = useSafeAreaInsets();
-  const router = useRouter();
-
   return (
     <View className="flex-1 bg-white">
       <WebSEO title="이용약관 - 사주라떼" description="사주라떼 서비스 이용약관을 확인하세요." />
-      <Stack.Screen options={{ headerShown: false }} />
-
-      {/* Header */}
-      <View
-        className="flex-row items-center border-b border-gray-100 bg-white px-4 pb-4"
-        style={{ paddingTop: insets.top + 10 }}>
-        <TouchableOpacity onPress={() => router.back()} className="mr-4 p-1">
-          <ChevronLeft size={28} color="#000" />
-        </TouchableOpacity>
-        <Text className="text-xl font-bold">이용약관</Text>
-      </View>
-
       <ScrollView className="flex-1 p-6" contentContainerClassName="pb-10">
         <View className="mb-8">
           <Text className="mb-4 text-2xl font-bold text-gray-900">서비스 이용약관</Text>
