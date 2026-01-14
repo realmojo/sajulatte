@@ -1140,6 +1140,8 @@ const getPillarDetail = (
       wunsung: get12Wunsung(ilganHanja, jiHj),
       // 년지 기준 신살 (일반적인 기준)
       shinsal: sajuJiHjs ? get12ShinSal(sajuJiHjs.yearJi, jiHj) : '',
+      jijanganHanja: jijanganHj.join(''),
+      jijanganItems: jijanganHj, // Array of Hanja chars ['戊', '丙', '甲']
     },
   };
 };

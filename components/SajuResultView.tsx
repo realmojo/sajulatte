@@ -55,6 +55,28 @@ const GAN_FULL_NAMES: Record<string, string> = {
   癸: '계수',
 };
 
+const JIJANGAN_DESCRIPTIONS: Record<string, string> = {
+  子: '왕지(旺地)로서 순수한 수(水)의 기운입니다.\n• 임(壬): 10일 (여기)\n• 계(癸): 20일 (정기)',
+  丑: '고지(庫地)이자 겨울을 닫는 토(土)입니다.\n• 계(癸): 9일 (여기)\n• 신(辛): 3일 (중기)\n• 기(己): 18일 (정기)',
+  寅: '생지(生地)로서 봄을 여는 목(木)입니다.\n• 무(戊): 7일 (여기)\n• 병(丙): 7일 (중기)\n• 갑(甲): 16일 (정기)',
+  卯: '왕지(旺地)로서 순수한 목(木)의 기운입니다.\n• 갑(甲): 10일 (여기)\n• 을(乙): 20일 (정기)',
+  辰: '고지(庫地)이자 봄을 닫는 토(土)입니다.\n• 을(乙): 9일 (여기)\n• 계(癸): 3일 (중기)\n• 무(戊): 18일 (정기)',
+  巳: '생지(生地)로서 여름을 여는 화(火)입니다.\n• 무(戊): 7일 (여기)\n• 경(庚): 7일 (중기)\n• 병(丙): 16일 (정기)',
+  午: '왕지(旺地)이지만 특이하게 기토를 품고 있습니다.\n• 병(丙): 10일 (여기)\n• 기(己): 9일 (중기)\n• 정(丁): 11일 (정기)',
+  未: '고지(庫地)이자 여름을 닫는 토(土)입니다.\n• 정(丁): 9일 (여기)\n• 을(乙): 3일 (중기)\n• 기(己): 18일 (정기)',
+  申: '생지(生地)로서 가을을 여는 금(金)입니다.\n• 무(戊): 7일 (여기)\n• 임(壬): 7일 (중기)\n• 경(庚): 16일 (정기)',
+  酉: '왕지(旺地)로서 순수한 금(金)의 기운입니다.\n• 경(庚): 10일 (여기)\n• 신(辛): 20일 (정기)',
+  戌: '고지(庫地)이자 가을을 닫는 토(土)입니다.\n• 신(辛): 9일 (여기)\n• 정(丁): 3일 (중기)\n• 무(戊): 18일 (정기)',
+  亥: '생지(生地)로서 겨울을 여는 수(水)입니다.\n• 무(戊): 7일 (여기)\n• 갑(甲): 7일 (중기)\n• 임(壬): 16일 (정기)',
+};
+
+const STRENGTH_DESCRIPTIONS: Record<string, string> = {
+  득령: '월지를 얻음. 태어난 달(계절)이 일간을 돕는 경우로, 사주의 강약을 결정하는 가장 중요한 요소입니다.',
+  득지: '일지를 얻음. 배우자 자리인 일지가 일간을 돕는 경우로, 실질적인 내 편이 되어줍니다.',
+  득시: '시지를 얻음. 태어난 시간이 일간을 돕는 오행인 경우입니다.',
+  득세: '세력을 얻음. 사주 전체에서 나를 돕는 오행(비겁, 인성)이 많아 세력이 강한 경우입니다.',
+};
+
 const JI_FULL_NAMES: Record<string, string> = {
   子: '자수',
   丑: '축토',
@@ -188,7 +210,16 @@ export const SajuResultView = ({
     setInfoModal(info[type]);
   };
 
-  const handleShinSalClick = (salName: string) => {
+  const handleShinSalClick = (salName: string, customTitle?: string, customContent?: string) => {
+    // If custom content is provided, use it directly (e.g. for Jijangan dynamic details)
+    if (customTitle && customContent) {
+      setInfoModal({
+        title: customTitle,
+        content: customContent,
+      });
+      return;
+    }
+
     if (!salName || salName === '-') return;
 
     // Find description in Encyclopedia
@@ -409,9 +440,7 @@ export const SajuResultView = ({
               <View key={i} className="flex-1 items-center justify-center border-l border-gray-200">
                 <TouchableOpacity
                   className="h-full w-full items-center justify-center gap-1"
-                  onPress={() =>
-                    handleShinSalClick(GAN_FULL_NAMES[pillar.gan.hanja] || pillar.gan.hanja)
-                  }>
+                  onPress={() => handleShinSalClick(pillar.gan.hanja)}>
                   <Text
                     className="text-4xl font-bold"
                     style={{
@@ -460,9 +489,7 @@ export const SajuResultView = ({
               <View key={i} className="flex-1 items-center justify-center border-l border-gray-200">
                 <TouchableOpacity
                   className="h-full w-full items-center justify-center gap-1"
-                  onPress={() =>
-                    handleShinSalClick(JI_FULL_NAMES[pillar.ji.hanja] || pillar.ji.hanja)
-                  }>
+                  onPress={() => handleShinSalClick(pillar.ji.hanja)}>
                   <Text
                     className="text-4xl font-bold"
                     style={{
@@ -509,10 +536,25 @@ export const SajuResultView = ({
             </View>
             {columns.map((pillar, i) => (
               <View key={i} className="flex-1 items-center justify-center border-l border-gray-200">
-                <TouchableOpacity onPress={() => handleShinSalClick('지장간')}>
-                  <Text className="text-xs font-medium text-gray-600 underline decoration-gray-300 decoration-dotted underline-offset-4">
+                <TouchableOpacity
+                  onPress={() => {
+                    // @ts-ignore
+                    const hanja = pillar.ji.hanja;
+                    const title = `${pillar.ji.korean}(${hanja})의 지장간`;
+                    const desc = JIJANGAN_DESCRIPTIONS[hanja] || '지장간 정보가 없습니다.';
+                    handleShinSalClick('지장간', title, desc);
+                  }}
+                  className="items-center gap-0.5">
+                  <Text className="text-xs font-medium text-gray-700">
                     {pillar.ji.jijangan || '-'}
                   </Text>
+                  {/* @ts-ignore */}
+                  {pillar.ji.jijanganHanja && (
+                    <Text className="text-[10px] text-gray-400">
+                      {/* @ts-ignore */}
+                      {pillar.ji.jijanganHanja}
+                    </Text>
+                  )}
                 </TouchableOpacity>
               </View>
             ))}
@@ -698,14 +740,22 @@ export const SajuResultView = ({
               { label: '득시', value: saju.strength?.flags.deukSi, color: '#EF4444' },
               { label: '득세', value: saju.strength?.flags.deukSe, color: '#3B82F6' },
             ].map((item, i) => (
-              <View key={i} className="flex-row items-center gap-1">
-                <Text className="text-sm text-gray-600">{item.label}</Text>
+              <TouchableOpacity
+                key={i}
+                className="flex-row items-center gap-1 active:opacity-60"
+                onPress={() => {
+                  const desc = STRENGTH_DESCRIPTIONS[item.label] || '';
+                  handleShinSalClick('strength', item.label, desc);
+                }}>
+                <Text className="text-sm text-gray-600 underline decoration-gray-300 decoration-dotted underline-offset-4">
+                  {item.label}
+                </Text>
                 {item.value ? (
                   <Circle size={14} color={item.color} fill={item.color} />
                 ) : (
                   <CircleX size={14} color="#EF4444" />
                 )}
-              </View>
+              </TouchableOpacity>
             ))}
           </View>
 

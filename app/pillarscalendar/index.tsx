@@ -236,7 +236,6 @@ export default function PillarsCalendarScreen() {
               }
 
               const day = cell.data;
-              console.log(day);
               const isSun = day.weekDay === 0;
               const isSat = day.weekDay === 6;
               // Check if today

@@ -189,7 +189,7 @@ export default function AmuletScreen() {
 
       <ScrollView className="flex-1 p-4" contentContainerClassName="pb-20">
         {/* Banner */}
-        <View className="relative mb-6 overflow-hidden rounded-2xl bg-amber-500 p-6 shadow-sm">
+        <View className="relative mb-6 overflow-hidden rounded-2xl bg-amber-500 p-6">
           <View className="absolute -right-4 -top-4 h-32 w-32 rounded-full bg-amber-400 opacity-50" />
           <View className="absolute -bottom-4 -left-4 h-24 w-24 rounded-full bg-amber-600 opacity-20" />
           <View className="flex-row items-center gap-4">
@@ -260,7 +260,7 @@ export default function AmuletScreen() {
           <View className="relative max-h-[85%] w-full max-w-sm overflow-hidden rounded-3xl bg-white">
             <TouchableOpacity
               onPress={() => setSelectedAmulet(null)}
-              className="absolute right-4 top-4 z-10 rounded-full bg-gray-100 p-2 shadow-sm">
+              className="absolute right-4 top-4 z-10 rounded-full bg-gray-100 p-2">
               <X size={20} color="#000" />
             </TouchableOpacity>
 
@@ -288,7 +288,7 @@ export default function AmuletScreen() {
                   <View className="w-full gap-3 pt-2">
                     <TouchableOpacity
                       onPress={handleSave}
-                      className="w-full flex-row items-center justify-center gap-2 rounded-xl bg-amber-500 py-4 shadow-sm active:bg-amber-600">
+                      className="w-full flex-row items-center justify-center gap-2 rounded-xl bg-amber-500 py-4 active:bg-amber-600">
                       <Download size={20} color="white" />
                       <Text className="text-lg font-bold text-white">부적 저장하기</Text>
                     </TouchableOpacity>

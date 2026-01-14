@@ -95,6 +95,10 @@ export default function RootLayout() {
               name="notice/index"
               options={{ title: '공지사항', headerBackTitle: '뒤로' }}
             />
+            <Stack.Screen
+              name="jijangan-info/index"
+              options={{ title: '지장간의 원리', headerBackTitle: '뒤로' }}
+            />
           </Stack>
         </View>
       </View>

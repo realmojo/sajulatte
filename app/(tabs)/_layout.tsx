@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { View } from 'react-native';
+import { View, Text } from 'react-native';
 import { CalendarDays, Sparkles, Ellipsis, HeartHandshake } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { NAV_THEME } from '@/lib/theme';
@@ -52,6 +52,7 @@ export default function TabLayout() {
         },
         tabBarActiveTintColor: '#d97706',
         tabBarInactiveTintColor: '#9ca3af',
+        tabBarLabelPosition: 'beside-icon',
         tabBarStyle: {
           backgroundColor: theme.colors.background,
           borderTopColor: theme.colors.border,
@@ -64,13 +65,13 @@ export default function TabLayout() {
           options={{
             title: tab.title,
             headerLeft: () => (
-              <View className="pl-4">
-                <tab.icon size={20} color={theme.colors.text} />
+              <View className="flex-row items-center gap-2 pl-4">
+                <tab.icon size={24} color={theme.colors.text} />
+                <Text className="text-2xl font-bold" style={{ color: theme.colors.text }}>
+                  {tab.title}
+                </Text>
               </View>
             ),
-            headerTitleContainerStyle: {
-              paddingLeft: 4,
-            },
             tabBarIcon: ({ focused, color }) => (
               <View>
                 <tab.icon color={focused ? '#d97706' : color} size={20} />

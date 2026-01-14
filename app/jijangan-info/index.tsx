@@ -3,7 +3,7 @@ import { ScrollView, View, TouchableOpacity } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { Text } from '@/components/ui/text';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft } from 'lucide-react-native';
+import { ChevronLeft, Zap, Sparkles, Anchor, TreeDeciduous, Info } from 'lucide-react-native';
 
 export default function JijanganInfoScreen() {
   const router = useRouter();
@@ -26,17 +26,6 @@ export default function JijanganInfoScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <Stack.Screen
-        options={{
-          headerShown: true,
-          title: '지장간의 원리',
-          headerLeft: () => (
-            <TouchableOpacity onPress={() => router.back()} className="mr-4">
-              <ChevronLeft size={24} color="#000" />
-            </TouchableOpacity>
-          ),
-        }}
-      />
       <ScrollView contentContainerClassName="p-6 gap-8 pb-20">
         {/* Section 1: Definition */}
         <View className="gap-3">
@@ -63,7 +52,8 @@ export default function JijanganInfoScreen() {
           <View className="mt-2 gap-4">
             <View className="flex-row gap-3">
               <View className="w-16 items-center justify-center rounded-lg bg-blue-100 py-2">
-                <Text className="font-bold text-blue-700">여기(餘氣)</Text>
+                <Text className="font-bold text-blue-700">여기</Text>
+                <Text className="font-bold text-blue-700">(餘氣)</Text>
               </View>
               <View className="flex-1 justify-center">
                 <Text className="font-medium text-gray-900">지난달의 남은 기운</Text>
@@ -75,7 +65,8 @@ export default function JijanganInfoScreen() {
 
             <View className="flex-row gap-3">
               <View className="w-16 items-center justify-center rounded-lg bg-green-100 py-2">
-                <Text className="font-bold text-green-700">중기(中氣)</Text>
+                <Text className="font-bold text-green-700">중기</Text>
+                <Text className="font-bold text-green-700">(中氣)</Text>
               </View>
               <View className="flex-1 justify-center">
                 <Text className="font-medium text-gray-900">중간에 머무는 기운</Text>
@@ -87,7 +78,8 @@ export default function JijanganInfoScreen() {
 
             <View className="flex-row gap-3">
               <View className="w-16 items-center justify-center rounded-lg bg-red-100 py-2">
-                <Text className="font-bold text-red-700">정기(正氣)</Text>
+                <Text className="font-bold text-red-700">정기</Text>
+                <Text className="font-bold text-red-700">(正氣)</Text>
               </View>
               <View className="flex-1 justify-center">
                 <Text className="font-medium text-gray-900">본래의 중심 기운</Text>
@@ -143,6 +135,106 @@ export default function JijanganInfoScreen() {
           <Text className="mt-2 text-center text-xs text-gray-400">
             * 숫자는 해당 기운이 관장하는 날짜 수를 의미합니다. (총 30일)
           </Text>
+        </View>
+
+        {/* Section 4: Classification of Branches (생지, 왕지, 고지) */}
+        <View className="gap-3">
+          <Text className="text-xl font-bold text-gray-900">지지의 특성에 따른 지장간</Text>
+          <Text className="leading-6 text-gray-600">
+            12지지는 그 특성에 따라 크게 세 그룹으로 나뉘며, 지장간의 구성 패턴도 다릅니다.
+          </Text>
+
+          {/* 인신사해 (맹지) */}
+          <View className="rounded-xl border border-rose-100 bg-rose-50/50 p-4">
+            <View className="mb-2 flex-row items-center gap-2">
+              <View className="rounded-lg bg-rose-100 p-1.5">
+                <Zap size={16} color="#be123c" />
+              </View>
+              <Text className="text-lg font-bold text-rose-800">
+                생지(生地): 인(寅), 신(申), 사(巳), 해(亥)
+              </Text>
+            </View>
+            <Text className="text-sm leading-6 text-gray-700">
+              • 계절이 시작되는 기운으로 역동적입니다.{'\n'}• 여기(7일), 중기(7일), 정기(16일)로
+              구성됩니다.{'\n'}• 중기는 다음 게절의 생지 기운을 미리 품고 있습니다.
+            </Text>
+          </View>
+
+          {/* 자오묘유 (왕지) */}
+          <View className="rounded-xl border border-violet-100 bg-violet-50/50 p-4">
+            <View className="mb-2 flex-row items-center gap-2">
+              <View className="rounded-lg bg-violet-100 p-1.5">
+                <Sparkles size={16} color="#6d28d9" />
+              </View>
+              <Text className="text-lg font-bold text-violet-800">
+                왕지(旺地): 자(子), 오(午), 묘(卯), 유(酉)
+              </Text>
+            </View>
+            <Text className="text-sm leading-6 text-gray-700">
+              • 계절의 절정으로 기운이 가장 순수하고 강력합니다.{'\n'}• 오(午)를 제외하면 중기가
+              없고, 여기(10일)와 정기(20일)로만 구성되어 순수한 기운을 자랑합니다.
+            </Text>
+          </View>
+
+          {/* 진술축미 (고지) */}
+          <View className="rounded-xl border border-amber-100 bg-amber-50/50 p-4">
+            <View className="mb-2 flex-row items-center gap-2">
+              <View className="rounded-lg bg-amber-100 p-1.5">
+                <Anchor size={16} color="#b45309" />
+              </View>
+              <Text className="text-lg font-bold text-amber-800">
+                고지(庫地): 진(辰), 술(戌), 축(丑), 미(未)
+              </Text>
+            </View>
+            <Text className="text-sm leading-6 text-gray-700">
+              • 계절을 마무리하고 환절기 역할을 합니다.{'\n'}• 여기(9일), 중기(3일), 정기(18일)로
+              구성됩니다.{'\n'}• 잡기(雜氣)라고도 하며, 여러 기운이 섞여 있어 복잡다단합니다.
+            </Text>
+          </View>
+        </View>
+
+        {/* Section 5: Practical Application (통근과 투출) */}
+        <View className="gap-3">
+          <Text className="text-xl font-bold text-gray-900">지장간은 어떻게 해석하나요?</Text>
+
+          <View className="flex-row gap-4">
+            {/* 통근 */}
+            <View className="flex-1 rounded-2xl border border-gray-200 bg-white p-4">
+              <View className="mb-3 items-center">
+                <View className="mb-2 h-10 w-10 items-center justify-center rounded-full bg-emerald-100">
+                  <TreeDeciduous size={20} color="#059669" />
+                </View>
+                <Text className="text-lg font-bold text-emerald-800">통근(通根)</Text>
+              </View>
+              <Text className="text-center text-xs leading-5 text-gray-600">
+                천간의 글자가 지장간에 같은 오행을 뿌리 내 린 것.{' '}
+                <Text className="font-bold">힘이 있고 튼튼하다</Text>고 해석합니다.
+              </Text>
+            </View>
+
+            {/* 투출 */}
+            <View className="flex-1 rounded-2xl border border-gray-200 bg-white p-4">
+              <View className="mb-3 items-center">
+                <View className="mb-2 h-10 w-10 items-center justify-center rounded-full bg-sky-100">
+                  <Info size={20} color="#0284c7" />
+                </View>
+                <Text className="text-lg font-bold text-sky-800">투출(透出)</Text>
+              </View>
+              <Text className="text-center text-xs leading-5 text-gray-600">
+                지장간에 숨어있던 글자가 천간으로 드러난 것.{' '}
+                <Text className="font-bold">잠재력이 세상 밖으로 발현</Text>된 것입니다.
+              </Text>
+            </View>
+          </View>
+
+          <View className="mt-2 rounded-xl bg-gray-50 p-4">
+            <Text className="text-sm leading-6 text-gray-700">
+              💡 <Text className="font-bold">심리 분석의 열쇠:</Text>
+              {'\n'}
+              지장간은 무의식이나 속마음을 나타내기도 합니다. 겉으로는 밝아 보여도(천간), 지장간에
+              우울한 기운이 있다면 남모를 고민이 깊을 수 있습니다.
+            </Text>
+          </View>
         </View>
       </ScrollView>
     </View>
