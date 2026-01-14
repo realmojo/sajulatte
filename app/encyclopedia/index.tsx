@@ -8,8 +8,8 @@ import {
   Platform,
   UIManager,
 } from 'react-native';
-import { useRouter, Stack } from 'expo-router';
-import { ChevronLeft, ChevronDown, ChevronUp, BookOpen } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
+import { ChevronDown, ChevronUp, BookOpen } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WebSEO } from '@/components/ui/WebSEO';
 

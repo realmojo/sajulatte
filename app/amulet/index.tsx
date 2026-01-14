@@ -1,7 +1,7 @@
 import { View, Text, ScrollView, TouchableOpacity, Modal } from 'react-native';
-import { Stack, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, Sparkles, X, Share2, Download } from 'lucide-react-native';
+import { Sparkles, X, Share2, Download } from 'lucide-react-native';
 import { WebSEO } from '@/components/ui/WebSEO';
 import { DigitalAmulet, AmuletType } from '@/components/amulet/DigitalAmulet';
 import { useRef, useState } from 'react';

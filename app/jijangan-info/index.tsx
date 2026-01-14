@@ -1,14 +1,9 @@
 import React from 'react';
-import { ScrollView, View, TouchableOpacity } from 'react-native';
-import { Stack, useRouter } from 'expo-router';
+import { ScrollView, View } from 'react-native';
 import { Text } from '@/components/ui/text';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeft, Zap, Sparkles, Anchor, TreeDeciduous, Info } from 'lucide-react-native';
+import { Zap, Sparkles, Anchor, TreeDeciduous, Info } from 'lucide-react-native';
 
 export default function JijanganInfoScreen() {
-  const router = useRouter();
-  const insets = useSafeAreaInsets();
-
   const JIJANGAN_DATA = [
     { ji: '자(子)', jiHanja: '子', yeogi: '임(壬) 10', junggi: '', jeonggi: '계(癸) 20' },
     { ji: '축(丑)', jiHanja: '丑', yeogi: '계(癸) 9', junggi: '신(辛) 3', jeonggi: '기(己) 18' },

@@ -1,10 +1,10 @@
 import { Text } from '@/components/ui/text';
-import { Stack, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import * as React from 'react';
 import { FlatList, Modal, TouchableOpacity, View, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
-import { Trash2, Plus, ChevronLeft, Pencil, Star } from 'lucide-react-native';
+import { Trash2, Plus, Pencil, Star } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from 'nativewind';
 import { ProfileEditModal, ProfileData } from '@/components/modal/ProfileEditModal';

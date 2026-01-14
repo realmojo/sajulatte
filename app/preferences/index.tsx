@@ -1,14 +1,6 @@
 import { View, Text, TouchableOpacity, ScrollView, Switch, Alert, Linking } from 'react-native';
-import { Stack, useRouter } from 'expo-router';
-import {
-  ChevronLeft,
-  ChevronRight,
-  Bell,
-  FileText,
-  HelpCircle,
-  LogOut,
-  Info,
-} from 'lucide-react-native';
+import { useRouter } from 'expo-router';
+import { ChevronRight, FileText, HelpCircle, LogOut, Info } from 'lucide-react-native';
 import { useState } from 'react';
 import Constants from 'expo-constants';
 import { supabase } from '@/lib/supabase';

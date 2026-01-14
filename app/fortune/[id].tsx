@@ -1,30 +1,15 @@
+import { supabase } from '@/lib/supabase';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
-import { ChevronLeft } from 'lucide-react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getMyEightSaju } from '@/lib/utils/latte';
 import { interpretSaju } from '@/lib/utils/interpreter';
 import { getDailyFortune } from '@/lib/utils/dailyFortuneLogic';
 
-const fortuneTitles: Record<string, string> = {
-  today: '종합',
-  love: '연애운',
-  money: '금전운',
-  marriage: '결혼운',
-  job: '직업운',
-  health: '건강운',
-  human: '대인운',
-  newyear: '신년운세',
-};
-
 export default function FortuneDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
-
-  const title = fortuneTitles[id || ''] || '운세 상세';
 
   const [loading, setLoading] = useState(true);
   const [content, setContent] = useState<string>('');
@@ -45,6 +30,26 @@ export default function FortuneDetailScreen() {
       if (jsonValue) {
         const list = JSON.parse(jsonValue);
         if (list.length > 0) profile = list[0];
+      }
+
+      // If no local profile, try fetching from Supabase
+      if (!profile) {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (user) {
+          const { data: userProfile } = await supabase
+            .from('sajulatte_users')
+            .select('*')
+            .eq('id', user.id)
+            .single();
+
+          if (userProfile) {
+            profile = userProfile;
+            // Sync to local storage for next time
+            await AsyncStorage.setItem('saju_list', JSON.stringify([userProfile]));
+          }
+        }
       }
 
       if (!profile) {
@@ -150,7 +155,7 @@ export default function FortuneDetailScreen() {
     };
 
     return (
-      <View className="mb-6 rounded-2xl border border-gray-100 bg-gray-50 p-5 shadow-sm">
+      <View className="mb-6 rounded-2xl border border-gray-200 bg-gray-50 p-5">
         <View className="mb-2 flex-row items-baseline justify-between">
           <Text className={`text-base font-bold ${config.color}`}>
             {config.emoji} {config.title}
