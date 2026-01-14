@@ -64,6 +64,7 @@ export default function TabLayout() {
           name={tab.name}
           options={{
             title: tab.title,
+            headerTitle: '',
             headerLeft: () => (
               <View className="flex-row items-center gap-2 pl-4">
                 <tab.icon size={24} color={theme.colors.text} />
