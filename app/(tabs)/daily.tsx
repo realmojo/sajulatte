@@ -297,7 +297,7 @@ export default function DailyScreen() {
 
         {/* Categories Grid */}
         <View className="gap-4">
-          <Text className="px-1 text-lg font-bold text-foreground">전체 카테고리</Text>
+          <Text className="px-1 text-lg font-bold text-foreground">오늘의 운세</Text>
           <View className="flex-row flex-wrap justify-between gap-y-6">
             {categories.map((item, index) => (
               <TouchableOpacity
