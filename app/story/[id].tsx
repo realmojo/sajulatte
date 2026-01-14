@@ -141,18 +141,6 @@ export default function StoryDetailScreen() {
           </View>
         </View>
       </ScrollView>
-
-      {/* Bottom Action Bar */}
-      <View className="flex-row items-center justify-between border-t border-gray-100 bg-white px-6 py-4 pb-8">
-        <View className="flex-row items-center gap-2">
-          <Heart size={24} color="#dc2626" />
-          <Text className="font-medium text-gray-900">{story.like_count || 124}</Text>
-        </View>
-        <View className="flex-row items-center gap-2">
-          <MessageCircle size={24} color="#4b5563" />
-          <Text className="font-medium text-gray-900">{story.view_count || 5}</Text>
-        </View>
-      </View>
     </View>
   );
 }
