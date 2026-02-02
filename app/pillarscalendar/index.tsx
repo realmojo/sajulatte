@@ -8,18 +8,19 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   FlatList,
+  Platform,
 } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { WebSEO } from '@/components/ui/WebSEO';
 import { useState, useEffect, useMemo } from 'react';
 import { getMonthlyIljin, getMyEightSaju } from '@/lib/utils/latte';
+import { FullWidthWebLayout } from '@/components/FullWidthWebLayout';
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 
 export default function PillarsCalendarScreen() {
-  const insets = useSafeAreaInsets();
+  const isWeb = Platform.OS === 'web';
   const router = useRouter();
 
   const today = new Date();
@@ -154,12 +155,8 @@ export default function PillarsCalendarScreen() {
     return cells;
   }, [calendarData]);
 
-  return (
-    <View className="flex-1 bg-white" style={{ paddingTop: insets.top }}>
-      <WebSEO
-        title="만세력 달력 - 사주라떼"
-        description="이달의 일진과 사주 흐름을 확인하는 만세력 달력"
-      />
+  const content = (
+    <View className="flex-1">
       <Stack.Screen options={{ headerShown: false }} />
 
       {/* Header */}
@@ -395,6 +392,24 @@ export default function PillarsCalendarScreen() {
           </View>
         </TouchableWithoutFeedback>
       </Modal>
+    </View>
+  );
+
+  return isWeb ? (
+    <FullWidthWebLayout>
+      <WebSEO
+        title="만세력 달력 - 사주라떼"
+        description="이달의 일진과 사주 흐름을 확인하는 만세력 달력"
+      />
+      {content}
+    </FullWidthWebLayout>
+  ) : (
+    <View className="flex-1 bg-white">
+      <WebSEO
+        title="만세력 달력 - 사주라떼"
+        description="이달의 일진과 사주 흐름을 확인하는 만세력 달력"
+      />
+      {content}
     </View>
   );
 }

@@ -1,0 +1,88 @@
+{
+  "project_info": {
+    "project_number": "325249576942",
+    "project_id": "mojoday-apps",
+    "storage_bucket": "mojoday-apps.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:325249576942:android:a49c6bd80a0e96d15828ff",
+        "android_client_info": {
+          "package_name": "com.mojoday.metronome"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCa3_o42BttUfQAo1CkP-RkoWGEuJFMZbE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      },
+      "admob_app_id": "ca-app-pub-9130836798889522~2413016701"
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:325249576942:android:f67cc7a007f669f15828ff",
+        "android_client_info": {
+          "package_name": "com.mojoday.sajulatte"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCa3_o42BttUfQAo1CkP-RkoWGEuJFMZbE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:325249576942:android:ef17df9efe53a3785828ff",
+        "android_client_info": {
+          "package_name": "com.mojoday.ssdown"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCa3_o42BttUfQAo1CkP-RkoWGEuJFMZbE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:325249576942:android:65fbd25b0b8df0b15828ff",
+        "android_client_info": {
+          "package_name": "com.mojoday.twinmatch"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCa3_o42BttUfQAo1CkP-RkoWGEuJFMZbE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      },
+      "admob_app_id": "ca-app-pub-9130836798889522~7784230055"
+    }
+  ],
+  "configuration_version": "1"
+}

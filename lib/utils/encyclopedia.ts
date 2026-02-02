@@ -721,3 +721,11 @@ export const ENCYCLOPEDIA_DATA: Category[] = [
     ],
   },
 ];
+
+export const getEncyclopediaItem = (term: string) => {
+  for (const category of ENCYCLOPEDIA_DATA) {
+    const item = category.items.find((item) => item.term === term);
+    if (item) return { ...item, categoryTitle: category.title };
+  }
+  return null;
+};

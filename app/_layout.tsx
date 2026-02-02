@@ -58,7 +58,7 @@ export default function RootLayout() {
           style={{
             flex: 1,
             width: '100%',
-            maxWidth: Platform.OS === 'web' ? 480 : '100%', // Limit width on web
+            maxWidth: '100%', // Limit width on web
             backgroundColor: '#ffffff',
             // Simple shadow for web to distinguish from background
             ...(Platform.OS === 'web' && {
@@ -70,7 +70,13 @@ export default function RootLayout() {
             }),
           }}>
           <Stack>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="index" options={{ headerShown: false }} />
+            <Stack.Screen name="blog/index" options={{ headerShown: false }} />
+            <Stack.Screen name="encyclopedia/index" options={{ headerShown: false }} />
+            <Stack.Screen name="faq" options={{ headerShown: false }} />
+            <Stack.Screen name="about" options={{ headerShown: false }} />
+            <Stack.Screen name="contact" options={{ headerShown: false }} />
+            <Stack.Screen name="compatibility/index" options={{ headerShown: false }} />
             <Stack.Screen
               name="fortune/[id]"
               options={{ title: '운세', headerBackTitle: '뒤로' }}
@@ -82,10 +88,6 @@ export default function RootLayout() {
             <Stack.Screen
               name="settings/saved"
               options={{ title: '저장된 사주', headerBackTitle: '뒤로' }}
-            />
-            <Stack.Screen
-              name="encyclopedia/index"
-              options={{ title: '사주 백과', headerBackTitle: '뒤로' }}
             />
             <Stack.Screen
               name="preferences/index"

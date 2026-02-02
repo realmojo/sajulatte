@@ -111,6 +111,7 @@ export default function PreferencesScreen() {
         {/* 서비스 정보 */}
         <MenuSection title="서비스 정보">
           <MenuItem icon={Info} label="앱 버전" value={`v${appVersion}`} showArrow={false} />
+          <MenuItem icon={Info} label="서비스 소개" onPress={() => router.push('/about')} />
           <MenuItem
             icon={FileText}
             label="서비스 이용약관"

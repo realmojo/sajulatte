@@ -13,6 +13,7 @@ import { ProfileEditModal, ProfileData } from '@/components/modal/ProfileEditMod
 import { WebSEO } from '@/components/ui/WebSEO';
 // Web SEO Helper
 import { Platform } from 'react-native';
+import { FullWidthWebLayout } from '@/components/FullWidthWebLayout';
 
 type Gender = 'male' | 'female';
 type CalendarType = 'solar' | 'lunar';
@@ -186,14 +187,9 @@ export default function CompatibilityScreen() {
     });
   };
 
-  return (
+  const isWeb = Platform.OS === 'web';
+  const content = (
     <View className="flex-1 bg-background">
-      <WebSEO
-        title="무료 궁합 보기 - 사주라떼"
-        description="연인, 친구, 동료와의 궁합을 오행 분석을 통해 무료로 확인해보세요."
-      />
-      {/* Header Removed (Using Native Tabs Header) */}
-
       <ScrollView contentContainerClassName="pb-20">
         <View className="px-6 py-8">
           <Text className="mb-6 text-xl font-bold text-gray-900">누구와 궁합을 볼까요?</Text>
@@ -313,6 +309,24 @@ export default function CompatibilityScreen() {
           />
         </View>
       </Modal>
+    </View>
+  );
+
+  return isWeb ? (
+    <FullWidthWebLayout>
+      <WebSEO
+        title="무료 궁합 보기 - 사주라떼"
+        description="연인, 친구, 동료와의 궁합을 오행 분석을 통해 무료로 확인해보세요."
+      />
+      {content}
+    </FullWidthWebLayout>
+  ) : (
+    <View className="flex-1 bg-background">
+      <WebSEO
+        title="무료 궁합 보기 - 사주라떼"
+        description="연인, 친구, 동료와의 궁합을 오행 분석을 통해 무료로 확인해보세요."
+      />
+      {content}
     </View>
   );
 }
