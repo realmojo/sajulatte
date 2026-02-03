@@ -77,30 +77,14 @@ export default function RootLayout() {
             <Stack.Screen name="about" options={{ headerShown: false }} />
             <Stack.Screen name="contact" options={{ headerShown: false }} />
             <Stack.Screen name="compatibility/index" options={{ headerShown: false }} />
-            <Stack.Screen
-              name="fortune/[id]"
-              options={{ title: '운세', headerBackTitle: '뒤로' }}
-            />
-            <Stack.Screen
-              name="amulet/index"
-              options={{ title: '디지털 부적', headerBackTitle: '뒤로' }}
-            />
-            <Stack.Screen
-              name="settings/saved"
-              options={{ title: '저장된 사주', headerBackTitle: '뒤로' }}
-            />
-            <Stack.Screen
-              name="preferences/index"
-              options={{ title: '환경 설정', headerBackTitle: '뒤로' }}
-            />
-            <Stack.Screen
-              name="notice/index"
-              options={{ title: '공지사항', headerBackTitle: '뒤로' }}
-            />
-            <Stack.Screen
-              name="jijangan-info/index"
-              options={{ title: '지장간의 원리', headerBackTitle: '뒤로' }}
-            />
+            <Stack.Screen name="fortune/[id]" options={{ title: '운세' }} />
+            <Stack.Screen name="amulet/index" options={{ title: '디지털 부적' }} />
+            <Stack.Screen name="settings/saved" options={{ title: '저장된 사주' }} />
+            <Stack.Screen name="preferences/index" options={{ title: '환경 설정' }} />
+            <Stack.Screen name="notice/index" options={{ title: '공지사항' }} />
+            <Stack.Screen name="jijangan-info/index" options={{ title: '지장간의 원리' }} />
+            <Stack.Screen name="privacy" options={{ headerShown: false }} />
+            <Stack.Screen name="terms" options={{ headerShown: false }} />
           </Stack>
         </View>
       </View>
