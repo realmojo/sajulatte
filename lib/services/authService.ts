@@ -20,6 +20,29 @@ const supaStorage = {
 };
 
 /**
+ * Sign in with Kakao
+ */
+export const signInWithKakao = async () => {
+  try {
+    const redirectTo = Platform.OS === 'web' ? window.location.origin : 'sajulatte://'; // Replace with your app scheme if needed
+
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'kakao',
+      options: {
+        redirectTo,
+        skipBrowserRedirect: false,
+      },
+    });
+
+    if (error) throw error;
+    return data;
+  } catch (e) {
+    console.error('Error signing in with Kakao:', e);
+    throw e;
+  }
+};
+
+/**
  * Logged-in user's Main Saju Profile -> Upload to Supabase
  */
 export const uploadMainProfileToSupabase = async () => {

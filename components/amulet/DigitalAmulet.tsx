@@ -127,7 +127,7 @@ export const DigitalAmulet = ({ type, width = 200, height = 300 }: AmuletProps) 
   const STAMP_COLOR = '#991b1b';
 
   return (
-    <View className="items-center bg-white shadow-md" style={{ width, height }}>
+    <View className="items-center bg-white" style={{ width, height }}>
       <Svg width="100%" height="100%" viewBox="0 0 200 300">
         <Defs>
           <LinearGradient id="paperGrad" x1="0" y1="0" x2="1" y2="1">

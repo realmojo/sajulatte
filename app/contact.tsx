@@ -16,7 +16,7 @@ export default function ContactScreen() {
   const content = (
     <View className="flex-1">
       {/* Header */}
-      <View className="mb-8 rounded-2xl bg-gradient-to-b from-amber-600 to-amber-500 p-12 shadow-lg">
+      <View className="mb-8 rounded-2xl bg-gradient-to-b from-amber-600 to-amber-500 p-12">
         <Text className="mb-3 text-5xl font-bold text-white">문의하기</Text>
         <Text className="text-xl text-amber-50">
           궁금한 점이나 불편한 사항이 있으신가요?{'\n'}
@@ -30,7 +30,7 @@ export default function ContactScreen() {
         <Pressable
           onPress={handleEmailPress}
           style={{ width: 'calc(50% - 12px)', minWidth: 300 }}
-          className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all hover:scale-105 hover:shadow-lg active:opacity-70">
+          className="overflow-hidden rounded-2xl border border-gray-200 bg-white transition-all hover:scale-105 active:opacity-70">
           <View className="p-8">
             <View className="mb-4 h-16 w-16 items-center justify-center rounded-2xl bg-amber-100">
               <Text className="text-3xl">📧</Text>
@@ -53,7 +53,7 @@ export default function ContactScreen() {
         <Pressable
           onPress={handleBusinessEmailPress}
           style={{ width: 'calc(50% - 12px)', minWidth: 300 }}
-          className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all hover:scale-105 hover:shadow-lg active:opacity-70">
+          className="overflow-hidden rounded-2xl border border-gray-200 bg-white transition-all hover:scale-105 active:opacity-70">
           <View className="p-8">
             <View className="mb-4 h-16 w-16 items-center justify-center rounded-2xl bg-blue-100">
               <Text className="text-3xl">💼</Text>
@@ -71,7 +71,7 @@ export default function ContactScreen() {
         {/* Bug Report */}
         <View
           style={{ width: 'calc(50% - 12px)', minWidth: 300 }}
-          className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+          className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
           <View className="p-8">
             <View className="mb-4 h-16 w-16 items-center justify-center rounded-2xl bg-red-100">
               <Text className="text-3xl">🐛</Text>
@@ -91,7 +91,7 @@ export default function ContactScreen() {
         {/* Feature Request */}
         <View
           style={{ width: 'calc(50% - 12px)', minWidth: 300 }}
-          className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+          className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
           <View className="p-8">
             <View className="mb-4 h-16 w-16 items-center justify-center rounded-2xl bg-green-100">
               <Text className="text-3xl">💡</Text>

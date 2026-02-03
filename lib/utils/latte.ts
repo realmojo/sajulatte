@@ -1580,3 +1580,40 @@ export const getMonthlyIljin = (year: number, month: number, myIlganHj?: string)
     days: list,
   };
 };
+
+/**
+ * 날짜 정보를 바탕으로 일간(Day Master)과 일지 정보를 반환하는 함수
+ * 로컬 데이터 등을 이용할 때 사용
+ */
+export const getMyIlganFromDate = (
+  year: number,
+  month: number,
+  day: number,
+  calendarType: string = 'solar',
+  isLeapMonth: boolean = false,
+  hour: number = 0,
+  minute: number = 0
+) => {
+  let solar;
+  // calendarType 표준화 ('solar', 'lunar')
+  const isLunar = calendarType === 'lunar' || calendarType === 'lunar-leap';
+
+  if (isLunar) {
+    const lunarMonth = isLeapMonth ? -month : month;
+    const lunar = Lunar.fromYmdHms(year, lunarMonth, day, hour, minute, 0);
+    solar = lunar.getSolar();
+  } else {
+    solar = Solar.fromYmdHms(year, month, day, hour, minute, 0);
+  }
+
+  const lunar = solar.getLunar();
+  const eightChar = lunar.getEightChar();
+  const ilganHanja = eightChar.getDayGan();
+  const dayJiHanja = eightChar.getDay()[1];
+
+  return {
+    ilgan: ilganHanja,
+    ilji: dayJiHanja,
+    color: getElementInfo(ilganHanja).color,
+  };
+};

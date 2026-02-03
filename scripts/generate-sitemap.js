@@ -1,102 +1,104 @@
 const fs = require('fs');
 const path = require('path');
 
-// Load environment variables from specific path to avoid issues when running from scripts/ dir
-require('dotenv').config({ path: path.resolve(__dirname, '../.env.local') });
+const DOMAIN = 'https://sajulatte.app';
+const TODAY = new Date().toISOString().split('T')[0];
 
-const { createClient } = require('@supabase/supabase-js');
-
-// 1. Setup Supabase
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
-
-if (!supabaseUrl || !supabaseKey) {
-  console.error(
-    'Error: EXPO_PUBLIC_SUPABASE_URL or EXPO_PUBLIC_SUPABASE_ANON_KEY is missing in .env'
-  );
-  process.exit(1);
-}
-
-const supabase = createClient(supabaseUrl, supabaseKey);
-
-// 2. Define Static URLs (Provided by User)
-const staticUrls = [
-  { loc: 'https://sajulatte.app/', changefreq: 'daily', priority: '1.0' },
-  { loc: 'https://sajulatte.app/daily', changefreq: 'daily', priority: '0.8' },
-  { loc: 'https://sajulatte.app/compatibility', changefreq: 'weekly', priority: '0.8' },
-  { loc: 'https://sajulatte.app/compatibility/analysis', changefreq: 'weekly', priority: '0.7' },
-  { loc: 'https://sajulatte.app/settings', changefreq: 'weekly', priority: '0.5' },
-  { loc: 'https://sajulatte.app/preferences', changefreq: 'monthly', priority: '0.3' },
-  { loc: 'https://sajulatte.app/privacy', changefreq: 'monthly', priority: '0.3' },
-  { loc: 'https://sajulatte.app/terms', changefreq: 'monthly', priority: '0.3' },
-  { loc: 'https://sajulatte.app/pillarscalendar', changefreq: 'weekly', priority: '0.7' },
-  { loc: 'https://sajulatte.app/encyclopedia', changefreq: 'weekly', priority: '0.7' },
-  { loc: 'https://sajulatte.app/amulet', changefreq: 'weekly', priority: '0.6' },
+// 1. Static Routes
+const staticRoutes = [
+  '',
+  '/saju',
+  '/saju/result', // Dynamic but accessible
+  '/compatibility',
+  '/pillarscalendar',
+  '/blog',
+  '/privacy',
+  '/terms',
 ];
 
-async function generateSitemap() {
-  console.log('Generating sitemap...');
+// 2. Blog Post IDs (Extracted from app/blog/index.tsx)
+const blogIds = [
+  'what-is-saju',
+  'ten-heavenly-stems',
+  'twelve-earthly-branches',
+  'five-elements-basics',
+  'day-lord-analysis',
+  'yearly-fortune',
+  'marriage-compatibility',
+  'career-guidance',
+  'wealth-luck',
+  'health-fortune',
+  'ten-gods-bijian',
+  'ten-gods-jie-cai',
+  'ten-gods-shi-shen',
+  'ten-gods-shang-guan',
+  'ten-gods-pian-cai',
+  'ten-gods-zheng-cai',
+  'ten-gods-pian-guan',
+  'ten-gods-zheng-guan',
+  'ten-gods-pian-yin',
+  'ten-gods-zheng-yin',
+  'twelve-growth-stars',
+  'strong-weak-chart',
+  'find-yongshin',
+  'peach-blossom',
+  'traveling-horse',
+  'saju-mbti',
+  '2026-forecast',
+  'education-saju',
+  'moving-day',
+  'lucky-colors',
+];
 
-  let xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-  xmlns:news="http://www.google.com/schemas/sitemap-news/0.9"
-  xmlns:xhtml="http://www.w3.org/1999/xhtml"
-  xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
-  xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
-`;
+// Generate 60 Gapja IDs
+const stemsEn = ['gap', 'eul', 'byeong', 'jeong', 'mu', 'gi', 'gyeong', 'sin', 'im', 'gye'];
+const branchesEn = ['ja', 'chuk', 'in', 'myo', 'jin', 'sa', 'o', 'mi', 'sin', 'yu', 'sul', 'hae'];
 
-  // 3. Add Static Pages
-  staticUrls.forEach((url) => {
-    xml += `  <url>
-    <loc>${url.loc}</loc>
-    <changefreq>${url.changefreq}</changefreq>
-    <priority>${url.priority}</priority>
-  </url>
-`;
-  });
-
-  // 4. Add Dynamic Pages (Stories from DB)
-  try {
-    console.log("Fetching stories from 'sajulatte_posts'...");
-
-    // Fetch all IDs and updated_at from sajulatte_posts
-    const { data: stories, error } = await supabase
-      .from('sajulatte_posts')
-      .select('id, updated_at');
-
-    if (error) {
-      console.warn('Warning: Failed to fetch stories from DB.', error.message);
-    } else if (stories && stories.length > 0) {
-      console.log(`Found ${stories.length} stories.`);
-
-      stories.forEach((story) => {
-        const lastmod = story.updated_at
-          ? new Date(story.updated_at).toISOString().split('T')[0] // YYYY-MM-DD
-          : new Date().toISOString().split('T')[0];
-
-        xml += `  <url>
-    <loc>https://sajulatte.app/story/${story.id}</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <lastmod>${lastmod}</lastmod>
-  </url>
-`;
-      });
-    } else {
-      console.log('No stories found in DB.');
-    }
-  } catch (e) {
-    console.error('Unexpected error fetching from DB:', e);
-  }
-
-  // 5. Close XML
-  xml += `</urlset>`;
-
-  // 6. Write to file
-  const outputPath = path.resolve(__dirname, '../public/sitemap.xml');
-  fs.writeFileSync(outputPath, xml, { encoding: 'utf-8' });
-
-  console.log(`Sitemap generated successfully at ${outputPath}`);
+for (let i = 0; i < 60; i++) {
+  const stem = stemsEn[i % 10];
+  const branch = branchesEn[i % 12];
+  blogIds.push(`${stem}-${branch}`);
 }
 
-generateSitemap();
+// Generate XML Content
+const generateSitemap = () => {
+  let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+  xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+
+  // Add Static Routes
+  staticRoutes.forEach((route) => {
+    xml += '  <url>\n';
+    xml += `    <loc>${DOMAIN}${route}</loc>\n`;
+    xml += `    <lastmod>${TODAY}</lastmod>\n`;
+    xml += '    <changefreq>daily</changefreq>\n';
+    xml += `    <priority>${route === '' ? '1.0' : '0.8'}</priority>\n`;
+    xml += '  </url>\n';
+  });
+
+  // Add Blog Routes
+  blogIds.forEach((id) => {
+    xml += '  <url>\n';
+    xml += `    <loc>${DOMAIN}/blog/${id}</loc>\n`;
+    xml += `    <lastmod>${TODAY}</lastmod>\n`;
+    xml += '    <changefreq>weekly</changefreq>\n';
+    xml += '    <priority>0.7</priority>\n';
+    xml += '  </url>\n';
+  });
+
+  xml += '</urlset>';
+  return xml;
+};
+
+// Write to public/sitemap.xml
+const sitemapContent = generateSitemap();
+const publicDir = path.join(__dirname, '../public');
+const sitemapPath = path.join(publicDir, 'sitemap.xml');
+
+// Ensure public directory exists (it should, but safety first)
+if (!fs.existsSync(publicDir)) {
+  fs.mkdirSync(publicDir, { recursive: true });
+}
+
+fs.writeFileSync(sitemapPath, sitemapContent);
+console.log(`✅ Sitemap generated at: ${sitemapPath}`);
+console.log(`Total URLs: ${staticRoutes.length + blogIds.length}`);

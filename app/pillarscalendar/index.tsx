@@ -11,11 +11,13 @@ import {
   Platform,
 } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
-import { ChevronLeft, ChevronRight } from 'lucide-react-native';
+import { ChevronLeft, ChevronRight, Lock } from 'lucide-react-native';
 import { WebSEO } from '@/components/ui/WebSEO';
 import { useState, useEffect, useMemo } from 'react';
-import { getMonthlyIljin, getMyEightSaju } from '@/lib/utils/latte';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getMonthlyIljin, getMyEightSaju, getMyIlganFromDate } from '@/lib/utils/latte';
 import { FullWidthWebLayout } from '@/components/FullWidthWebLayout';
+import { signInWithKakao } from '@/lib/services/authService';
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 
@@ -31,6 +33,7 @@ export default function PillarsCalendarScreen() {
 
   const [calendarData, setCalendarData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [hasProfile, setHasProfile] = useState<boolean | null>(null); // null: checking, true: yes, false: no
   const [userIlgan, setUserIlgan] = useState<string | undefined>(undefined);
   const [userIlji, setUserIlji] = useState<string | undefined>(undefined);
   const [userIlganColor, setUserIlganColor] = useState<string | undefined>(undefined);
@@ -40,22 +43,21 @@ export default function PillarsCalendarScreen() {
   const [pickerYear, setPickerYear] = useState(2024);
   const [pickerMonth, setPickerMonth] = useState(1);
 
-  // Day Analysis Modal State Removed
-
   const YEARS = Array.from({ length: 1101 }, (_, i) => 1900 + i);
   const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
   const ITEM_HEIGHT = 50;
 
   useEffect(() => {
-    // Fetch User Ilgan
+    // Fetch User Ilgan and Check Profile
     const fetchUserData = async () => {
+      setLoading(true);
       try {
+        // 1. Try fetching authenticated user data first
         const result = await getMyEightSaju();
-        console.log(111, result);
         if (result && result.meta) {
+          setHasProfile(true);
           if (result.meta.ilgan) {
             setUserIlgan(result.meta.ilgan);
-            // Ilgan is day's gan.
             if (result.day && result.day.gan && result.day.gan.color) {
               setUserIlganColor(result.day.gan.color);
             }
@@ -63,28 +65,72 @@ export default function PillarsCalendarScreen() {
           if (result.meta.sajuJiHjs && result.meta.sajuJiHjs.dayJi) {
             setUserIlji(result.meta.sajuJiHjs.dayJi);
           }
+        } else {
+          // 2. If no auth data, try local storage
+          const jsonValue = await AsyncStorage.getItem('my_saju_list');
+          if (jsonValue) {
+            const profiles = JSON.parse(jsonValue);
+            if (profiles && profiles.length > 0) {
+              // Use the first profile (most recent or main)
+              const localProfile = profiles[0];
+              const pYear = Number(localProfile.birth_year || localProfile.year);
+              const pMonth = Number(localProfile.birth_month || localProfile.month);
+              const pDay = Number(localProfile.birth_day || localProfile.day);
+              const pHour = Number(localProfile.birth_hour || localProfile.hour || 0);
+              const pMinute = Number(localProfile.birth_minute || localProfile.minute || 0);
+              const pCalType = localProfile.calendar_type || localProfile.calendarType || 'solar';
+              const pIsLeap = localProfile.is_leap || localProfile.isLeapMonth === 'true' || false;
+
+              const localResult = getMyIlganFromDate(
+                pYear,
+                pMonth,
+                pDay,
+                pCalType,
+                pIsLeap,
+                pHour,
+                pMinute
+              );
+
+              if (localResult) {
+                setHasProfile(true);
+                setUserIlgan(localResult.ilgan);
+                setUserIlji(localResult.ilji);
+                setUserIlganColor(localResult.color);
+              } else {
+                setHasProfile(false);
+              }
+            } else {
+              setHasProfile(false);
+            }
+          } else {
+            setHasProfile(false);
+          }
         }
       } catch (e) {
         console.error('Failed to fetch user ilgan:', e);
+        setHasProfile(false);
+      } finally {
+        setLoading(false);
       }
     };
     fetchUserData();
   }, []);
 
   useEffect(() => {
+    if (hasProfile === false) return; // Don't fetch calendar if no profile
+
     // Fetch data when year/month changes
-    setLoading(true);
-    // Simulate slight delay for rendering smoothness or just direct call implies instant
-    // We can just call it directly since it's synchronous
-    try {
-      const data = getMonthlyIljin(currentDate.year, currentDate.month, userIlgan);
-      setCalendarData(data);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
+    // Only set loading if checking profile is done
+    if (hasProfile !== null) {
+      // We can do background update or just quick calc
+      try {
+        const data = getMonthlyIljin(currentDate.year, currentDate.month, userIlgan);
+        setCalendarData(data);
+      } catch (e) {
+        console.error(e);
+      }
     }
-  }, [currentDate, userIlgan]);
+  }, [currentDate, userIlgan, hasProfile]);
 
   const handlePrevMonth = () => {
     setCurrentDate((prev) => {
@@ -135,6 +181,21 @@ export default function PillarsCalendarScreen() {
     });
   };
 
+  const handleKakaoLogin = async () => {
+    try {
+      await signInWithKakao();
+      // After login, ideally we should refresh or redirect.
+      // Since signInWithKakao redirects, page will reload.
+    } catch (e) {
+      console.error('Login failed', e);
+      alert('로그인 중 오류가 발생했습니다.');
+    }
+  };
+
+  const handleGoToInput = () => {
+    router.push('/saju');
+  };
+
   // Grid Generation logic with padding
   const gridCells = useMemo(() => {
     if (!calendarData) return [];
@@ -148,10 +209,6 @@ export default function PillarsCalendarScreen() {
     calendarData.days.forEach((day: any) => {
       cells.push({ type: 'day', data: day, key: `day-${day.day}` });
     });
-    // Trailing Padding (Optional, for full grid look)
-    //   while (cells.length % 7 !== 0) {
-    //       cells.push({ type: 'empty', key: `pad-end-${cells.length}` });
-    //   }
     return cells;
   }, [calendarData]);
 
@@ -213,12 +270,40 @@ export default function PillarsCalendarScreen() {
         ))}
       </View>
 
-      {/* Calendar Grid */}
+      {/* Main Content Area */}
       {loading ? (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" color="#d97706" />
         </View>
+      ) : hasProfile === false ? (
+        // NO PROFILE - LOGIN GUARD
+        <View className="flex-1 items-center justify-center p-8">
+          <View className="mb-6 rounded-full bg-gray-50 p-6">
+            <Lock size={48} color="#9ca3af" />
+          </View>
+          <Text className="mb-2 text-center text-xl font-bold text-gray-900">
+            사주 정보가 필요해요
+          </Text>
+          <Text className="mb-8 text-center leading-6 text-gray-500">
+            나의 일간과 사주 흐름을 분석하여{'\n'}
+            맞춤형 만세력 달력을 제공해드립니다.
+          </Text>
+
+          <TouchableOpacity
+            onPress={handleKakaoLogin}
+            className="mb-3 w-full max-w-xs flex-row items-center justify-center gap-2 rounded-xl bg-[#FEE500] py-4 active:opacity-90">
+            <Text className="text-xl">💬</Text>
+            <Text className="text-base font-bold text-[#191919]">카카오로 3초만에 시작하기</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={handleGoToInput}
+            className="w-full max-w-xs rounded-xl border border-gray-200 py-3 active:bg-gray-50">
+            <Text className="text-center font-semibold text-gray-600">직접 정보 입력하기</Text>
+          </TouchableOpacity>
+        </View>
       ) : (
+        // CALENDAR GRID
         <ScrollView className="flex-1" contentContainerClassName="pb-10">
           <View className="flex-row flex-wrap">
             {gridCells.map((cell: any, index) => {
@@ -235,7 +320,6 @@ export default function PillarsCalendarScreen() {
               const day = cell.data;
               const isSun = day.weekDay === 0;
               const isSat = day.weekDay === 6;
-              // Check if today
               const isToday =
                 today.getFullYear() === currentDate.year &&
                 today.getMonth() + 1 === currentDate.month &&
@@ -306,7 +390,7 @@ export default function PillarsCalendarScreen() {
         <TouchableWithoutFeedback onPress={() => setDatePickerVisible(false)}>
           <View className="flex-1 items-center justify-center bg-black/50 p-6">
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-              <View className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
+              <View className="w-full max-w-sm rounded-2xl bg-white p-6">
                 <Text className="mb-4 text-center text-lg font-bold text-gray-900">날짜 선택</Text>
 
                 <View className="h-64 flex-row gap-4">
@@ -395,7 +479,7 @@ export default function PillarsCalendarScreen() {
     </View>
   );
 
-  return isWeb ? (
+  return (
     <FullWidthWebLayout>
       <WebSEO
         title="만세력 달력 - 사주라떼"
@@ -403,13 +487,5 @@ export default function PillarsCalendarScreen() {
       />
       {content}
     </FullWidthWebLayout>
-  ) : (
-    <View className="flex-1 bg-white">
-      <WebSEO
-        title="만세력 달력 - 사주라떼"
-        description="이달의 일진과 사주 흐름을 확인하는 만세력 달력"
-      />
-      {content}
-    </View>
   );
 }

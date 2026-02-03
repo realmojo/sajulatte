@@ -312,12 +312,12 @@ export default function SavedScreen() {
         onPress={() => handlePress(item)}
         className={`mb-3 w-full flex-row items-center justify-between rounded-2xl border ${colors.bg} ${
           isMain ? 'border-2 border-amber-400' : 'border-transparent' // Remove border from non-main items for cleaner look or use colors.border
-        } p-4 shadow-sm`}
+        } p-4`}
         style={!isMain ? { borderWidth: 1, borderColor: isDark ? '#333' : '#e5e7eb' } : {}}>
         <View className="flex-1 flex-row items-center gap-3">
           {/* Avatar / Icon */}
           <View
-            className={`h-12 w-12 items-center justify-center rounded-full border border-gray-100 bg-white shadow-sm`}>
+            className={`h-12 w-12 items-center justify-center rounded-full border border-gray-100 bg-white`}>
             <Text className="text-xl">{zodiacEmoji}</Text>
           </View>
 
@@ -408,7 +408,7 @@ export default function SavedScreen() {
           <TouchableOpacity
             onPress={openCreateModal}
             activeOpacity={0.8}
-            className="h-14 w-14 items-center justify-center rounded-full bg-primary shadow-lg shadow-black/30"
+            className="h-14 w-14 items-center justify-center rounded-full bg-primary shadow-black/30"
             style={{ elevation: 5 }}>
             <Plus size={32} color="#fff" strokeWidth={2.5} />
           </TouchableOpacity>
@@ -429,7 +429,7 @@ export default function SavedScreen() {
           animationType="fade"
           onRequestClose={() => setIsDeleteModalVisible(false)}>
           <View className="flex-1 items-center justify-center bg-black/60 p-6 backdrop-blur-sm">
-            <View className="w-full max-w-sm gap-4 rounded-2xl border border-white/10 bg-background p-6 shadow-2xl">
+            <View className="w-full max-w-sm gap-4 rounded-2xl border border-white/10 bg-background p-6">
               <View className="items-center gap-3">
                 <View className="h-12 w-12 items-center justify-center rounded-full bg-red-100">
                   <Trash2 size={24} color="#ef4444" />

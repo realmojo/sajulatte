@@ -36,7 +36,7 @@ export default function EncyclopediaScreen() {
     <View className="flex-1">
       <ScrollView className="flex-1" contentContainerClassName="pb-10">
         {/* Intro Card */}
-        <View className="mb-8 rounded-2xl bg-blue-500 p-8 shadow-lg">
+        <View className="mb-8 rounded-2xl bg-blue-500 p-8">
           <View className="mb-3 flex-row items-center gap-3">
             <BookOpen size={28} color="white" />
             <Text className="text-2xl font-bold text-white">알기 쉬운 사주 이야기</Text>
@@ -54,7 +54,7 @@ export default function EncyclopediaScreen() {
             return (
               <View
                 key={category.id}
-                className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+                className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
                 <TouchableOpacity
                   activeOpacity={0.7}
                   onPress={() => toggleSection(category.id)}

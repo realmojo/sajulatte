@@ -150,7 +150,7 @@ export default function FAQScreen() {
                   <Pressable
                     key={questionIndex}
                     onPress={() => toggleQuestion(categoryIndex, questionIndex)}
-                    className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm hover:shadow-md">
+                    className="overflow-hidden rounded-xl border border-gray-200 bg-white">
                     <View className="flex-row items-center justify-between bg-gray-50 p-4">
                       <Text className="flex-1 pr-3 font-semibold text-gray-900">Q. {item.q}</Text>
                       <Text className="text-xl text-amber-600">{isExpanded ? '−' : '+'}</Text>
@@ -173,7 +173,7 @@ export default function FAQScreen() {
       </View>
 
       {/* Contact CTA */}
-      <View className="mt-12 rounded-2xl bg-gradient-to-r from-amber-600 to-amber-500 p-8 shadow-lg">
+      <View className="mt-12 rounded-2xl bg-gradient-to-r from-amber-600 to-amber-500 p-8">
         <Text className="mb-2 text-2xl font-bold text-white">더 궁금한 점이 있으신가요?</Text>
         <Text className="mb-4 text-lg leading-7 text-amber-50">
           FAQ에서 답을 찾지 못하셨다면 언제든 문의해주세요.{'\n'}

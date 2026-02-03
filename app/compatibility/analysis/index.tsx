@@ -184,7 +184,7 @@ export default function CompatibilityAnalysisScreen() {
             <View className="p-6 pb-20">
               {/* Header Box */}
               <View className="mb-8 items-center rounded-2xl bg-rose-50 p-6">
-                <View className="mb-2 rounded-full bg-white p-3 shadow-sm">
+                <View className="mb-2 rounded-full bg-white p-3">
                   <HeartHandshake size={32} color="#f43f5e" />
                 </View>
                 <Text className="text-lg font-bold text-gray-900">나와 {partnerName}님의 궁합</Text>

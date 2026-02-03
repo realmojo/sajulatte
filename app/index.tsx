@@ -1,205 +1,157 @@
-import { View, Text, TouchableOpacity, Platform, ScrollView, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, Platform, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { WebSEO } from '@/components/ui/WebSEO';
 import { FullWidthWebLayout } from '@/components/FullWidthWebLayout';
-import { Calendar } from 'lucide-react-native';
-import { useState } from 'react';
+import {
+  Calendar,
+  Heart,
+  BookOpen,
+  Clock,
+  FileText,
+  HelpCircle,
+  Mail,
+  Info,
+} from 'lucide-react-native';
+import { signInWithKakao } from '@/lib/services/authService';
 
 export default function HomeScreen() {
   const isWeb = Platform.OS === 'web';
   const router = useRouter();
 
-  const [name, setName] = useState('');
-  const [gender, setGender] = useState<'male' | 'female'>('male');
-  const [year, setYear] = useState('');
-  const [month, setMonth] = useState('');
-  const [day, setDay] = useState('');
-  const [hour, setHour] = useState('');
-  const [minute, setMinute] = useState('');
-  const [calendarType, setCalendarType] = useState<'solar' | 'lunar'>('solar');
-
-  const handleSubmit = () => {
-    if (!name || !year || !month || !day) {
-      alert('필수 정보를 입력해주세요.');
-      return;
+  const handleKakaoLogin = async () => {
+    try {
+      await signInWithKakao();
+    } catch (e) {
+      console.error('Login failed', e);
+      alert('로그인 중 오류가 발생했습니다.');
     }
-
-    router.push({
-      pathname: '/saju',
-      params: {
-        name,
-        year,
-        month,
-        day,
-        hour: hour || '0',
-        minute: minute || '0',
-        gender,
-        calendarType,
-        isLeapMonth: 'false',
-      },
-    });
   };
+
+  const featureCards = [
+    {
+      title: '정통 사주 분석',
+      desc: '생년월일시를 기반으로 분석하는\n당신의 타고난 운명과 기질',
+      icon: Calendar,
+      route: '/saju',
+    },
+    {
+      title: '만세력 달력',
+      desc: '매일의 일진과 길흉을 확인하는\n스마트한 만세력',
+      icon: Clock,
+      route: '/pillarscalendar',
+    },
+    {
+      title: '운세 백과사전',
+      desc: '어려운 명리학 용어를\n쉽고 재미있게 풀어드립니다',
+      icon: BookOpen,
+      route: '/encyclopedia',
+    },
+    {
+      title: '궁합 분석',
+      desc: '연인, 친구, 동료와의\n특별한 인연을 확인하세요',
+      icon: Heart,
+      route: '/compatibility',
+    },
+  ];
 
   const content = (
     <View className="flex-1 items-center justify-center p-8">
       {/* Hero Section */}
-      <View className="mb-12 w-full max-w-2xl items-center">
-        <View className="mb-6 h-24 w-24 items-center justify-center overflow-hidden rounded-3xl bg-amber-100 shadow-xl">
-          <Text className="text-5xl">☕️</Text>
+      <View className="mb-16 w-full max-w-4xl items-center">
+        <View className="mb-8 h-32 w-32 items-center justify-center overflow-hidden rounded-3xl bg-gradient-to-br from-amber-400 to-orange-500">
+          <Text className="text-7xl">☕️</Text>
         </View>
-        <Text className="mb-3 text-center text-4xl font-bold text-gray-900">사주 분석</Text>
-        <Text className="text-center text-lg leading-7 text-gray-600">
-          정통 명리학 기반의 정확한 사주 풀이
+        <Text className="mb-4 text-center text-5xl font-bold text-gray-900">사주라떼</Text>
+        <Text className="mb-8 text-center text-xl leading-relaxed text-gray-600">
+          천년의 지혜를 한 잔의 커피처럼{'\n'}
+          따뜻하고 편안하게 즐기는 일상의 명리학
         </Text>
+
+        {/* Main CTA */}
+        <TouchableOpacity
+          onPress={() => router.push('/saju')}
+          className="mb-3 w-full max-w-md rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 px-12 py-5 shadow-md active:scale-95">
+          <Text className="text-center text-xl font-bold text-white">무료로 사주 보러가기</Text>
+        </TouchableOpacity>
+
+        {/* Kakao Login CTA */}
+        <TouchableOpacity
+          onPress={handleKakaoLogin}
+          className="mb-4 w-full max-w-md flex-row items-center justify-center gap-2 rounded-2xl bg-[#FEE500] px-12 py-5 shadow-md hover:bg-[#FDD835] active:scale-95">
+          <Text className="text-xl">💬</Text>
+          <Text className="text-center text-xl font-bold text-[#191919]">
+            카카오로 3초만에 시작하기
+          </Text>
+        </TouchableOpacity>
       </View>
 
-      {/* Input Form */}
-      <View className="w-full max-w-2xl rounded-2xl border border-gray-200 bg-white p-8 shadow-lg">
-        {/* Name */}
-        <View className="mb-6">
-          <Text className="mb-2 text-sm font-semibold text-gray-700">이름</Text>
-          <TextInput
-            value={name}
-            onChangeText={setName}
-            placeholder="이름을 입력하세요"
-            className="rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-gray-900"
-          />
+      {/* Features Grid */}
+      <View className="w-full max-w-6xl">
+        <Text className="mb-8 text-center text-2xl font-bold text-gray-900">
+          사주라떼가 제공하는 서비스
+        </Text>
+        <View className="flex-row flex-wrap justify-center gap-6">
+          {featureCards.map((feature, index) => (
+            <TouchableOpacity
+              key={index}
+              onPress={() => router.push(feature.route as any)}
+              className="w-full max-w-sm rounded-2xl border border-gray-200 bg-white p-6 transition-all hover:border-amber-400 hover:shadow-lg active:scale-95 md:w-[calc(50%-8px)]">
+              <View className="mb-4 h-14 w-14 items-center justify-center rounded-2xl bg-amber-50">
+                <feature.icon size={28} color="#f59e0b" />
+              </View>
+              <Text className="mb-2 text-xl font-bold text-gray-900">{feature.title}</Text>
+              <Text className="text-gray-600">{feature.desc}</Text>
+            </TouchableOpacity>
+          ))}
         </View>
+      </View>
 
-        {/* Gender */}
-        <View className="mb-6">
-          <Text className="mb-2 text-sm font-semibold text-gray-700">성별</Text>
-          <View className="flex-row gap-3">
-            <TouchableOpacity
-              onPress={() => setGender('male')}
-              className={`flex-1 rounded-xl border py-3 ${
-                gender === 'male' ? 'border-amber-500 bg-amber-50' : 'border-gray-300 bg-white'
-              }`}>
-              <Text
-                className={`text-center font-semibold ${
-                  gender === 'male' ? 'text-amber-600' : 'text-gray-600'
-                }`}>
-                남자
+      {/* Why Sajulatte? */}
+      <View className="mt-20 w-full max-w-4xl rounded-3xl bg-gray-50 p-10">
+        <Text className="mb-8 text-center text-2xl font-bold text-gray-900">
+          왜 사주라떼인가요?
+        </Text>
+        <View className="gap-6">
+          <View className="flex-row gap-4">
+            <View className="h-2 w-2 translate-y-2 rounded-full bg-amber-500" />
+            <View>
+              <Text className="mb-1 text-lg font-bold text-gray-900">정확한 만세력 알고리즘</Text>
+              <Text className="text-gray-600">
+                한국천문연구원의 데이터를 기반으로 한 정밀한 절기 계산으로 오차 없는 정확한 사주를
+                분석합니다.
               </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => setGender('female')}
-              className={`flex-1 rounded-xl border py-3 ${
-                gender === 'female' ? 'border-amber-500 bg-amber-50' : 'border-gray-300 bg-white'
-              }`}>
-              <Text
-                className={`text-center font-semibold ${
-                  gender === 'female' ? 'text-amber-600' : 'text-gray-600'
-                }`}>
-                여자
+            </View>
+          </View>
+          <View className="flex-row gap-4">
+            <View className="h-2 w-2 translate-y-2 rounded-full bg-amber-500" />
+            <View>
+              <Text className="mb-1 text-lg font-bold text-gray-900">현대적인 해석</Text>
+              <Text className="text-gray-600">
+                고리타분한 옛날 해석이 아닌, 현대 사회에 맞춘 실요적이고 긍정적인 해석을 제공합니다.
               </Text>
-            </TouchableOpacity>
+            </View>
+          </View>
+          <View className="flex-row gap-4">
+            <View className="h-2 w-2 translate-y-2 rounded-full bg-amber-500" />
+            <View>
+              <Text className="mb-1 text-lg font-bold text-gray-900">쉬운 사용성</Text>
+              <Text className="text-gray-600">
+                복잡한 한자 없이도 누구나 쉽게 이해할 수 있는 직관적인 디자인과 설명을 제공합니다.
+              </Text>
+            </View>
           </View>
         </View>
-
-        {/* Calendar Type */}
-        <View className="mb-6">
-          <Text className="mb-2 text-sm font-semibold text-gray-700">생년월일</Text>
-          <View className="mb-3 flex-row gap-3">
-            <TouchableOpacity
-              onPress={() => setCalendarType('solar')}
-              className={`flex-1 rounded-xl border py-2 ${
-                calendarType === 'solar'
-                  ? 'border-amber-500 bg-amber-50'
-                  : 'border-gray-300 bg-white'
-              }`}>
-              <Text
-                className={`text-center text-sm font-semibold ${
-                  calendarType === 'solar' ? 'text-amber-600' : 'text-gray-600'
-                }`}>
-                양력
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => setCalendarType('lunar')}
-              className={`flex-1 rounded-xl border py-2 ${
-                calendarType === 'lunar'
-                  ? 'border-amber-500 bg-amber-50'
-                  : 'border-gray-300 bg-white'
-              }`}>
-              <Text
-                className={`text-center text-sm font-semibold ${
-                  calendarType === 'lunar' ? 'text-amber-600' : 'text-gray-600'
-                }`}>
-                음력
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          <View className="flex-row gap-3">
-            <TextInput
-              value={year}
-              onChangeText={setYear}
-              placeholder="YYYY"
-              keyboardType="number-pad"
-              maxLength={4}
-              className="flex-1 rounded-xl border border-gray-300 bg-white px-4 py-3 text-center text-base text-gray-900"
-            />
-            <TextInput
-              value={month}
-              onChangeText={setMonth}
-              placeholder="MM"
-              keyboardType="number-pad"
-              maxLength={2}
-              className="w-20 rounded-xl border border-gray-300 bg-white px-4 py-3 text-center text-base text-gray-900"
-            />
-            <TextInput
-              value={day}
-              onChangeText={setDay}
-              placeholder="DD"
-              keyboardType="number-pad"
-              maxLength={2}
-              className="w-20 rounded-xl border border-gray-300 bg-white px-4 py-3 text-center text-base text-gray-900"
-            />
-          </View>
-        </View>
-
-        {/* Birth Time (Optional) */}
-        <View className="mb-8">
-          <Text className="mb-2 text-sm font-semibold text-gray-700">
-            태어난 시각 <Text className="text-gray-400">(선택)</Text>
-          </Text>
-          <View className="flex-row gap-3">
-            <TextInput
-              value={hour}
-              onChangeText={setHour}
-              placeholder="HH"
-              keyboardType="number-pad"
-              maxLength={2}
-              className="w-20 rounded-xl border border-gray-300 bg-white px-4 py-3 text-center text-base text-gray-900"
-            />
-            <Text className="py-3 text-xl text-gray-400">:</Text>
-            <TextInput
-              value={minute}
-              onChangeText={setMinute}
-              placeholder="MM"
-              keyboardType="number-pad"
-              maxLength={2}
-              className="w-20 rounded-xl border border-gray-300 bg-white px-4 py-3 text-center text-base text-gray-900"
-            />
-          </View>
-        </View>
-
-        {/* Submit Button */}
-        <TouchableOpacity
-          onPress={handleSubmit}
-          className="w-full rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 px-8 py-4 shadow-lg active:scale-95">
-          <Text className="text-center text-lg font-bold text-white">분석하기</Text>
-        </TouchableOpacity>
       </View>
     </View>
   );
 
-  return isWeb ? (
+  // Use FullWidthWebLayout for layout consistently
+  // Now FullWidthWebLayout handles mobile vs web responsively
+  return (
     <FullWidthWebLayout>
       <WebSEO
-        title="사주라떼 - 무료 사주 만세력"
-        description="생년월일만 입력하면 정통 명리학 기반의 정확한 사주 풀이와 만세력을 무료로 확인할 수 있습니다. 오늘의 운세와 궁합도 확인해보세요."
+        title="사주라떼 - 쉬운 사주, 정확한 만세력"
+        description="천년의 지혜를 한 잔의 커피처럼 따뜻하고 편안하게. 정통 명리학 기반의 사주 분석과 정확한 만세력을 무료로 만나보세요."
         jsonLd={{
           '@context': 'https://schema.org',
           '@type': 'WebSite',
@@ -209,19 +161,5 @@ export default function HomeScreen() {
       />
       {content}
     </FullWidthWebLayout>
-  ) : (
-    <ScrollView className="flex-1 bg-white">
-      <WebSEO
-        title="사주라떼 - 무료 사주 만세력"
-        description="생년월일만 입력하면 정통 명리학 기반의 정확한 사주 풀이와 만세력을 무료로 확인할 수 있습니다. 오늘의 운세와 궁합도 확인해보세요."
-        jsonLd={{
-          '@context': 'https://schema.org',
-          '@type': 'WebSite',
-          name: '사주라떼',
-          url: 'https://sajulatte.app',
-        }}
-      />
-      {content}
-    </ScrollView>
   );
 }

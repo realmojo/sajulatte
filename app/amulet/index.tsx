@@ -237,7 +237,7 @@ export default function AmuletScreen() {
               onPress={() => setSelectedAmulet(item)}
               activeOpacity={0.8}>
               <View
-                className="mb-2 transform overflow-hidden shadow-sm transition-all active:scale-95"
+                className="mb-2 transform overflow-hidden transition-all active:scale-95"
                 pointerEvents="none">
                 <DigitalAmulet type={item.type} width={160} height={240} />
               </View>
@@ -269,7 +269,7 @@ export default function AmuletScreen() {
               showsVerticalScrollIndicator={false}>
               {selectedAmulet && (
                 <>
-                  <View className="mt-8 shadow-xl">
+                  <View className="mt-8">
                     {/* Size slightly reduced for better fitting on smaller screens */}
                     <ViewShot ref={viewShotRef} options={{ format: 'png', quality: 1.0 }}>
                       <DigitalAmulet type={selectedAmulet.type} width={220} height={330} />

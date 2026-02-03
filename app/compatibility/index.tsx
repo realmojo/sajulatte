@@ -1,18 +1,25 @@
-import { View, Text, TouchableOpacity, ScrollView, Modal, Alert, FlatList } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  Modal,
+  Alert,
+  FlatList,
+  Platform,
+} from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useState, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
-import { ChevronRight, X, Plus, Star, HeartHandshake } from 'lucide-react-native';
+import { ChevronRight, X, Plus, Star, HeartHandshake, Trash2 } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import { supabase } from '@/lib/supabase';
 import { userService, UserProfile } from '@/lib/services/userService';
 import { CELEBS, Celebrity } from '@/lib/data/celebs';
 import { ProfileEditModal, ProfileData } from '@/components/modal/ProfileEditModal';
 import { WebSEO } from '@/components/ui/WebSEO';
-// Web SEO Helper
-import { Platform } from 'react-native';
 import { FullWidthWebLayout } from '@/components/FullWidthWebLayout';
 
 type Gender = 'male' | 'female';
@@ -29,9 +36,7 @@ interface PartnerProfile {
 }
 
 export default function CompatibilityScreen() {
-  const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { colorScheme } = useColorScheme();
   const [showInputModal, setShowInputModal] = useState(false);
   const [showCelebModal, setShowCelebModal] = useState(false);
   const [myProfile, setMyProfile] = useState<UserProfile | null>(null);
@@ -71,6 +76,25 @@ export default function CompatibilityScreen() {
     }, [])
   );
 
+  const deletePartner = async (id: string) => {
+    Alert.alert('삭제 확인', '정말 삭제하시겠습니까?', [
+      { text: '취소', style: 'cancel' },
+      {
+        text: '삭제',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            const newList = savedList.filter((item) => item.id !== id);
+            await AsyncStorage.setItem('relationship_saju_list', JSON.stringify(newList));
+            setSavedList(newList);
+          } catch (e) {
+            console.error(e);
+          }
+        },
+      },
+    ]);
+  };
+
   const executeCalculate = (targetPartner: PartnerProfile) => {
     if (!myProfile) {
       Alert.alert('로그인 필요', '먼저 나의 사주 정보를 설정 탭에서 입력해주세요.');
@@ -81,7 +105,6 @@ export default function CompatibilityScreen() {
       return;
     }
 
-    // Parse Time
     let pHour = 0;
     if (targetPartner.birthHour && targetPartner.birthHour.includes(':')) {
       const [h] = targetPartner.birthHour.split(':').map(Number);
@@ -90,7 +113,6 @@ export default function CompatibilityScreen() {
       pHour = Number(targetPartner.birthHour);
     }
 
-    // Navigate to Analysis Screen
     router.push({
       pathname: '/compatibility/analysis',
       params: {
@@ -109,7 +131,6 @@ export default function CompatibilityScreen() {
   };
 
   const handleSelectFromList = (item: any) => {
-    // Convert saved item to PartnerProfile
     const hourStr =
       item.birth_hour !== null && item.birth_minute !== null
         ? `${String(item.birth_hour).padStart(2, '0')}:${String(item.birth_minute).padStart(2, '0')}`
@@ -128,7 +149,6 @@ export default function CompatibilityScreen() {
 
   const handleSavePartner = async (data: ProfileData) => {
     try {
-      // 1. Save to relationship_saju_list
       const existingData = await AsyncStorage.getItem('relationship_saju_list');
       const list = existingData ? JSON.parse(existingData) : [];
 
@@ -150,11 +170,8 @@ export default function CompatibilityScreen() {
       const newList = [...list, newProfile];
       await AsyncStorage.setItem('relationship_saju_list', JSON.stringify(newList));
       setSavedList(newList);
-
-      // Close modal immediately
       setShowInputModal(false);
 
-      // 2. Execute Calculation
       const hourStr =
         data.birth_hour !== null && data.birth_minute !== null
           ? `${String(data.birth_hour).padStart(2, '0')}:${String(data.birth_minute).padStart(2, '0')}`
@@ -183,79 +200,128 @@ export default function CompatibilityScreen() {
       birthMonth: celeb.birthMonth,
       birthDay: celeb.birthDay,
       birthHour: celeb.birthHour || '',
-      calendarType: 'solar', // Celeb info is usually solar
+      calendarType: 'solar',
     });
   };
 
-  const isWeb = Platform.OS === 'web';
-  const content = (
-    <View className="flex-1 bg-background">
-      <ScrollView contentContainerClassName="pb-20">
-        <View className="px-6 py-8">
-          <Text className="mb-6 text-xl font-bold text-gray-900">누구와 궁합을 볼까요?</Text>
-
-          {/* Saved List */}
-          {savedList.length > 0 ? (
-            <View className="mb-6 gap-3">
-              {savedList.map((item) => (
-                <TouchableOpacity
-                  key={item.id}
-                  onPress={() => handleSelectFromList(item)}
-                  activeOpacity={0.7}
-                  className="flex-row items-center justify-between rounded-2xl border border-gray-100 bg-gray-50 p-4">
-                  <View className="flex-row items-center gap-4">
-                    <View
-                      className={`h-12 w-12 items-center justify-center rounded-full ${
-                        item.gender === 'male' ? 'bg-blue-100' : 'bg-rose-100'
-                      }`}>
-                      <Text className="text-xl">{item.gender === 'male' ? '👨' : '👩'}</Text>
-                    </View>
-                    <View>
-                      <Text className="text-lg font-bold text-gray-900">{item.name}</Text>
-                      <Text className="text-xs text-gray-500">
-                        {item.birth_year}.{item.birth_month}.{item.birth_day} ·{' '}
-                        {item.relationship === 'family'
-                          ? '가족'
-                          : item.relationship === 'partner'
-                            ? '연인'
-                            : item.relationship === 'colleague'
-                              ? '동료'
-                              : '친구/기타'}
-                      </Text>
-                    </View>
-                  </View>
-                  <ChevronRight size={20} color="#9ca3af" />
-                </TouchableOpacity>
-              ))}
+  return (
+    <FullWidthWebLayout>
+      <WebSEO
+        title="무료 궁합 보기 - 사주라떼"
+        description="연인, 친구, 동료와의 궁합을 오행 분석을 통해 무료로 확인해보세요."
+      />
+      <View className="flex-1 items-center justify-center p-6">
+        <ScrollView
+          className="w-full max-w-2xl flex-1"
+          contentContainerStyle={{ paddingBottom: 100 }}
+          showsVerticalScrollIndicator={false}>
+          {/* Hero Section */}
+          <View className="mb-10 w-full items-center">
+            <View className="mb-6 h-24 w-24 items-center justify-center overflow-hidden rounded-3xl bg-pink-100 shadow-sm">
+              <Text className="text-5xl">💑</Text>
             </View>
-          ) : (
-            <View className="mb-8 items-center justify-center p-4">
-              <Text className="text-gray-400">저장된 상대가 없습니다.</Text>
-            </View>
-          )}
+            <Text className="mb-3 text-center text-4xl font-bold text-gray-900">궁합 분석</Text>
+            <Text className="text-center text-lg leading-7 text-gray-500">
+              연인, 친구, 동료와의 인연을 확인해보세요.
+            </Text>
+          </View>
 
           {/* Action Buttons */}
-          <View className="gap-3">
+          <View className="mb-8 flex-row gap-4">
             <TouchableOpacity
-              activeOpacity={0.8}
+              activeOpacity={0.9}
               onPress={() => setShowInputModal(true)}
-              className="w-full flex-row items-center justify-center gap-2 rounded-full bg-gray-900 px-6 py-4 shadow-sm">
-              <Plus size={20} color="white" />
-              <Text className="text-base font-bold text-white">새로운 상대 추가하기</Text>
+              className="flex-1 items-center justify-center rounded-2xl bg-gradient-to-r from-pink-500 to-rose-500 py-4 shadow-md active:scale-95">
+              <View className="mb-2 h-10 w-10 items-center justify-center rounded-full bg-white/20">
+                <Plus size={24} color="white" />
+              </View>
+              <Text className="font-bold text-white">새 파트너 추가</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              activeOpacity={0.8}
+              activeOpacity={0.9}
               onPress={() => setShowCelebModal(true)}
-              className="w-full flex-row items-center justify-center gap-2 rounded-full border border-rose-100 bg-rose-50 px-6 py-4">
-              <Star size={20} color="#e11d48" />
-              <Text className="text-base font-bold text-rose-600">유명인과 궁합 보기</Text>
+              className="flex-1 items-center justify-center rounded-2xl border border-gray-100 bg-white py-4 shadow-sm active:scale-95 active:bg-gray-50">
+              <View className="mb-2 h-10 w-10 items-center justify-center rounded-full bg-yellow-100">
+                <Star size={24} color="#ca8a04" />
+              </View>
+              <Text className="font-bold text-gray-800">유명인과 궁합</Text>
             </TouchableOpacity>
           </View>
-        </View>
-      </ScrollView>
 
-      {/* Input Modal using ProfileEditModal */}
+          {/* Saved List Section */}
+          <View>
+            <View className="mb-4 flex-row items-center justify-between px-2">
+              <Text className="text-lg font-bold text-gray-900">저장된 파트너</Text>
+              <Text className="text-sm font-medium text-gray-400">{savedList.length}명</Text>
+            </View>
+
+            {savedList.length > 0 ? (
+              <View className="gap-3">
+                {savedList.map((item) => (
+                  <View
+                    key={item.id}
+                    className="flex-row items-center justify-between rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+                    <TouchableOpacity
+                      onPress={() => handleSelectFromList(item)}
+                      activeOpacity={0.7}
+                      className="flex-1 flex-row items-center gap-4">
+                      <View
+                        className={`h-14 w-14 items-center justify-center rounded-2xl ${
+                          item.gender === 'male' ? 'bg-blue-50' : 'bg-pink-50'
+                        }`}>
+                        <Text className="text-2xl">{item.gender === 'male' ? '👨' : '👩'}</Text>
+                      </View>
+                      <View>
+                        <View className="flex-row items-center gap-2">
+                          <Text className="text-lg font-bold text-gray-900">{item.name}</Text>
+                          <View className="rounded-md bg-gray-100 px-2 py-0.5">
+                            <Text className="text-xs font-medium text-gray-500">
+                              {item.relationship === 'family'
+                                ? '가족'
+                                : item.relationship === 'partner'
+                                  ? '연인'
+                                  : item.relationship === 'colleague'
+                                    ? '동료'
+                                    : '친구/기타'}
+                            </Text>
+                          </View>
+                        </View>
+                        <Text className="text-sm text-gray-500">
+                          {item.birth_year}.{item.birth_month}.{item.birth_day}
+                          {item.calendar_type === 'lunar' && ' (음)'}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+
+                    <View className="flex-row items-center gap-1">
+                      <TouchableOpacity
+                        onPress={() => handleSelectFromList(item)}
+                        className="rounded-xl bg-pink-50 px-4 py-2 hover:bg-pink-100">
+                        <Text className="text-sm font-bold text-pink-600">보기</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => deletePartner(item.id)}
+                        className="p-3 opacity-30 hover:opacity-100">
+                        <Trash2 size={18} color="#ef4444" />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                ))}
+              </View>
+            ) : (
+              <View className="items-center justify-center rounded-3xl border border-dashed border-gray-200 bg-gray-50 py-12">
+                <HeartHandshake size={48} color="#d1d5db" />
+                <Text className="mt-4 text-center text-gray-400">
+                  아직 저장된 파트너가 없습니다.{'\n'}새 파트너를 추가하고 궁합을 확인해보세요!
+                </Text>
+              </View>
+            )}
+          </View>
+        </ScrollView>
+      </View>
+
+      {/* Input Modal */}
       <ProfileEditModal
         visible={showInputModal}
         onClose={() => setShowInputModal(false)}
@@ -286,9 +352,9 @@ export default function CompatibilityScreen() {
             renderItem={({ item }) => (
               <TouchableOpacity
                 onPress={() => handleCelebSelect(item)}
-                className="mb-3 flex-row items-center rounded-xl border border-gray-100 bg-gray-50 p-4">
-                <View className="mr-4 h-12 w-12 items-center justify-center rounded-full bg-gray-200">
-                  <Text className="text-xl">🌟</Text>
+                className="mb-3 flex-row items-center rounded-xl border border-gray-100 bg-gray-50 p-4 active:bg-gray-100">
+                <View className="mr-4 h-12 w-12 items-center justify-center rounded-full bg-white shadow-sm">
+                  <Text className="text-2xl">🌟</Text>
                 </View>
                 <View className="flex-1">
                   <View className="flex-row items-center gap-2">
@@ -309,24 +375,6 @@ export default function CompatibilityScreen() {
           />
         </View>
       </Modal>
-    </View>
-  );
-
-  return isWeb ? (
-    <FullWidthWebLayout>
-      <WebSEO
-        title="무료 궁합 보기 - 사주라떼"
-        description="연인, 친구, 동료와의 궁합을 오행 분석을 통해 무료로 확인해보세요."
-      />
-      {content}
     </FullWidthWebLayout>
-  ) : (
-    <View className="flex-1 bg-background">
-      <WebSEO
-        title="무료 궁합 보기 - 사주라떼"
-        description="연인, 친구, 동료와의 궁합을 오행 분석을 통해 무료로 확인해보세요."
-      />
-      {content}
-    </View>
   );
 }

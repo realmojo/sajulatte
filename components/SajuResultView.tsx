@@ -385,7 +385,7 @@ export const SajuResultView = ({
                   if (color && animal) {
                     return (
                       <View className="items-center gap-1">
-                        <View className="mb-0.5 rounded-full bg-slate-800 px-2 py-0.5 shadow-sm">
+                        <View className="mb-0.5 rounded-full bg-slate-800 px-2 py-0.5">
                           <Text className="text-[9px] font-bold text-white">
                             {color} {animal}
                           </Text>
@@ -1407,7 +1407,7 @@ export const SajuResultView = ({
         <TouchableWithoutFeedback onPress={() => setInfoModal(null)}>
           <View className="flex-1 items-center justify-center bg-black/50 p-6">
             <TouchableWithoutFeedback>
-              <View className="w-full max-w-sm gap-4 rounded-xl bg-white p-6 shadow-xl">
+              <View className="w-full max-w-sm gap-4 rounded-xl bg-white p-6">
                 <Text className="text-lg font-bold text-gray-900">{infoModal?.title}</Text>
                 <Text className="leading-6 text-gray-600">{infoModal?.content}</Text>
                 <TouchableOpacity

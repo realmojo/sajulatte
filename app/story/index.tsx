@@ -79,7 +79,7 @@ export default function StoryListScreen() {
           <View className="gap-4">
             {stories.map((story) => (
               <Link key={story.id} href={`/story/${story.id}`} asChild>
-                <TouchableOpacity className="flex-row items-center gap-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm active:bg-gray-50">
+                <TouchableOpacity className="flex-row items-center gap-4 rounded-2xl border border-gray-100 bg-white p-4 active:bg-gray-50">
                   <View
                     className={`h-12 w-12 items-center justify-center rounded-full ${story.color_class || 'bg-gray-100'}`}>
                     <BookOpen

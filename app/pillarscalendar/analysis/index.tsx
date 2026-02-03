@@ -139,12 +139,12 @@ export default function DayAnalysisScreen() {
         {/* Sipsin & Score Badge Row */}
         <View className="mb-6 flex-row gap-4">
           {/* Sipsin */}
-          <View className="flex-1 items-center justify-center rounded-2xl bg-amber-50 p-6 shadow-sm">
+          <View className="flex-1 items-center justify-center rounded-2xl bg-amber-50 p-6">
             <Text className="mb-2 text-sm font-bold text-amber-800">십성</Text>
             <Text className="text-2xl font-bold text-amber-600">{analysis.sipsin}</Text>
           </View>
           {/* Score */}
-          <View className="flex-1 items-center justify-center rounded-2xl bg-blue-50 p-6 shadow-sm">
+          <View className="flex-1 items-center justify-center rounded-2xl bg-blue-50 p-6">
             <Text className="mb-2 text-sm font-bold text-blue-800">운세 점수</Text>
             <View className="flex-row items-baseline gap-1">
               <Text className="text-4xl font-black text-blue-600">{analysis.score}</Text>
