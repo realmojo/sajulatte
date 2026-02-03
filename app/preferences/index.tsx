@@ -21,7 +21,7 @@ export default function PreferencesScreen() {
         style: 'destructive',
         onPress: async () => {
           await supabase.auth.signOut();
-          router.replace('/(tabs)/settings');
+          router.replace('/');
         },
       },
     ]);

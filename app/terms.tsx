@@ -12,16 +12,6 @@ export default function TermsScreen() {
       <WebSEO title="이용약관 - 사주라떼" description="사주라떼 서비스 이용약관을 확인하세요." />
 
       <View className="flex-1 bg-white">
-        {/* Header with Back Button */}
-        <View className="border-b border-gray-100 bg-white px-4 py-3">
-          <TouchableOpacity
-            onPress={() => router.back()}
-            className="flex-row items-center gap-1 self-start rounded-lg p-2 active:bg-gray-100">
-            <ChevronLeft size={20} color="#4b5563" />
-            <Text className="font-medium text-gray-600">뒤로가기</Text>
-          </TouchableOpacity>
-        </View>
-
         <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 100 }}>
           <View className="mx-auto max-w-4xl px-6 py-10 md:px-12 md:py-16">
             <View className="mb-10 border-b border-gray-200 pb-8">
