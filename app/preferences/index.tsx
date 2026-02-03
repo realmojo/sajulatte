@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, ScrollView, Switch, Alert, Linking } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert, Linking } from 'react-native';
 import { useRouter } from 'expo-router';
 import { ChevronRight, FileText, HelpCircle, LogOut, Info } from 'lucide-react-native';
 import { useState } from 'react';
@@ -10,7 +10,7 @@ import { WebSEO } from '@/components/ui/WebSEO';
 export default function PreferencesScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const [pushEnabled, setPushEnabled] = useState(true);
+  // const [pushEnabled, setPushEnabled] = useState(true);
   const appVersion = Constants.expoConfig?.version || '1.0.0';
 
   const handleLogout = async () => {
@@ -27,6 +27,7 @@ export default function PreferencesScreen() {
     ]);
   };
 
+  /*
   const handleDeleteAccount = () => {
     Alert.alert(
       '회원 탈퇴',
@@ -37,6 +38,7 @@ export default function PreferencesScreen() {
       ]
     );
   };
+  */
 
   const MenuSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
     <View className="mb-6">
@@ -85,28 +87,14 @@ export default function PreferencesScreen() {
 
   return (
     <View className="flex-1 bg-gray-50" style={{ paddingTop: insets.top }}>
-      <WebSEO
-        title="디지털 부적 - 사주라떼"
-        description="나만의 디지털 부적으로 행운을 높여보세요."
-      />
-
+      <WebSEO title="환경설정 - 사주라떼" description="사주라떼 앱 설정을 관리합니다." />
       <ScrollView className="flex-1 p-4" showsVerticalScrollIndicator={false}>
-        {/* 알림 설정 */}
-        {/* <MenuSection title="알림">
-          <MenuItem
-            icon={Bell}
-            label="푸시 알림"
-            showArrow={false}
-            rightElement={
-              <Switch
-                value={pushEnabled}
-                onValueChange={setPushEnabled}
-                trackColor={{ false: '#d1d5db', true: '#fbbf24' }} // Amber-400
-                thumbColor={'#fff'}
-              />
-            }
-          />
-        </MenuSection> */}
+        {/* 알림 설정 (비활성화됨) */}
+        {/* 
+        <MenuSection title="알림">
+          ...
+        </MenuSection> 
+        */}
 
         {/* 서비스 정보 */}
         <MenuSection title="서비스 정보">

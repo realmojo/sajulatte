@@ -145,20 +145,49 @@ export default function ContactScreen() {
     </View>
   );
 
+  /* Structured Data for SEO */
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'ContactPage',
+    name: '문의하기 - 사주라떼',
+    url: 'https://sajulatte.app/contact',
+    mainEntity: {
+      '@type': 'Organization',
+      name: '사주라떼',
+      contactPoint: [
+        {
+          '@type': 'ContactPoint',
+          email: 'support@sajulatte.app',
+          contactType: 'customer service',
+        },
+        {
+          '@type': 'ContactPoint',
+          email: 'business@sajulatte.app',
+          contactType: 'business',
+        },
+      ],
+    },
+  };
+
+  const seoProps = {
+    title: '문의하기 - 사주라떼',
+    description:
+      '사주라떼에 궁금한 점이나 제안사항이 있으신가요? 언제든지 편하게 연락주세요. 빠르고 친절하게 답변해드리겠습니다.',
+    keywords: '문의하기, 고객센터, 사주라떼, 비즈니스 제휴, 버그 제보, 기능 제안',
+    url: 'https://sajulatte.app/contact',
+    type: 'website',
+    image: 'https://sajulatte.app/assets/images/og-image.png',
+    jsonLd: jsonLd,
+  };
+
   return isWeb ? (
     <FullWidthWebLayout>
-      <WebSEO
-        title="문의하기 - 사주라떼"
-        description="사주라떼에 궁금한 점이나 제안사항이 있으신가요? 언제든지 편하게 연락주세요. 빠르고 친절하게 답변해드리겠습니다."
-      />
+      <WebSEO {...seoProps} />
       {content}
     </FullWidthWebLayout>
   ) : (
     <ScrollView className="flex-1 bg-white p-6">
-      <WebSEO
-        title="문의하기 - 사주라떼"
-        description="사주라떼에 궁금한 점이나 제안사항이 있으신가요? 언제든지 편하게 연락주세요. 빠르고 친절하게 답변해드리겠습니다."
-      />
+      <WebSEO {...seoProps} />
       {content}
     </ScrollView>
   );

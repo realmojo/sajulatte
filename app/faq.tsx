@@ -1,7 +1,6 @@
 import { View, Text, ScrollView, Pressable, Platform } from 'react-native';
 import { useState } from 'react';
 import { WebSEO } from '@/components/ui/WebSEO';
-import { Link } from 'expo-router';
 import { FullWidthWebLayout } from '@/components/FullWidthWebLayout';
 
 const faqData = [
@@ -186,20 +185,41 @@ export default function FAQScreen() {
     </View>
   );
 
+  /* Structured Data for SEO: FAQPage */
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqData.flatMap((category) =>
+      category.questions.map((item) => ({
+        '@type': 'Question',
+        name: item.q,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: item.a,
+        },
+      }))
+    ),
+  };
+
+  const seoProps = {
+    title: '자주 묻는 질문(FAQ) - 사주라떼',
+    description:
+      '사주라떼 서비스 이용, 사주 해석, 만세력 활용법 등 자주 묻는 질문과 답변을 모았습니다. 궁금한 점을 빠르게 확인해보세요.',
+    keywords: '사주 질문, 만세력 사용법, 사주라떼 FAQ, 운세 문의, 사주 해석 방법',
+    url: 'https://sajulatte.app/faq',
+    type: 'website',
+    image: 'https://sajulatte.app/assets/images/og-image.png',
+    jsonLd: jsonLd,
+  };
+
   return isWeb ? (
     <FullWidthWebLayout>
-      <WebSEO
-        title="자주 묻는 질문 - 사주라떼"
-        description="사주라떼 이용 중 궁금한 점을 빠르게 해결하세요. 서비스 이용, 사주 해석, 기술 지원 등 다양한 질문에 대한 답변을 제공합니다."
-      />
+      <WebSEO {...seoProps} />
       {content}
     </FullWidthWebLayout>
   ) : (
     <ScrollView className="flex-1 bg-white p-6">
-      <WebSEO
-        title="자주 묻는 질문 - 사주라떼"
-        description="사주라떼 이용 중 궁금한 점을 빠르게 해결하세요. 서비스 이용, 사주 해석, 기술 지원 등 다양한 질문에 대한 답변을 제공합니다."
-      />
+      <WebSEO {...seoProps} />
       {content}
     </ScrollView>
   );

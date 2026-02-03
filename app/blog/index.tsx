@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Pressable, Platform } from 'react-native';
+import { View, Text, ScrollView, Pressable } from 'react-native';
 import { Link } from 'expo-router';
 import { WebSEO } from '@/components/ui/WebSEO';
 import { FullWidthWebLayout } from '@/components/FullWidthWebLayout';
@@ -13,12 +13,40 @@ export default function BlogIndexScreen() {
     (article) => selectedCategory === '전체' || article.category === selectedCategory
   );
 
+  /* Structured Data for SEO: Blog */
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Blog',
+    name: '사주명리학 가이드 - 사주라떼',
+    description: '사주명리학의 기초부터 실전 활용까지, 전문가가 알려주는 사주 지식 백과사전',
+    url: 'https://sajulatte.app/blog',
+    blogPost: blogArticles.map((article) => ({
+      '@type': 'BlogPosting',
+      headline: article.title,
+      description: article.description,
+      datePublished: article.date,
+      author: {
+        '@type': 'Organization',
+        name: '사주라떼',
+      },
+      url: `https://sajulatte.app/blog/${article.id}`,
+    })),
+  };
+
+  const seoProps = {
+    title: '사주명리학 가이드 - 사주라떼',
+    description:
+      '사주명리학의 기초부터 실전 활용까지, 전문가가 알려주는 사주 지식 백과사전입니다. 천간, 지지, 십신 등 다양한 주제를 다룹니다.',
+    keywords: '사주 공부, 명리학 강의, 사주 블로그, 천간 지지, 십신, 운세 보는 법',
+    url: 'https://sajulatte.app/blog',
+    type: 'blog',
+    image: 'https://sajulatte.app/assets/images/og-image.png',
+    jsonLd: jsonLd,
+  };
+
   return (
     <FullWidthWebLayout>
-      <WebSEO
-        title="사주명리학 가이드 - 사주라떼"
-        description="사주명리학의 기초부터 실전 활용까지, 전문가가 알려주는 사주 지식 백과사전입니다."
-      />
+      <WebSEO {...seoProps} />
       <View className="flex-1 px-4 md:px-0">
         {/* Hero Section */}
         <View className="relative mb-8 overflow-hidden rounded-3xl bg-gradient-to-br from-amber-500 via-orange-500 to-pink-500 p-6 md:mb-12 md:p-12">

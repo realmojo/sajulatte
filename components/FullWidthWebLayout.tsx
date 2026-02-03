@@ -17,6 +17,7 @@ import {
   X,
   Clock,
   Sun,
+  Shield,
 } from 'lucide-react-native';
 
 const navigation = [
@@ -25,7 +26,9 @@ const navigation = [
   { name: '오늘의 운세', href: '/daily', icon: Sun, color: '#f59e0b' },
   { name: '궁합', href: '/compatibility', icon: Heart, color: '#ec4899' },
   { name: '만세력', href: '/pillarscalendar', icon: Clock, color: '#10b981' },
+  { name: '사주 이야기', href: '/story', icon: BookOpen, color: '#8b5cf6' },
   { name: '블로그', href: '/blog', icon: FileText, color: '#f59e0b' },
+  { name: '디지털 부적', href: '/amulet', icon: Shield, color: '#a855f7' },
   { name: '백과사전', href: '/encyclopedia', icon: BookOpen, color: '#06b6d4' },
   { name: 'FAQ', href: '/faq', icon: HelpCircle, color: '#84cc16' },
   { name: '문의', href: '/contact', icon: Mail, color: '#f97316' },

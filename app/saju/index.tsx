@@ -13,7 +13,7 @@ import { FullWidthWebLayout } from '@/components/FullWidthWebLayout';
 import { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { fetchMainProfileFromSupabase } from '@/lib/services/authService';
-import { Plus, User, Calendar, Clock, ChevronRight } from 'lucide-react-native';
+import { Plus, User, Calendar, Clock } from 'lucide-react-native';
 
 interface SajuProfile {
   id: string;
@@ -184,18 +184,14 @@ export default function SajuInputScreen() {
     const sCalType = pCalType === 'lunar-leap' || pCalType === 'lunar' ? 'lunar' : 'solar';
     const sIsLeap = pCalType === 'lunar-leap' ? 'true' : 'false';
 
+    // Navigate to new dynamic route
+    // Path: /saju/[gender]/[year]/[month]/[day]/[hour]/[minute]/[calendarType]/[isLeap]
+    const routePath = `/saju/${pGender || 'male'}/${sYear}/${sMonth}/${sDay}/${sHour}/${sMinute}/${sCalType}/${sIsLeap}`;
+
     router.push({
-      pathname: '/saju/result',
+      pathname: routePath as any,
       params: {
         name: pName || '',
-        year: sYear,
-        month: sMonth,
-        day: sDay,
-        hour: sHour,
-        minute: sMinute,
-        gender: pGender || 'male',
-        calendarType: sCalType,
-        isLeapMonth: sIsLeap,
       },
     });
   };
@@ -456,34 +452,48 @@ export default function SajuInputScreen() {
     );
   };
 
+  /* Structured Data for SEO: Service */
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name: '무료 사주 분석 - 사주라떼',
+    description:
+      '생년월일시만 입력하면 평생 총운, 대운, 연도별 운세, 적성 운을 무료로 분석해드립니다.',
+    provider: {
+      '@type': 'Organization',
+      name: '사주라떼',
+    },
+    serviceType: 'Fortune Telling',
+    category: 'Lifestyle',
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'KRW',
+    },
+    url: 'https://sajulatte.app/saju',
+  };
+
+  const seoProps = {
+    title: '무료 사주 풀이 (정통 명리학) - 사주라떼',
+    description:
+      '내 운명이 궁금하다면? 생년월일만으로 확인하는 정통 사주 풀이. 평생 총운, 대운의 흐름, 오행 분석을 무료로 제공합니다.',
+    keywords: '무료 사주, 사주 풀이, 만세력, 정통 명리학, 평생 운세, 대운, 오행 분석',
+    url: 'https://sajulatte.app/saju',
+    type: 'website',
+    image: 'https://sajulatte.app/assets/images/og-image.png',
+    jsonLd: jsonLd,
+  };
+
   return isWeb ? (
     <FullWidthWebLayout>
       <Stack.Screen options={{ headerShown: false }} />
-      <WebSEO
-        title="사주 분석 - 사주라떼"
-        description="생년월일만 입력하면 정통 명리학 기반의 정확한 사주 풀이와 만세력을 무료로 확인할 수 있습니다."
-        jsonLd={{
-          '@context': 'https://schema.org',
-          '@type': 'WebPage',
-          name: '사주 분석',
-          url: 'https://sajulatte.app/saju',
-        }}
-      />
+      <WebSEO {...seoProps} />
       <View className="flex-1 items-center justify-center">{renderContent()}</View>
     </FullWidthWebLayout>
   ) : (
     <ScrollView className="flex-1 bg-white" contentContainerStyle={{ flexGrow: 1 }}>
       <Stack.Screen options={{ headerShown: false }} />
-      <WebSEO
-        title="사주 분석 - 사주라떼"
-        description="생년월일만 입력하면 정통 명리학 기반의 정확한 사주 풀이와 만세력을 무료로 확인할 수 있습니다."
-        jsonLd={{
-          '@context': 'https://schema.org',
-          '@type': 'WebPage',
-          name: '사주 분석',
-          url: 'https://sajulatte.app/saju',
-        }}
-      />
+      <WebSEO {...seoProps} />
       <View className="flex-1 items-center justify-center">{renderContent()}</View>
     </ScrollView>
   );

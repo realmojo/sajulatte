@@ -3,6 +3,7 @@ import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ChevronLeft } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getMyEightSaju, getElementInfo, convertCharToKorean } from '@/lib/utils/latte';
 import { getDailyFortune, DailyFortune } from '@/lib/utils/dailyFortuneLogic';
 import { WebSEO } from '@/components/ui/WebSEO';
@@ -25,7 +26,34 @@ export default function DayAnalysisScreen() {
       if (!year || !month || !day) return;
 
       // 1. Fetch User Info (Ilgan, Ilji)
-      const saju = await getMyEightSaju();
+      // First try fetching authenticated user data
+      let saju = await getMyEightSaju();
+
+      // If no auth data, try local storage
+      if (!saju) {
+        const jsonValue = await AsyncStorage.getItem('my_saju_list');
+        if (jsonValue) {
+          const profiles = JSON.parse(jsonValue);
+          if (profiles && profiles.length > 0) {
+            const p = profiles[0];
+            saju = await getMyEightSaju({
+              year: Number(p.birth_year || p.year),
+              month: Number(p.birth_month || p.month),
+              day: Number(p.birth_day || p.day),
+              hour: Number(p.birth_hour || p.hour || 0),
+              minute: Number(p.birth_minute || p.minute || 0),
+              gender: p.gender,
+              calendarType: p.calendar_type?.startsWith('lunar') ? 'lunar' : 'solar',
+              isLeapMonth:
+                p.calendar_type === 'lunar-leap' ||
+                p.is_leap ||
+                p.is_leap_month === 'true' ||
+                false,
+            });
+          }
+        }
+      }
+
       if (!saju || !saju.meta || !saju.meta.ilgan || !saju.meta.sajuJiHjs?.dayJi) {
         // Handle error: User profile not found
         setLoading(false);

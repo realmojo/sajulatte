@@ -24,7 +24,6 @@ if (Platform.OS === 'android') {
 
 export default function EncyclopediaScreen() {
   const isWeb = Platform.OS === 'web';
-  const router = useRouter();
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
 
   const toggleSection = (sectionId: string) => {
@@ -114,20 +113,43 @@ export default function EncyclopediaScreen() {
     </View>
   );
 
+  /* Structured Data for SEO: DefinedTermSet (Glossary) */
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'DefinedTermSet',
+    name: '사주 용어 사전',
+    description: '어려운 사주 명리학 용어를 누구나 이해하기 쉽게 풀어드립니다.',
+    url: 'https://sajulatte.app/encyclopedia',
+    hasDefinedTerm: ENCYCLOPEDIA_DATA.flatMap((category) =>
+      category.items.map((item) => ({
+        '@type': 'DefinedTerm',
+        name: item.term,
+        description: item.description,
+        url: `https://sajulatte.app/encyclopedia/${encodeURIComponent(item.term)}`,
+        inDefinedTermSet: 'https://sajulatte.app/encyclopedia',
+      }))
+    ),
+  };
+
+  const seoProps = {
+    title: '사주 명리 용어 사전 - 사주라떼',
+    description:
+      '갑자, 육십갑자, 십신, 12운성 등 어려운 사주 용어를 쉽게 설명해드립니다. 사주라떼 백과사전에서 명리학의 기초를 다져보세요.',
+    keywords: '사주 용어, 명리학 사전, 십신, 12운성, 신살, 천간, 지지, 만세력 용어',
+    url: 'https://sajulatte.app/encyclopedia',
+    type: 'website',
+    image: 'https://sajulatte.app/assets/images/og-image.png',
+    jsonLd: jsonLd,
+  };
+
   return isWeb ? (
     <FullWidthWebLayout>
-      <WebSEO
-        title="사주 용어 사전 - 사주라떼"
-        description="어려운 사주 용어를 쉽게 풀어드립니다. 사주, 팔자, 천간, 지지 등 핵심 개념을 알아보세요."
-      />
+      <WebSEO {...seoProps} />
       {content}
     </FullWidthWebLayout>
   ) : (
     <ScrollView className="flex-1 bg-gray-50 p-4">
-      <WebSEO
-        title="사주 용어 사전 - 사주라떼"
-        description="어려운 사주 용어를 쉽게 풀어드립니다. 사주, 팔자, 천간, 지지 등 핵심 개념을 알아보세요."
-      />
+      <WebSEO {...seoProps} />
       {content}
     </ScrollView>
   );

@@ -22,7 +22,6 @@ import { signInWithKakao } from '@/lib/services/authService';
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 
 export default function PillarsCalendarScreen() {
-  const isWeb = Platform.OS === 'web';
   const router = useRouter();
 
   const today = new Date();
@@ -218,10 +217,6 @@ export default function PillarsCalendarScreen() {
 
       {/* Header */}
       <View className="z-10 flex-row items-center justify-between border-b border-gray-100 bg-white px-4 py-3">
-        <TouchableOpacity onPress={() => router.back()} className="p-2">
-          <ChevronLeft size={24} color="#000" />
-        </TouchableOpacity>
-
         <View className="flex-row items-center gap-4">
           <TouchableOpacity
             onPress={handlePrevMonth}
@@ -402,7 +397,7 @@ export default function PillarsCalendarScreen() {
                     <FlatList
                       data={YEARS}
                       keyExtractor={(item) => item.toString()}
-                      getItemLayout={(data, index) => ({
+                      getItemLayout={(_, index) => ({
                         length: ITEM_HEIGHT,
                         offset: ITEM_HEIGHT * index,
                         index,
@@ -434,7 +429,7 @@ export default function PillarsCalendarScreen() {
                     <FlatList
                       data={MONTHS}
                       keyExtractor={(item) => item.toString()}
-                      getItemLayout={(data, index) => ({
+                      getItemLayout={(_, index) => ({
                         length: ITEM_HEIGHT,
                         offset: ITEM_HEIGHT * index,
                         index,
@@ -479,12 +474,38 @@ export default function PillarsCalendarScreen() {
     </View>
   );
 
+  /* Structured Data for SEO: WebApplication (Tool) */
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: '만세력 달력 - 사주라떼',
+    description:
+      '매일의 일진(천간, 지지)과 개인의 사주 흐름을 확인할 수 있는 무료 디지털 만세력 달력입니다. 길일과 흉일을 확인하고 하루를 계획하세요.',
+    applicationCategory: 'LifestyleApplication',
+    operatingSystem: 'All',
+    browserRequirements: 'Requires JavaScript. Optimized for Chrome, Safari, Firefox.',
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'KRW',
+    },
+    url: 'https://sajulatte.app/pillarscalendar',
+  };
+
+  const seoProps = {
+    title: '무료 만세력 달력 (일진력) - 사주라떼',
+    description:
+      '오늘의 일진과 내 사주와의 조화를 확인하는 만세력 달력입니다. 갑자, 을축 등 매일의 간지와 길흉 정보를 제공합니다.',
+    keywords: '만세력, 일진, 사주 달력, 길일, 이사 날짜, 결혼 날짜, 오늘의 운세',
+    url: 'https://sajulatte.app/pillarscalendar',
+    type: 'application', // or website
+    image: 'https://sajulatte.app/assets/images/og-image.png',
+    jsonLd: jsonLd,
+  };
+
   return (
     <FullWidthWebLayout>
-      <WebSEO
-        title="만세력 달력 - 사주라떼"
-        description="이달의 일진과 사주 흐름을 확인하는 만세력 달력"
-      />
+      <WebSEO {...seoProps} />
       {content}
     </FullWidthWebLayout>
   );

@@ -5,7 +5,6 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   RefreshControl,
-  Platform,
 } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { useState, useEffect, useCallback } from 'react';
@@ -206,16 +205,45 @@ export default function DailyFortuneScreen() {
     </View>
   );
 
+  /* Structured Data for SEO: Service */
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name: '오늘의 운세 - 사주라떼',
+    description:
+      '매일 매일 변화하는 나의 운세 흐름을 사주 명리학으로 분석해드립니다. 재물운, 연애운, 직업운을 무료로 확인하세요.',
+    provider: {
+      '@type': 'Organization',
+      name: '사주라떼',
+    },
+    serviceType: 'Fortune Telling',
+    category: 'Lifestyle',
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'KRW',
+    },
+    url: 'https://sajulatte.app/daily',
+  };
+
+  const seoProps = {
+    title: '오늘의 운세 (무료) - 사주라떼',
+    description:
+      '오늘 나의 하루는 어떨까요? 정통 사주 명리학으로 분석한 오늘의 재물운, 연애운, 사업운, 건강운을 무료로 확인해보세요.',
+    keywords: '오늘의 운세, 무료 운세, 일일 운세, 재물운, 연애운, 사주 운세, 매일 운세',
+    url: 'https://sajulatte.app/daily',
+    type: 'website',
+    image: 'https://sajulatte.app/assets/images/og-image.png',
+    jsonLd: jsonLd,
+  };
+
   return (
     <FullWidthWebLayout>
       <Stack.Screen options={{ title: '오늘의 운세', headerShown: false }} />
-      <WebSEO
-        title="오늘의 운세 - 사주라떼"
-        description="매일 확인하는 나의 운세, 사주라떼에서 확인하세요."
-      />
+      <WebSEO {...seoProps} />
 
       <ScrollView
-        className="flex-1 bg-white"
+        className="flex-1"
         contentContainerStyle={{ flexGrow: 1 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
         {loading ? (

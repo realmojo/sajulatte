@@ -13,7 +13,13 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sajulatte.app/saju/result</loc>
+    <loc>https://sajulatte.app/daily</loc>
+    <lastmod>2026-02-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sajulatte.app/story</loc>
     <lastmod>2026-02-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -31,7 +37,31 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://sajulatte.app/encyclopedia</loc>
+    <lastmod>2026-02-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://sajulatte.app/blog</loc>
+    <lastmod>2026-02-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sajulatte.app/about</loc>
+    <lastmod>2026-02-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sajulatte.app/faq</loc>
+    <lastmod>2026-02-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sajulatte.app/contact</loc>
     <lastmod>2026-02-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>

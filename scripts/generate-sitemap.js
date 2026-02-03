@@ -8,10 +8,15 @@ const TODAY = new Date().toISOString().split('T')[0];
 const staticRoutes = [
   '',
   '/saju',
-  '/saju/result', // Dynamic but accessible
+  '/daily',
+  '/story',
   '/compatibility',
   '/pillarscalendar',
+  '/encyclopedia',
   '/blog',
+  '/about',
+  '/faq',
+  '/contact',
   '/privacy',
   '/terms',
 ];

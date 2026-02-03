@@ -216,21 +216,47 @@ export default function AboutScreen() {
     </View>
   );
 
+  /* Structured Data for SEO */
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: '사주라떼',
+    url: 'https://sajulatte.app',
+    logo: 'https://sajulatte.app/assets/images/icon.png',
+    description: '사주라떼는 2026년에 설립된 디지털 사주명리 서비스 전문 기업입니다.',
+    email: 'support@sajulatte.app',
+    foundingDate: '2026',
+    address: {
+      '@type': 'PostalAddress',
+      addressCountry: 'KR',
+    },
+    contactPoint: {
+      '@type': 'ContactPoint',
+      email: 'support@sajulatte.app',
+      contactType: 'customer service',
+    },
+  };
+
+  const seoProps = {
+    title: '회사 소개 - 사주라떼',
+    description:
+      '사주라떼는 20년 이상의 명리학 연구 경험을 가진 전문가팀이 운영하는 디지털 사주명리 서비스입니다. 전통 사주명리학을 현대적인 기술로 재해석하여 누구나 쉽게 자신의 운명을 이해할 수 있도록 돕습니다.',
+    keywords: '사주, 명리학, 사주라떼, 운세, 만세력, 디지털 사주, 스타트업',
+    url: 'https://sajulatte.app/about',
+    type: 'website',
+    image: 'https://sajulatte.app/assets/images/og-image.png', // Placeholder
+    jsonLd: jsonLd,
+  };
+
   return isWeb ? (
     <FullWidthWebLayout>
-      <WebSEO
-        title="소개 - 사주라떼"
-        description="사주라떼는 20년 이상의 명리학 연구 경험을 가진 전문가팀이 운영하는 디지털 사주명리 서비스입니다. 전통 사주명리학을 현대적인 기술로 재해석하여 누구나 쉽게 자신의 운명을 이해할 수 있도록 돕습니다."
-      />
+      <WebSEO {...seoProps} />
       {content}
     </FullWidthWebLayout>
   ) : (
-    <ScrollView className="flex-1 bg-white p-6">
-      <WebSEO
-        title="소개 - 사주라떼"
-        description="사주라떼는 20년 이상의 명리학 연구 경험을 가진 전문가팀이 운영하는 디지털 사주명리 서비스입니다. 전통 사주명리학을 현대적인 기술로 재해석하여 누구나 쉽게 자신의 운명을 이해할 수 있도록 돕습니다."
-      />
+    <View className="flex-1 bg-white">
+      <WebSEO {...seoProps} />
       {content}
-    </ScrollView>
+    </View>
   );
 }

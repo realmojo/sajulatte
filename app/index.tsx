@@ -1,21 +1,11 @@
-import { View, Text, TouchableOpacity, Platform, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { WebSEO } from '@/components/ui/WebSEO';
 import { FullWidthWebLayout } from '@/components/FullWidthWebLayout';
-import {
-  Calendar,
-  Heart,
-  BookOpen,
-  Clock,
-  FileText,
-  HelpCircle,
-  Mail,
-  Info,
-} from 'lucide-react-native';
+import { Calendar, Heart, BookOpen, Clock } from 'lucide-react-native';
 import { signInWithKakao } from '@/lib/services/authService';
 
 export default function HomeScreen() {
-  const isWeb = Platform.OS === 'web';
   const router = useRouter();
 
   const handleKakaoLogin = async () => {
@@ -145,20 +135,51 @@ export default function HomeScreen() {
     </View>
   );
 
+  /* Structured Data for SEO: WebSite & Organization */
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebSite',
+        name: '사주라떼',
+        url: 'https://sajulatte.app',
+        description: '쉬운 사주, 정확한 만세력, 오늘의 운세',
+        publisher: {
+          '@id': 'https://sajulatte.app/#organization',
+        },
+      },
+      {
+        '@type': 'Organization',
+        '@id': 'https://sajulatte.app/#organization',
+        name: '사주라떼',
+        url: 'https://sajulatte.app',
+        logo: {
+          '@type': 'ImageObject',
+          url: 'https://sajulatte.app/assets/images/icon.png',
+          width: 512,
+          height: 512,
+        },
+        sameAs: ['https://instagram.com/sajulatte'],
+      },
+    ],
+  };
+
+  const seoProps = {
+    title: '사주라떼 - 쉬운 사주, 정확한 만세력, 무료 운세',
+    description:
+      '천년의 지혜를 한 잔의 커피처럼 쉽고 편안하게. 정통 명리학 기반의 사주 분석, 정확한 만세력, 오늘의 운세, 궁합을 무료로 확인하세요.',
+    keywords: '사주, 만세력, 무료 운세, 사주 풀이, 궁합, 명리학, 사주 팔자, 일진, 사주라떼',
+    url: 'https://sajulatte.app',
+    type: 'website',
+    image: 'https://sajulatte.app/assets/images/og-image.png',
+    jsonLd: jsonLd,
+  };
+
   // Use FullWidthWebLayout for layout consistently
   // Now FullWidthWebLayout handles mobile vs web responsively
   return (
     <FullWidthWebLayout>
-      <WebSEO
-        title="사주라떼 - 쉬운 사주, 정확한 만세력"
-        description="천년의 지혜를 한 잔의 커피처럼 따뜻하고 편안하게. 정통 명리학 기반의 사주 분석과 정확한 만세력을 무료로 만나보세요."
-        jsonLd={{
-          '@context': 'https://schema.org',
-          '@type': 'WebSite',
-          name: '사주라떼',
-          url: 'https://sajulatte.app',
-        }}
-      />
+      <WebSEO {...seoProps} />
       {content}
     </FullWidthWebLayout>
   );

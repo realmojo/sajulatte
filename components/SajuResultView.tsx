@@ -265,7 +265,7 @@ export const SajuResultView = ({
 
   if (!saju) {
     return (
-      <View className="flex-1 items-center justify-center bg-background p-6">
+      <View className="flex-1 items-center justify-center p-6">
         <ActivityIndicator size="large" color="#d97706" />
         <Text className="mt-4 text-base font-medium text-gray-500">
           사주 정보를 분석하고 있습니다...
@@ -277,9 +277,9 @@ export const SajuResultView = ({
   const columns = [saju.hour, saju.day, saju.month, saju.year];
 
   return (
-    <ScrollView contentContainerClassName="px-6 gap-10" className="flex-1 bg-background">
+    <ScrollView contentContainerClassName="px-6 gap-10" className="flex-1">
       <View className="pt-2">
-        <View className="relative overflow-hidden rounded-3xl border border-gray-100 bg-white">
+        <View className="relative overflow-hidden rounded-3xl border border-border bg-white">
           {/* Top Accent Bar */}
           <View className="h-3 w-full opacity-80" style={{ backgroundColor: saju.day.gan.color }} />
 
@@ -416,9 +416,9 @@ export const SajuResultView = ({
             <CircleHelp size={16} color="#A3A3A3" />
           </TouchableOpacity> */}
         </View>
-        <View className="overflow-hidden rounded-xl border border-gray-100 bg-white">
+        <View className="overflow-hidden rounded-xl border border-border bg-white">
           {/* Header Row */}
-          <View className="flex-row border-b border-gray-200 bg-gray-50">
+          <View className="flex-row border-b border-gray-200">
             <View className="w-12 items-center justify-center p-2" />
             {['생시', '생일', '생월', '생년'].map((title, i) => (
               <View
@@ -464,7 +464,7 @@ export const SajuResultView = ({
 
           {/* Row 2: 십성 (Sipsin for Gan) */}
           <View className="flex-row border-b border-gray-200">
-            <View className="w-12 items-center justify-center bg-gray-50 py-1">
+            <View className="w-12 items-center justify-center py-1">
               <Text className="text-xs font-medium text-gray-500">십성</Text>
             </View>
             {columns.map((pillar, i) => (
@@ -482,7 +482,7 @@ export const SajuResultView = ({
 
           {/* Row 3: 지지 (Ji) */}
           <View className="h-20 flex-row border-b border-gray-200">
-            <View className="w-12 items-center justify-center bg-gray-50 py-1">
+            <View className="w-12 items-center justify-center py-1">
               <Text className="text-xs font-medium text-gray-500">지지</Text>
             </View>
             {columns.map((pillar, i) => (
@@ -513,7 +513,7 @@ export const SajuResultView = ({
 
           {/* Row 4: 십성 (Sipsin for Ji) */}
           <View className="flex-row border-b border-gray-200">
-            <View className="w-12 items-center justify-center bg-gray-50 py-1">
+            <View className="w-12 items-center justify-center py-1">
               <Text className="text-xs font-medium text-gray-500">십성</Text>
             </View>
             {columns.map((pillar, i) => (
@@ -531,7 +531,7 @@ export const SajuResultView = ({
 
           {/* Row 5: 지장간 (Jijangan) */}
           <View className="flex-row border-b border-gray-200">
-            <View className="w-12 items-center justify-center bg-gray-50 py-1">
+            <View className="w-12 items-center justify-center py-1">
               <Text className="text-xs font-medium text-gray-500">지장간</Text>
             </View>
             {columns.map((pillar, i) => (
@@ -562,7 +562,7 @@ export const SajuResultView = ({
 
           {/* Row 6: 12운성 (12Wunsung) */}
           <View className="flex-row border-b border-gray-200">
-            <View className="w-12 items-center justify-center bg-gray-50 py-1">
+            <View className="w-12 items-center justify-center py-1">
               <Text className="text-xs font-medium text-gray-500">12운성</Text>
             </View>
             {columns.map((pillar, i) => (
@@ -578,7 +578,7 @@ export const SajuResultView = ({
 
           {/* Row 7: 12신살 (12Shinsal) */}
           <View className="flex-row">
-            <View className="w-12 items-center justify-center bg-gray-50 py-1">
+            <View className="w-12 items-center justify-center py-1">
               <Text className="text-xs font-medium text-gray-500">12신살</Text>
             </View>
             {columns.map((pillar, i) => (
@@ -605,7 +605,7 @@ export const SajuResultView = ({
             <ChevronRight size={16} color="#6B7280" />
           </TouchableOpacity>
         </View>
-        <View className="gap-3 rounded-2xl border border-gray-100 bg-white p-5">
+        <View className="gap-3 rounded-2xl border border-border bg-white p-5">
           <View className="flex-row justify-between gap-2">
             {(() => {
               const dayGongmang = getGongmang(saju.day.gan.hanja, saju.day.ji.hanja);
@@ -1385,7 +1385,7 @@ export const SajuResultView = ({
       <View className="pb-10">
         <TouchableOpacity
           onPress={() => router.push('/pillarscalendar')}
-          className="flex-row items-center justify-between rounded-2xl border border-gray-100 bg-white p-5 active:bg-gray-50">
+          className="flex-row items-center justify-between rounded-2xl border border-border bg-white p-5 active:bg-gray-50">
           <View className="gap-1">
             <View className="flex-row items-center gap-2">
               <Text className="text-lg font-bold text-gray-900">만세력 달력</Text>

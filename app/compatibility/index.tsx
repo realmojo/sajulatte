@@ -1,20 +1,9 @@
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  Modal,
-  Alert,
-  FlatList,
-  Platform,
-} from 'react-native';
-import { Stack, useRouter } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { View, Text, TouchableOpacity, ScrollView, Modal, Alert, FlatList } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useState, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { ChevronRight, X, Plus, Star, HeartHandshake, Trash2 } from 'lucide-react-native';
-import { useColorScheme } from 'nativewind';
 import { supabase } from '@/lib/supabase';
 import { userService, UserProfile } from '@/lib/services/userService';
 import { CELEBS, Celebrity } from '@/lib/data/celebs';
@@ -204,12 +193,41 @@ export default function CompatibilityScreen() {
     });
   };
 
+  /* Structured Data for SEO: Service */
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name: '궁합 분석 서비스 - 사주라떼',
+    description:
+      '연인, 친구, 동료와의 궁합을 무료로 분석해보세요. 정통 명리학에 기반한 정확한 궁합 풀이를 제공합니다.',
+    provider: {
+      '@type': 'Organization',
+      name: '사주라떼',
+    },
+    serviceType: 'Fortune Telling',
+    category: 'Lifestyle',
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'KRW',
+    },
+    url: 'https://sajulatte.app/compatibility',
+  };
+
+  const seoProps = {
+    title: '무료 궁합 보기 (연인/친구/동료) - 사주라떼',
+    description:
+      '상대방과의 궁합이 궁금하신가요? 사주라떼에서 연인, 결혼, 친구, 동료 궁합을 무료로 확인하세요. 오행의 조화를 분석해드립니다.',
+    keywords: '무료 궁합, 속궁합, 겉궁합, 연인 궁합, 결혼 궁합, 친구 궁합, 사주 궁합',
+    url: 'https://sajulatte.app/compatibility',
+    type: 'website',
+    image: 'https://sajulatte.app/assets/images/og-image.png',
+    jsonLd: jsonLd,
+  };
+
   return (
     <FullWidthWebLayout>
-      <WebSEO
-        title="무료 궁합 보기 - 사주라떼"
-        description="연인, 친구, 동료와의 궁합을 오행 분석을 통해 무료로 확인해보세요."
-      />
+      <WebSEO {...seoProps} />
       <View className="flex-1 items-center justify-center p-6">
         <ScrollView
           className="w-full max-w-2xl flex-1"

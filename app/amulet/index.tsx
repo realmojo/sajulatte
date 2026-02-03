@@ -1,20 +1,20 @@
-import { View, Text, ScrollView, TouchableOpacity, Modal } from 'react-native';
-import { useRouter } from 'expo-router';
+import React, { useRef, useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Modal, Platform } from 'react-native';
+import { Stack } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Sparkles, X, Share2, Download } from 'lucide-react-native';
 import { WebSEO } from '@/components/ui/WebSEO';
 import { DigitalAmulet, AmuletType } from '@/components/amulet/DigitalAmulet';
-import { useRef, useState } from 'react';
-import { Platform } from 'react-native';
 import ViewShot from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 import * as MediaLibrary from 'expo-media-library';
+import { FullWidthWebLayout } from '@/components/FullWidthWebLayout';
 
 const AMULET_LIST: { type: AmuletType; title: string; desc: string }[] = [
   {
     type: 'wealth',
     title: '만사형통 부적',
-    desc: '하늘과 땅의 재물 기운을 하나로 모아 금전운을 크게 열어주는 부적입니다. 막혀있던 재물 흐름을 뚫어주고, 하는 일마다 풍요로운 성과를 거두게 돕습니다.Unexpectedly, 횡재수와 사업운을 동시에 불러와 경제적인 안정을 찾고 부의 그릇을 넓혀줍니다. 지갑이나 금고 근처에 두면 그 효험이 더욱 빛을 발합니다.',
+    desc: '하늘과 땅의 재물 기운을 하나로 모아 금전운을 크게 열어주는 부적입니다. 막혀있던 재물 흐름을 뚫어주고, 하는 일마다 풍요로운 성과를 거두게 돕습니다. 횡재수와 사업운을 동시에 불러와 경제적인 안정을 찾고 부의 그릇을 넓혀줍니다. 지갑이나 금고 근처에 두면 그 효험이 더욱 빛을 발합니다.',
   },
   {
     type: 'love',
@@ -122,7 +122,6 @@ const CATEGORIES: { [key: string]: AmuletType[] } = {
 
 export default function AmuletScreen() {
   const insets = useSafeAreaInsets();
-  const router = useRouter();
   const [selectedAmulet, setSelectedAmulet] = useState<{
     type: AmuletType;
     title: string;
@@ -152,8 +151,7 @@ export default function AmuletScreen() {
           // Request permissions
           const { status } = await MediaLibrary.requestPermissionsAsync(true);
           if (status === 'granted') {
-            const asset = await MediaLibrary.createAssetAsync(uri);
-            // await MediaLibrary.createAlbumAsync('SajuLatte', asset, false); // Optional: Create an album
+            await MediaLibrary.createAssetAsync(uri);
             alert('부적이 갤러리에 저장되었습니다.');
           } else {
             alert('갤러리 접근 권한이 필요합니다.');
@@ -180,13 +178,37 @@ export default function AmuletScreen() {
       console.error(e);
     }
   };
-  return (
-    <View className="flex-1 bg-gray-50" style={{ paddingTop: insets.top }}>
-      <WebSEO
-        title="디지털 부적 - 사주라떼"
-        description="나만의 디지털 부적으로 행운을 높여보세요."
-      />
 
+  const isWeb = Platform.OS === 'web';
+
+  /* Structured Data for SEO: WebApplication */
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: '디지털 부적 - 사주라떼',
+    description: '나만의 맞춤 디지털 부적으로 행운을 불러오고 액운을 막으세요.',
+    applicationCategory: 'EntertainmentApplication',
+    operatingSystem: 'Any',
+    url: 'https://sajulatte.app/amulet',
+    author: {
+      '@type': 'Organization',
+      name: '사주라떼',
+    },
+  };
+
+  const seoProps = {
+    title: '나만의 디지털 부적 - 사주라떼',
+    description:
+      '금전운, 애정운, 건강운 등 20여 종의 맞춤 디지털 부적을 무료로 다운로드하고 행운을 간직하세요.',
+    keywords: '디지털 부적, 부적 다운로드, 행운 부적, 사주 부적, 액운 타파, 만사형통',
+    url: 'https://sajulatte.app/amulet',
+    type: 'website',
+    image: 'https://sajulatte.app/assets/images/og-image.png',
+    jsonLd: jsonLd,
+  };
+
+  const content = (
+    <View className="flex-1">
       <ScrollView className="flex-1 p-4" contentContainerClassName="pb-20">
         {/* Banner */}
         <View className="relative mb-6 overflow-hidden rounded-2xl bg-amber-500 p-6">
@@ -308,5 +330,13 @@ export default function AmuletScreen() {
         </View>
       </Modal>
     </View>
+  );
+
+  return (
+    <FullWidthWebLayout>
+      <Stack.Screen options={{ headerShown: false }} />
+      <WebSEO {...seoProps} />
+      {content}
+    </FullWidthWebLayout>
   );
 }

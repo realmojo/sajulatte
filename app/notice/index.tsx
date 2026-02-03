@@ -1,7 +1,7 @@
-import { View, Text, ScrollView, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronRight, Megaphone } from 'lucide-react-native';
+import { ChevronRight } from 'lucide-react-native';
 
 const NOTICE_DATA = [
   {
@@ -22,9 +22,6 @@ const NOTICE_DATA = [
 ];
 
 export default function NoticeScreen() {
-  const router = useRouter();
-  const insets = useSafeAreaInsets();
-
   return (
     <View className="flex-1 bg-background">
       <Stack.Screen options={{ title: '공지사항' }} />

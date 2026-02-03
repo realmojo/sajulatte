@@ -2,7 +2,7 @@ import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { WebSEO } from '@/components/ui/WebSEO';
 import { FullWidthWebLayout } from '@/components/FullWidthWebLayout';
-import { ChevronLeft, Calendar, Clock, Share2 } from 'lucide-react-native';
+import { ChevronLeft, Calendar } from 'lucide-react-native';
 import { blogContent } from './data';
 
 export default function BlogDetailScreen() {
@@ -31,10 +31,47 @@ export default function BlogDetailScreen() {
     );
   }
 
+  /* Structured Data for SEO: BlogPosting */
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: article.title,
+    description: article.description,
+    datePublished: article.date,
+    author: {
+      '@type': 'Organization',
+      name: '사주라떼 전문가팀',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: '사주라떼',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://sajulatte.app/assets/images/icon.png',
+      },
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `https://sajulatte.app/blog/${id}`,
+    },
+    image: 'https://sajulatte.app/assets/images/og-image.png', // Fallback or dynamic URL
+  };
+
+  const seoProps = {
+    title: `${article.title} - 사주라떼 블로그`,
+    description: article.description,
+    keywords: `사주, 명리학, ${article.category}, ${article.title}, 사주라떼`,
+    url: `https://sajulatte.app/blog/${id}`,
+    type: 'article',
+    image: 'https://sajulatte.app/assets/images/og-image.png',
+    author: '사주라떼 전문가팀',
+    jsonLd: jsonLd,
+  };
+
   return (
     <FullWidthWebLayout>
       <Stack.Screen options={{ headerShown: false }} />
-      <WebSEO title={`${article.title} - 사주라떼`} description={article.description} />
+      <WebSEO {...seoProps} />
 
       {/* Back Button Header (Mobile friendly addition) */}
       <View className="border-b border-gray-100 bg-white px-4 py-3">
