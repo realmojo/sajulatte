@@ -31,8 +31,9 @@ export default function DailyFortuneScreen() {
       setErrorMsg(null);
 
       // 1. Load Profile (Local -> Supabase)
+      // 1. Load Profile (Local -> Supabase)
       let profile = null;
-      const jsonValue = await AsyncStorage.getItem('saju_list');
+      const jsonValue = await AsyncStorage.getItem('my_saju_list');
 
       if (jsonValue) {
         const list = JSON.parse(jsonValue);
@@ -52,7 +53,8 @@ export default function DailyFortuneScreen() {
 
           if (userProfile) {
             profile = userProfile;
-            await AsyncStorage.setItem('saju_list', JSON.stringify([userProfile]));
+            // Optionally sync to local if needed, but 'my_saju_list' is the source of truth for local
+            // await AsyncStorage.setItem('my_saju_list', JSON.stringify([userProfile]));
           }
         }
       }
@@ -65,20 +67,35 @@ export default function DailyFortuneScreen() {
 
       setUserName(profile.name);
 
+      // Normalize profile data
+      const pYear = Number(profile.birth_year || profile.year);
+      const pMonth = Number(profile.birth_month || profile.month);
+      const pDay = Number(profile.birth_day || profile.day);
+      const pHour = Number(profile.birth_hour || profile.hour || 0);
+      const pMinute = Number(profile.birth_minute || profile.minute || 0);
+      const pCalType = profile.calendar_type || profile.calendarType || 'solar';
+      // Handle various leap month flags
+      const pIsLeap =
+        profile.is_leap ||
+        profile.isLeapMonth === 'true' ||
+        profile.isLeapMonth === true ||
+        profile.calendar_type === 'lunar-leap' ||
+        false;
+
+      // 2. Calculate Saju
+
+      setUserName(profile.name);
+
       // 2. Calculate Saju
       const result = await getMyEightSaju({
-        year: profile.birth_year,
-        month: profile.birth_month,
-        day: profile.birth_day,
-        hour: profile.birth_hour,
-        minute: profile.birth_minute,
-        gender: profile.gender,
-        calendarType: profile.calendar_type?.startsWith('lunar') ? 'lunar' : 'solar',
-        isLeapMonth:
-          profile.calendar_type === 'lunar-leap' ||
-          profile.is_leap ||
-          profile.is_leap_month ||
-          false,
+        year: pYear,
+        month: pMonth,
+        day: pDay,
+        hour: pHour,
+        minute: pMinute,
+        gender: profile.gender || 'male',
+        calendarType: pCalType.startsWith('lunar') ? 'lunar' : 'solar',
+        isLeapMonth: pIsLeap,
       });
 
       if (!result) {
