@@ -103,8 +103,8 @@ export default function HomeScreen() {
         </Text>
         <View className="gap-6">
           <View className="flex-row gap-4">
-            <View className="h-2 w-2 translate-y-2 rounded-full bg-amber-500" />
-            <View>
+            <View className="mt-2.5 h-2 w-2 rounded-full bg-amber-500" />
+            <View className="flex-1">
               <Text className="mb-1 text-lg font-bold text-gray-900">정확한 만세력 알고리즘</Text>
               <Text className="text-gray-600">
                 한국천문연구원의 데이터를 기반으로 한 정밀한 절기 계산으로 오차 없는 정확한 사주를
@@ -113,8 +113,8 @@ export default function HomeScreen() {
             </View>
           </View>
           <View className="flex-row gap-4">
-            <View className="h-2 w-2 translate-y-2 rounded-full bg-amber-500" />
-            <View>
+            <View className="mt-2.5 h-2 w-2 rounded-full bg-amber-500" />
+            <View className="flex-1">
               <Text className="mb-1 text-lg font-bold text-gray-900">현대적인 해석</Text>
               <Text className="text-gray-600">
                 고리타분한 옛날 해석이 아닌, 현대 사회에 맞춘 실요적이고 긍정적인 해석을 제공합니다.
@@ -122,8 +122,8 @@ export default function HomeScreen() {
             </View>
           </View>
           <View className="flex-row gap-4">
-            <View className="h-2 w-2 translate-y-2 rounded-full bg-amber-500" />
-            <View>
+            <View className="mt-2.5 h-2 w-2 rounded-full bg-amber-500" />
+            <View className="flex-1">
               <Text className="mb-1 text-lg font-bold text-gray-900">쉬운 사용성</Text>
               <Text className="text-gray-600">
                 복잡한 한자 없이도 누구나 쉽게 이해할 수 있는 직관적인 디자인과 설명을 제공합니다.
