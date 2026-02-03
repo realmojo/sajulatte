@@ -5,6 +5,8 @@ import { FullWidthWebLayout } from '@/components/FullWidthWebLayout';
 import { Calendar, Heart, BookOpen, Clock } from 'lucide-react-native';
 import { signInWithKakao } from '@/lib/services/authService';
 
+import { PWAInstallPrompt } from '@/components/PWAInstallPrompt';
+
 export default function HomeScreen() {
   const router = useRouter();
 
@@ -180,6 +182,7 @@ export default function HomeScreen() {
   return (
     <FullWidthWebLayout>
       <WebSEO {...seoProps} />
+      <PWAInstallPrompt />
       {content}
     </FullWidthWebLayout>
   );

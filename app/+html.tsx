@@ -19,6 +19,10 @@ export default function Root({ children }: PropsWithChildren) {
           crossOrigin="anonymous"
         />
 
+        <meta name="theme-color" content="#fbbf24" />
+        <link rel="manifest" href="/manifest.json" />
+        <link rel="apple-touch-icon" href="/icons/icon.png" />
+
         {/* Global styles for full-width web layout */}
         <style
           dangerouslySetInnerHTML={{
