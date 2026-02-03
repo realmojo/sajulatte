@@ -16,11 +16,13 @@ import {
   Menu,
   X,
   Clock,
+  Sun,
 } from 'lucide-react-native';
 
 const navigation = [
   { name: '홈', href: '/', icon: Home, color: '#3b82f6' },
   { name: '사주 분석', href: '/saju', icon: Calendar, color: '#8b5cf6' },
+  { name: '오늘의 운세', href: '/daily', icon: Sun, color: '#f59e0b' },
   { name: '궁합', href: '/compatibility', icon: Heart, color: '#ec4899' },
   { name: '만세력', href: '/pillarscalendar', icon: Clock, color: '#10b981' },
   { name: '블로그', href: '/blog', icon: FileText, color: '#f59e0b' },

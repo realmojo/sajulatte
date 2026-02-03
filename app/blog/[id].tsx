@@ -1,5 +1,5 @@
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { WebSEO } from '@/components/ui/WebSEO';
 import { FullWidthWebLayout } from '@/components/FullWidthWebLayout';
 import { ChevronLeft, Calendar, Clock, Share2 } from 'lucide-react-native';
@@ -33,6 +33,7 @@ export default function BlogDetailScreen() {
 
   return (
     <FullWidthWebLayout>
+      <Stack.Screen options={{ headerShown: false }} />
       <WebSEO title={`${article.title} - 사주라떼`} description={article.description} />
 
       {/* Back Button Header (Mobile friendly addition) */}
@@ -46,35 +47,20 @@ export default function BlogDetailScreen() {
       </View>
 
       <ScrollView className="flex-1 bg-white" contentContainerStyle={{ paddingBottom: 80 }}>
-        {/* Article Header */}
-        <View className="border-b border-gray-100 bg-gradient-to-b from-amber-50/50 to-white px-6 py-8 md:px-12 md:py-12">
+        {/* Simple Article Header */}
+        <View className="px-6 pb-2 pt-10 md:max-w-4xl md:px-12 md:pt-14">
           <View className="mb-4 flex-row items-center gap-3">
             <View className="rounded-full bg-amber-100 px-3 py-1">
               <Text className="text-xs font-bold text-amber-700">{article.category}</Text>
             </View>
             <View className="flex-row items-center gap-1">
-              <Clock size={14} color="#9ca3af" />
-              <Text className="text-sm text-gray-500">{article.readTime} 읽기</Text>
+              <Calendar size={14} color="#9ca3af" />
+              <Text className="text-sm text-gray-500">{article.date}</Text>
             </View>
           </View>
           <Text className="mb-4 text-3xl font-bold leading-tight text-gray-900 md:text-4xl">
             {article.title}
           </Text>
-          <Text className="mb-4 text-lg leading-relaxed text-gray-600 md:text-xl">
-            {article.description}
-          </Text>
-
-          <View className="mt-4 flex-row items-center justify-between border-t border-gray-100 pt-4">
-            <View className="flex-row items-center gap-2">
-              <Calendar size={16} color="#9ca3af" />
-              <Text className="text-sm text-gray-400">{article.date}</Text>
-            </View>
-
-            {/* Share Button Placeholder */}
-            <TouchableOpacity className="rounded-full p-2 hover:bg-gray-100 active:bg-gray-100">
-              <Share2 size={20} color="#6b7280" />
-            </TouchableOpacity>
-          </View>
         </View>
 
         {/* Article Content */}
@@ -115,7 +101,7 @@ export default function BlogDetailScreen() {
         {/* Author Box */}
         <View className="mx-6 mb-12 mt-8 max-w-4xl rounded-3xl bg-amber-50 p-8 md:mx-12">
           <View className="mb-4 flex-row items-center gap-4">
-            <View className="h-14 w-14 items-center justify-center rounded-full border-2 border-white bg-amber-200 shadow-sm">
+            <View className="h-14 w-14 items-center justify-center rounded-full border-2 border-white bg-amber-200">
               <Text className="text-2xl">✍️</Text>
             </View>
             <View>

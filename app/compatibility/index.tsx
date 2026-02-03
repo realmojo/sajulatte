@@ -217,7 +217,7 @@ export default function CompatibilityScreen() {
           showsVerticalScrollIndicator={false}>
           {/* Hero Section */}
           <View className="mb-10 w-full items-center">
-            <View className="mb-6 h-24 w-24 items-center justify-center overflow-hidden rounded-3xl bg-pink-100 shadow-sm">
+            <View className="mb-6 h-24 w-24 items-center justify-center overflow-hidden rounded-3xl bg-pink-100">
               <Text className="text-5xl">💑</Text>
             </View>
             <Text className="mb-3 text-center text-4xl font-bold text-gray-900">궁합 분석</Text>
@@ -231,7 +231,7 @@ export default function CompatibilityScreen() {
             <TouchableOpacity
               activeOpacity={0.9}
               onPress={() => setShowInputModal(true)}
-              className="flex-1 items-center justify-center rounded-2xl bg-gradient-to-r from-pink-500 to-rose-500 py-4 shadow-md active:scale-95">
+              className="flex-1 items-center justify-center rounded-2xl bg-gradient-to-r from-pink-500 to-rose-500 py-4 active:scale-95">
               <View className="mb-2 h-10 w-10 items-center justify-center rounded-full bg-white/20">
                 <Plus size={24} color="white" />
               </View>
@@ -241,7 +241,7 @@ export default function CompatibilityScreen() {
             <TouchableOpacity
               activeOpacity={0.9}
               onPress={() => setShowCelebModal(true)}
-              className="flex-1 items-center justify-center rounded-2xl border border-gray-100 bg-white py-4 shadow-sm active:scale-95 active:bg-gray-50">
+              className="flex-1 items-center justify-center rounded-2xl border border-gray-100 bg-white py-4 active:scale-95 active:bg-gray-50">
               <View className="mb-2 h-10 w-10 items-center justify-center rounded-full bg-yellow-100">
                 <Star size={24} color="#ca8a04" />
               </View>
@@ -261,7 +261,7 @@ export default function CompatibilityScreen() {
                 {savedList.map((item) => (
                   <View
                     key={item.id}
-                    className="flex-row items-center justify-between rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+                    className="flex-row items-center justify-between rounded-2xl border border-gray-100 bg-white p-4">
                     <TouchableOpacity
                       onPress={() => handleSelectFromList(item)}
                       activeOpacity={0.7}
@@ -353,7 +353,7 @@ export default function CompatibilityScreen() {
               <TouchableOpacity
                 onPress={() => handleCelebSelect(item)}
                 className="mb-3 flex-row items-center rounded-xl border border-gray-100 bg-gray-50 p-4 active:bg-gray-100">
-                <View className="mr-4 h-12 w-12 items-center justify-center rounded-full bg-white shadow-sm">
+                <View className="mr-4 h-12 w-12 items-center justify-center rounded-full bg-white">
                   <Text className="text-2xl">🌟</Text>
                 </View>
                 <View className="flex-1">

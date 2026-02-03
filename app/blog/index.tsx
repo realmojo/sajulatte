@@ -19,9 +19,9 @@ export default function BlogIndexScreen() {
         title="사주명리학 가이드 - 사주라떼"
         description="사주명리학의 기초부터 실전 활용까지, 전문가가 알려주는 사주 지식 백과사전입니다."
       />
-      <View className="flex-1">
+      <View className="flex-1 px-4 md:px-0">
         {/* Hero Section */}
-        <View className="relative mb-12 overflow-hidden rounded-3xl bg-gradient-to-br from-amber-500 via-orange-500 to-pink-500 p-12">
+        <View className="relative mb-8 overflow-hidden rounded-3xl bg-gradient-to-br from-amber-500 via-orange-500 to-pink-500 p-6 md:mb-12 md:p-12">
           <View className="relative z-10">
             <View className="mb-4 flex-row items-center gap-2">
               <Sparkles size={24} color="#fff" />
@@ -29,8 +29,10 @@ export default function BlogIndexScreen() {
                 Knowledge Base
               </Text>
             </View>
-            <Text className="mb-4 text-5xl font-bold text-white">사주명리학 가이드</Text>
-            <Text className="max-w-2xl text-xl leading-relaxed text-white/90">
+            <Text className="mb-4 text-3xl font-bold text-white md:text-5xl">
+              사주명리학 가이드
+            </Text>
+            <Text className="max-w-2xl text-lg leading-relaxed text-white/90 md:text-xl">
               천년의 지혜를 현대적으로 풀어낸 전문 가이드
             </Text>
             <View className="mt-8 flex-row items-center gap-3">
@@ -56,41 +58,47 @@ export default function BlogIndexScreen() {
 
         {/* Category Filter */}
         <View className="mb-8">
-          <View className="flex-row flex-wrap gap-3">
-            {categories.map((category, index) => {
-              const isSelected = selectedCategory === category.name;
-              return (
-                <Pressable
-                  key={index}
-                  onPress={() => setSelectedCategory(category.name)}
-                  className={`flex-row items-center gap-2 rounded-full border-2 px-6 py-3 transition-all active:scale-95 ${
-                    isSelected ? 'border-gray-900 bg-gray-900' : 'bg-white hover:scale-105'
-                  }`}
-                  style={!isSelected ? { borderColor: category.color } : {}}>
-                  {!isSelected && (
-                    <View
-                      className="h-3 w-3 rounded-full"
-                      style={{ backgroundColor: category.color }}
-                    />
-                  )}
-                  <Text className={`font-semibold ${isSelected ? 'text-white' : 'text-gray-900'}`}>
-                    {category.name}
-                  </Text>
-                  <View
-                    className="rounded-full px-2 py-0.5"
-                    style={{
-                      backgroundColor: isSelected ? 'rgba(255,255,255,0.2)' : category.color + '20',
-                    }}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row gap-3">
+            {/* Native Safe Scroll Wrapper if needed, or just flex-wrap view for web */}
+            <View className="flex-row flex-wrap gap-2 md:gap-3">
+              {categories.map((category, index) => {
+                const isSelected = selectedCategory === category.name;
+                return (
+                  <Pressable
+                    key={index}
+                    onPress={() => setSelectedCategory(category.name)}
+                    className={`flex-row items-center gap-2 rounded-full border-2 px-4 py-2 transition-all active:scale-95 md:px-6 md:py-3 ${
+                      isSelected ? 'border-gray-900 bg-gray-900' : 'bg-white hover:scale-105'
+                    }`}
+                    style={!isSelected ? { borderColor: category.color } : {}}>
+                    {!isSelected && (
+                      <View
+                        className="h-2 w-2 rounded-full md:h-3 md:w-3"
+                        style={{ backgroundColor: category.color }}
+                      />
+                    )}
                     <Text
-                      className="text-xs font-bold"
-                      style={{ color: isSelected ? '#fff' : category.color }}>
-                      {category.count}
+                      className={`text-sm font-semibold md:text-base ${isSelected ? 'text-white' : 'text-gray-900'}`}>
+                      {category.name}
                     </Text>
-                  </View>
-                </Pressable>
-              );
-            })}
-          </View>
+                    <View
+                      className="rounded-full px-2 py-0.5"
+                      style={{
+                        backgroundColor: isSelected
+                          ? 'rgba(255,255,255,0.2)'
+                          : category.color + '20',
+                      }}>
+                      <Text
+                        className="text-[10px] font-bold md:text-xs"
+                        style={{ color: isSelected ? '#fff' : category.color }}>
+                        {category.count}
+                      </Text>
+                    </View>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </ScrollView>
         </View>
 
         {/* Articles Grid */}
@@ -98,18 +106,12 @@ export default function BlogIndexScreen() {
           {filteredArticles.length > 0 ? (
             filteredArticles.map((article) => (
               <Link key={article.id} href={`/blog/${article.id}` as any} asChild>
-                <Pressable
-                  style={
-                    Platform.OS === 'web'
-                      ? { width: 'calc(33.333% - 16px)', minWidth: 300 }
-                      : { width: '100%' }
-                  }
-                  className="overflow-hidden rounded-2xl border border-gray-200 bg-white transition-all hover:scale-105 active:bg-gray-50">
+                <Pressable className="w-full overflow-hidden rounded-2xl border border-gray-200 bg-white transition-all hover:scale-105 active:bg-gray-50 md:w-[47%] lg:w-[31%]">
                   {/* Colored Header */}
                   <View className="h-2" style={{ backgroundColor: article.color }} />
 
                   {/* Content */}
-                  <View className="p-6">
+                  <View className="p-5 md:p-6">
                     {/* Category Badge */}
                     <View className="mb-4 flex-row items-center justify-between">
                       <View
@@ -126,7 +128,7 @@ export default function BlogIndexScreen() {
                     </View>
 
                     {/* Title */}
-                    <Text className="mb-2 text-2xl font-bold leading-tight text-gray-900">
+                    <Text className="mb-2 text-xl font-bold leading-tight text-gray-900 md:text-2xl">
                       {article.title}
                     </Text>
                     <Text className="mb-3 text-sm font-medium text-gray-500">
@@ -134,7 +136,9 @@ export default function BlogIndexScreen() {
                     </Text>
 
                     {/* Description */}
-                    <Text className="mb-4 leading-relaxed text-gray-600" numberOfLines={3}>
+                    <Text
+                      className="mb-4 text-sm leading-relaxed text-gray-600 md:text-base"
+                      numberOfLines={3}>
                       {article.description}
                     </Text>
 
@@ -163,10 +167,10 @@ export default function BlogIndexScreen() {
         </View>
 
         {/* Popular Topics Section */}
-        <View className="mb-12 rounded-2xl bg-gradient-to-br from-purple-50 to-pink-50 p-8">
+        <View className="mb-12 rounded-2xl bg-gradient-to-br from-purple-50 to-pink-50 p-6 md:p-8">
           <View className="mb-6 flex-row items-center gap-3">
             <TrendingUp size={24} color="#8b5cf6" />
-            <Text className="text-2xl font-bold text-gray-900">인기 주제</Text>
+            <Text className="text-xl font-bold text-gray-900 md:text-2xl">인기 주제</Text>
           </View>
           <View className="flex-row flex-wrap gap-4">
             {[
@@ -176,13 +180,7 @@ export default function BlogIndexScreen() {
               { title: '궁합 비결', id: 'marriage-compatibility' },
             ].map((item, index) => (
               <Link key={index} href={`/blog/${item.id}` as any} asChild>
-                <Pressable
-                  style={
-                    Platform.OS === 'web'
-                      ? { width: 'calc(25% - 12px)', minWidth: 150 }
-                      : { width: '48%' }
-                  }
-                  className="rounded-xl bg-white p-4 transition-all hover:scale-105 active:bg-gray-100">
+                <Pressable className="w-full rounded-xl bg-white p-4 transition-all hover:scale-105 active:bg-gray-100 md:w-[23%]">
                   <Text className="text-center font-semibold text-gray-900">{item.title}</Text>
                 </Pressable>
               </Link>
@@ -191,7 +189,7 @@ export default function BlogIndexScreen() {
         </View>
 
         {/* Expert Advice */}
-        <View className="rounded-2xl border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 p-8">
+        <View className="rounded-2xl border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 p-6 md:p-8">
           <View className="flex-row items-start gap-4">
             <View className="rounded-full bg-amber-500 p-3">
               <Text className="text-2xl">💡</Text>

@@ -70,14 +70,14 @@ export default function HomeScreen() {
         {/* Main CTA */}
         <TouchableOpacity
           onPress={() => router.push('/saju')}
-          className="mb-3 w-full max-w-md rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 px-12 py-5 shadow-md active:scale-95">
+          className="mb-3 w-full max-w-md rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 px-12 py-5 active:scale-95">
           <Text className="text-center text-xl font-bold text-white">무료로 사주 보러가기</Text>
         </TouchableOpacity>
 
         {/* Kakao Login CTA */}
         <TouchableOpacity
           onPress={handleKakaoLogin}
-          className="mb-4 w-full max-w-md flex-row items-center justify-center gap-2 rounded-2xl bg-[#FEE500] px-12 py-5 shadow-md hover:bg-[#FDD835] active:scale-95">
+          className="mb-4 w-full max-w-md flex-row items-center justify-center gap-2 rounded-2xl bg-[#FEE500] px-12 py-5 hover:bg-[#FDD835] active:scale-95">
           <Text className="text-xl">💬</Text>
           <Text className="text-center text-xl font-bold text-[#191919]">
             카카오로 3초만에 시작하기

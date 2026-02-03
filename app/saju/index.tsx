@@ -292,7 +292,7 @@ export default function SajuInputScreen() {
 
     // FORM VIEW
     return (
-      <View className="w-full max-w-2xl items-center justify-center p-8">
+      <View className="w-full max-w-2xl items-center justify-center px-4 py-8 md:p-8">
         {/* Header */}
         <View className="mb-8 w-full items-center">
           <View className="mb-6 h-24 w-24 items-center justify-center overflow-hidden rounded-3xl bg-amber-100">
@@ -305,7 +305,7 @@ export default function SajuInputScreen() {
         </View>
 
         {/* Input Form */}
-        <View className="w-full rounded-2xl border border-gray-200 bg-white p-8">
+        <View className="w-full rounded-2xl border border-gray-200 bg-white p-4 md:p-8">
           {/* List Back Button */}
           {savedProfiles.length > 0 && (
             <TouchableOpacity
@@ -391,14 +391,14 @@ export default function SajuInputScreen() {
               </TouchableOpacity>
             </View>
 
-            <View className="flex-row gap-3">
+            <View className="flex-row gap-2">
               <TextInput
                 value={year}
                 onChangeText={setYear}
                 placeholder="YYYY"
                 keyboardType="number-pad"
                 maxLength={4}
-                className="flex-1 rounded-xl border border-gray-300 bg-white px-4 py-3 text-center text-base text-gray-900"
+                className="min-w-0 flex-1 rounded-xl border border-gray-300 bg-white px-0 py-3 text-center text-base text-gray-900 md:px-4"
               />
               <TextInput
                 value={month}
@@ -406,7 +406,7 @@ export default function SajuInputScreen() {
                 placeholder="MM"
                 keyboardType="number-pad"
                 maxLength={2}
-                className="w-20 rounded-xl border border-gray-300 bg-white px-4 py-3 text-center text-base text-gray-900"
+                className="min-w-0 flex-1 rounded-xl border border-gray-300 bg-white px-0 py-3 text-center text-base text-gray-900 md:px-4"
               />
               <TextInput
                 value={day}
@@ -414,7 +414,7 @@ export default function SajuInputScreen() {
                 placeholder="DD"
                 keyboardType="number-pad"
                 maxLength={2}
-                className="w-20 rounded-xl border border-gray-300 bg-white px-4 py-3 text-center text-base text-gray-900"
+                className="min-w-0 flex-1 rounded-xl border border-gray-300 bg-white px-0 py-3 text-center text-base text-gray-900 md:px-4"
               />
             </View>
           </View>

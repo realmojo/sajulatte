@@ -188,7 +188,7 @@ export default function FortuneDetailScreen() {
           <View className="mt-20 items-center">
             <Text className="mb-2 text-gray-500">{errorMsg}</Text>
             <TouchableOpacity
-              onPress={() => router.push('/(tabs)/settings')}
+              onPress={() => router.push('/saju')}
               className="rounded-lg bg-amber-100 px-4 py-2">
               <Text className="font-bold text-amber-700">프로필 등록하러 가기</Text>
             </TouchableOpacity>
